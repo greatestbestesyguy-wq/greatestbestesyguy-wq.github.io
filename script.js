@@ -1,26 +1,43 @@
 const pages = {
-    home: `<h1>St. Louis Recycling</h1><p>Welcome to the STL green initiative. Explore our research below.</p>`,
-    interviews: `<h1>Expert Interviews</h1><p>Loading interviews with local STL waste managers...</p>`,
-    map: `<h1>Recycling Map</h1><div style="height:300px; background:#eee; border-radius:8px; display:flex; align-items:center; justify-content:center;">Map loading...</div>`,
-    about: `<h1>About This Project</h1><p>Created for my 2026 school research project.</p>`
+    home: `
+        <div class="card" style="grid-column: span 2;">
+            <h2>Our Mission</h2>
+            <p>We are students at <strong>Metro Academic and Classical High School</strong>. Our goal is to bring awareness to the declining state of recycling in St. Louis. With contamination rates rising, many items in our blue bins end up in landfills. We're here to change that.</p>
+        </div>
+        <div class="card">
+            <h3>STL Fact #1</h3>
+            <p>Contamination over 3% can cause an entire recycling truck to be rejected in St. Louis City.</p>
+        </div>
+    `,
+    interviews: `
+        <div class="card">
+            <h2>Student Voices</h2>
+            <p>Placeholder for interviews with Metro faculty and STL waste management experts.</p>
+        </div>
+    `,
+    map: `
+        <div class="card" style="grid-column: span 2;">
+            <h2>Recycling Hotspots</h2>
+            <p>A dynamic map showing where Metro students can drop off specialized glass and electronics.</p>
+        </div>
+    `,
+    about: `
+        <div class="card">
+            <h2>About the Team</h2>
+            <p>This is a Metro High School initiative focused on local sustainability and data-driven environmentalism.</p>
+        </div>
+    `
 };
 
 function loadPage(pageKey) {
-    const contentDiv = document.getElementById('content');
-    contentDiv.innerHTML = pages[pageKey] || "<h1>404</h1><p>Page not found.</p>";
-    
-    // Smooth scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('content').innerHTML = pages[pageKey] || "<h2>404</h2>";
 }
 
-// Listen for clicks on the nav links
 document.querySelectorAll('nav a').forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
-        const page = e.target.getAttribute('data-page');
-        loadPage(page);
+        loadPage(e.target.getAttribute('data-page'));
     });
 });
 
-// Load home by default
 loadPage('home');
