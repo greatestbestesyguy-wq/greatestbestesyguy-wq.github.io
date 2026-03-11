@@ -7,8 +7,8 @@
     <script>
         // Set the flag for the custom popup
         sessionStorage.setItem('showRedirectPopup', 'true');
-        // Redirect home instantly
-        window.location.href = 'index.html'; 
+        // Redirect to the ROOT domain to avoid the /index.html/index.html loop
+        window.location.href = '/'; 
     </script>
 </body>
 </html>
