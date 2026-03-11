@@ -2,40 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>St. Louis Recycling Project</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; line-height: 1.6; color: #333; }
-        nav { background: #2e7d32; color: white; padding: 1rem; display: flex; justify-content: space-around; position: sticky; top: 0; }
-        nav a { color: white; text-decoration: none; font-weight: bold; }
-        nav a:hover { text-decoration: underline; }
-        .hero { background: #e8f5e9; padding: 60px 20px; text-align: center; }
-        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
-        .placeholder { border: 2px dashed #ccc; padding: 40px; text-align: center; color: #999; margin: 20px 0; background: #fafafa; }
-        footer { text-align: center; padding: 20px; font-size: 0.8rem; color: #777; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recycle STL</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <nav>
-    <a href="index.html">Home</a>
-    <a href="interviews.html">Interviews</a>
-    <a href="map.html">Recycling Map</a>
-    <a href="about.html">About Project</a>
+    <a href="#" data-page="home">Home</a>
+    <a href="#" data-page="interviews">Interviews</a>
+    <a href="#" data-page="map">Map</a>
+    <a href="#" data-page="about">About</a>
 </nav>
 
 <div class="hero">
     <h1>Recycle St. Louis</h1>
-    <p>A student research project on urban sustainability.</p>
+    <p>Modern Solutions for a Greener City</p>
 </div>
 
-<div class="container">
-    <h2>Project Overview</h2>
-    <p>This page will introduce the problem of recycling in STL.</p>
-    <div class="placeholder">IMAGE PLACEHOLDER: Photo of a local recycling center</div>
-    <p>[Insert your introduction text here...]</p>
-</div>
+<div class="container" id="content">
+    </div>
 
-<footer>&copy; 2026 St. Louis School Project</footer>
-
+<script src="script.js"></script>
 </body>
 </html>
