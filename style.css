@@ -1,50 +1,161 @@
-/* Stats Section */
+/* --- METRO HS BRANDING & VARIABLES --- */
+:root {
+    --bg: #050505;
+    --card: #121212;
+    --primary: #39FF14; /* Neon Green */
+    --primary-dim: rgba(57, 255, 20, 0.15);
+    --text-main: #ffffff;
+    --text-dim: #a1a1aa;
+    --border: #27272a;
+    --glass: rgba(18, 18, 18, 0.8);
+}
+
+/* --- RESET & BASE --- */
+* { box-sizing: border-box; }
+
+body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* --- NAVIGATION (MODERN FROSTED) --- */
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.2rem;
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+nav a:hover {
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary-dim);
+}
+
+/* --- HERO SECTION --- */
+.hero {
+    padding: 100px 20px 60px;
+    text-align: center;
+    background: radial-gradient(circle at top, #142e14 0%, #050505 60%);
+}
+
+.badge {
+    background: var(--primary-dim);
+    color: var(--primary);
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    border: 1px solid rgba(57, 255, 20, 0.3);
+}
+
+.hero h1 {
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-weight: 900;
+    margin: 20px 0;
+    letter-spacing: -2px;
+    background: linear-gradient(to bottom, #fff, #888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --- STATS SECTION --- */
 .stats-container {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    padding: 40px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: -40px auto 40px;
+    padding: 0 20px;
 }
 
 .stat-card {
-    background: #161616;
-    padding: 20px;
-    border-radius: 20px;
-    text-align: center;
+    background: var(--card);
+    padding: 2rem;
+    border-radius: 24px;
+    border: 1px solid var(--border);
     flex: 1;
-    border: 1px solid #222;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .stat-card h2 {
+    font-size: 3rem;
     color: var(--primary);
-    font-size: 2.5rem;
     margin: 0;
+    font-weight: 800;
 }
 
 .stat-card p {
     color: var(--text-dim);
-    font-size: 0.9rem;
-    margin: 5px 0 0 0;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    text-transform: uppercase;
 }
 
-/* Bento Grid Spacing */
+/* --- BENTO GRID SYSTEM --- */
 .bento-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 40px 20px;
 }
 
-/* Make cards span multiple columns for a 'complete' look */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 35px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card:hover {
+    transform: scale(1.02);
+    border-color: var(--primary);
+}
+
+.card h2, .card h3 { color: var(--primary); margin-top: 0; }
 .span-2 { grid-column: span 2; }
 .span-3 { grid-column: span 3; }
 
-@media (max-width: 768px) {
-    .stats-container { flex-direction: column; }
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 850px) {
+    .stats-container { flex-direction: column; margin-top: 20px; }
     .bento-grid { grid-template-columns: 1fr; }
     .span-2, .span-3 { grid-column: span 1; }
+    nav { gap: 1rem; }
+    nav a { font-size: 0.8rem; }
+}
+
+/* --- ANIMATION --- */
+#content {
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
