@@ -1,81 +1,50 @@
-:root {
-    --bg: #0a0a0a;
-    --card: #161616;
-    --primary: #39FF14; /* Neon Recycling Green */
-    --text: #ffffff;
-    --text-dim: #a0a0a0;
-}
-
-body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
-    margin: 0;
-    line-height: 1.6;
-}
-
-/* Modern Bento Grid Layout */
-.bento-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+/* Stats Section */
+.stats-container {
+    display: flex;
+    justify-content: center;
     gap: 20px;
-    padding: 20px;
+    padding: 40px 20px;
     max-width: 1200px;
     margin: 0 auto;
 }
 
-.card {
-    background: var(--card);
-    border: 1px solid #222;
-    border-radius: 24px;
-    padding: 30px;
-    transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    border-color: var(--primary);
-}
-
-.hero {
-    text-align: center;
-    padding: 100px 20px;
-    background: radial-gradient(circle at center, #1b3d1b 0%, #0a0a0a 70%);
-}
-
-.hero h1 {
-    font-size: 3.5rem;
-    margin-bottom: 10px;
-    letter-spacing: -2px;
-}
-
-.badge {
-    background: rgba(57, 255, 20, 0.1);
-    color: var(--primary);
-    padding: 5px 15px;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
-nav {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
+.stat-card {
+    background: #161616;
     padding: 20px;
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(15px);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    border-radius: 20px;
+    text-align: center;
+    flex: 1;
+    border: 1px solid #222;
 }
 
-nav a {
+.stat-card h2 {
+    color: var(--primary);
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.stat-card p {
     color: var(--text-dim);
-    text-decoration: none;
-    font-weight: 500;
-    transition: 0.3s;
+    font-size: 0.9rem;
+    margin: 5px 0 0 0;
 }
 
-nav a:hover { color: var(--primary); }
+/* Bento Grid Spacing */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Make cards span multiple columns for a 'complete' look */
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+
+@media (max-width: 768px) {
+    .stats-container { flex-direction: column; }
+    .bento-grid { grid-template-columns: 1fr; }
+    .span-2, .span-3 { grid-column: span 1; }
+}
