@@ -11,7 +11,8 @@
             --card-bg: #1a1a1a;
             --text-main: #ffffff;
             --text-dim: #a0a0a0;
-            --accent: #3b82f6; /* Modern Blue */
+            --accent: #3b82f6; 
+            --alert-bg: #2563eb;
         }
 
         body {
@@ -23,7 +24,6 @@
             line-height: 1.6;
         }
 
-        /* CONTAINER: Prevents the "messed up" stretched look */
         .container {
             max-width: 1100px;
             margin: 0 auto;
@@ -56,7 +56,7 @@
 
         /* HERO SECTION */
         h1 {
-            font-size: clamp(2.5rem, 8vw, 4rem); /* Responsive font size */
+            font-size: clamp(2.5rem, 8vw, 4rem);
             margin: 0 0 10px 0;
             letter-spacing: -1px;
         }
@@ -67,7 +67,7 @@
             margin-bottom: 60px;
         }
 
-        /* DYNAMIC STATS GRID */
+        /* STATS GRID */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -81,18 +81,11 @@
             border-radius: 30px;
             text-align: center;
             border: 1px solid #333;
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
         }
 
         .stat-card h2 {
             font-size: 80px;
             margin: 0;
-            line-height: 1;
             color: var(--text-main);
         }
 
@@ -101,59 +94,89 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             font-size: 14px;
-            margin-top: 15px;
+        }
+
+        /* NOTIFICATION POPUP */
+        #popup-notif {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            max-width: 350px;
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            border-left: 5px solid var(--accent);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none; /* Hidden by default, shown by JS */
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        #popup-notif p {
+            margin: 0 0 15px 0;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+
+        .popup-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .close-notif {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 18px;
+            cursor: pointer;
         }
 
         /* CONTENT SECTIONS */
         section {
-            max-width: 800px; /* Keeps text readable */
+            max-width: 800px;
             margin-bottom: 60px;
         }
 
-        .section-label {
-            color: var(--accent);
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        h3 {
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-
-        p {
-            font-size: 18px;
-            color: #d1d1d1;
-        }
-
-        .highlight-box {
-            background: linear-gradient(145deg, #1e1e1e, #141414);
-            padding: 30px;
-            border-radius: 20px;
-            border-left: 4px solid var(--accent);
-        }
+        h3 { font-size: 32px; margin-bottom: 20px; }
 
         footer {
             margin-top: 100px;
-            padding-top: 40px;
+            padding: 40px 0;
             border-top: 1px solid #222;
             text-align: center;
             color: var(--text-dim);
-            font-size: 14px;
         }
 
-        /* MOBILE FIXES */
         @media (max-width: 600px) {
-            .container { padding: 20px; }
-            nav { gap: 15px; }
-            .stat-card { padding: 40px 10px; }
+            #popup-notif { left: 20px; right: 20px; max-width: none; }
         }
     </style>
 </head>
 <body>
+
+    <div id="popup-notif">
+        <button class="close-notif" onclick="closePopup()">&times;</button>
+        <p><strong>Did you know?</strong> If you live in St. Louis, your recycling often gets put in the trash due to contamination.</p>
+        <a href="map.html" class="popup-btn">Find a Nearby Spot</a>
+    </div>
 
     <div class="container">
         <header>
@@ -186,20 +209,8 @@
             </div>
 
             <section>
-                <span class="section-label">The Problem</span>
                 <h3>Why Recycling is Failing in STL</h3>
                 <p>St. Louis currently faces a <strong>"Single-Stream Crisis."</strong> Because residents put everything in one bin, glass shards often contaminate paper, and plastic bags tangle sorting machines.</p>
-            </section>
-
-            <section class="highlight-box">
-                <span class="section-label">Pro Tip</span>
-                <h3>The Tap Test</h3>
-                <p>If a plastic item is crinkly or soft (like a grocery bag), it <strong>CANNOT</strong> go in the blue bin. Take it to Schnucks or Target instead!</p>
-            </section>
-
-            <section>
-                <h3>Where does it go?</h3>
-                <p>Most STL recycling goes to the Republic Services Materials Recovery Facility (MRF). If a load is more than 10% trash, the whole truck is sent to the landfill.</p>
             </section>
         </main>
 
@@ -209,8 +220,16 @@
     </div>
 
     <script>
-        // JS included as requested
-        console.log("Dark Mode Recycle STL Loaded");
+        // Show the popup after 2 seconds
+        window.onload = function() {
+            setTimeout(function() {
+                document.getElementById('popup-notif').style.display = 'block';
+            }, 2000);
+        };
+
+        function closePopup() {
+            document.getElementById('popup-notif').style.display = 'none';
+        }
     </script>
 </body>
 </html>
