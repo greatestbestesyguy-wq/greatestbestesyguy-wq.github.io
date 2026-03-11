@@ -41,3 +41,14 @@ document.querySelectorAll('nav a').forEach(link => {
 });
 
 loadPage('home');
+// Check if the user was just redirected from a 404 page
+window.onload = function() {
+    if (sessionStorage.getItem('showRedirectPopup') === 'true') {
+        
+        // Create a simple popup alert
+        alert("Oops! That page isn't ready yet. Returning you to the home page.");
+        
+        // Remove the flag so the popup doesn't keep appearing
+        sessionStorage.removeItem('showRedirectPopup');
+    }
+};
