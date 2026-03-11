@@ -1,63 +1,81 @@
 :root {
-    --primary: #2e7d32;
-    --accent: #81c784;
-    --bg: #f8fafc;
-    --glass: rgba(255, 255, 255, 0.8);
+    --bg: #0a0a0a;
+    --card: #161616;
+    --primary: #39FF14; /* Neon Recycling Green */
+    --text: #ffffff;
+    --text-dim: #a0a0a0;
 }
 
 body {
-    font-family: 'Inter', system-ui, sans-serif;
-    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--bg);
-    color: #1a1a1a;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.6;
 }
 
-/* Glassmorphism Nav */
+/* Modern Bento Grid Layout */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid #222;
+    border-radius: 24px;
+    padding: 30px;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.hero {
+    text-align: center;
+    padding: 100px 20px;
+    background: radial-gradient(circle at center, #1b3d1b 0%, #0a0a0a 70%);
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    letter-spacing: -2px;
+}
+
+.badge {
+    background: rgba(57, 255, 20, 0.1);
+    color: var(--primary);
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
 nav {
-    position: sticky;
-    top: 0;
-    background: var(--glass);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(0,0,0,0.1);
     display: flex;
     justify-content: center;
-    padding: 1rem;
-    z-index: 1000;
+    gap: 30px;
+    padding: 20px;
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(15px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 nav a {
-    margin: 0 15px;
+    color: var(--text-dim);
     text-decoration: none;
-    color: #333;
     font-weight: 500;
-    transition: color 0.3s;
+    transition: 0.3s;
 }
 
 nav a:hover { color: var(--primary); }
-
-/* Hero Section */
-.hero {
-    padding: 80px 20px;
-    text-align: center;
-    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
-    color: white;
-}
-
-.container {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-}
-
-/* Dynamic Content Animation */
-#content {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
