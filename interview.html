@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interviews | Recycle STL</title>
+    <style>
+        /* CORE MODERN DARK THEME */
+        :root {
+            --bg: #050505;
+            --card-bg: #121212;
+            --accent: #3b82f6;
+            --text: #ffffff;
+            --text-dim: #999;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* CENTERED NAVIGATION */
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover { color: var(--accent); }
+
+        header h2 {
+            font-size: 14px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            margin: 0 0 10px 0;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin-bottom: 60px;
+            font-size: 1.1rem;
+        }
+
+        /* VIDEO CONTAINER */
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 24px;
+            background-color: #1a1a1a;
+            border: 1px solid #222;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .video-wrapper iframe, .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .video-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #444;
+        }
+
+        .video-placeholder svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            fill: currentColor;
+        }
+
+        /* DESCRIPTION SECTION */
+        .interview-details {
+            text-align: left;
+            max-width: 800px;
+            margin: 0 auto 80px;
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid #222;
+        }
+
+        .interview-details h3 {
+            font-size: 24px;
+            margin-top: 0;
+            color: var(--accent);
+        }
+
+        .interview-details p {
+            font-size: 18px;
+            color: #ccc;
+        }
+
+        .timestamp-list {
+            margin-top: 30px;
+            border-top: 1px solid #222;
+            padding-top: 20px;
+        }
+
+        .timestamp-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .time {
+            color: var(--accent);
+            font-weight: bold;
+            min-width: 60px;
+        }
+
+        footer {
+            padding: 60px 0;
+            border-top: 1px solid #222;
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="interviews.html" style="color: var(--text)">Interviews</a>
+                <a href="map.html">Map</a>
+                <a href="about.html">About</a>
+            </nav>
+            <h2>Metro Academic & Classical High School</h2>
+        </header>
+
+        <main>
+            <h1>The Interviews</h1>
+            <p class="subtitle">Direct conversations with the leaders shaping St. Louis waste policy.</p>
+
+            <div class="video-wrapper">
+                <!-- Replace 'placeholder' with your YouTube embed code later -->
+                <div class="video-placeholder">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <p>Interview Video Uploading Soon</p>
+                </div>
+                <!-- 
+                <iframe src="https://www.youtube.com/embed/YOUR_ID_HERE" 
+                    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen></iframe> 
+                -->
+            </div>
+
+            <section class="interview-details">
+                <h3>Mayor Cara Spencer</h3>
+                <p>In this exclusive sit-down, we discuss the logistics of the 2025-2026 recycling pivot. Topics include the city's move away from curbside collection, the expansion of the drop-off network, and how Metro High School students can impact contamination rates through localized education.</p>
+                
+                <div class="timestamp-list">
+                    <div class="timestamp-item">
+                        <span class="time">0:00</span>
+                        <span>Introduction and the current state of STL waste.</span>
+                    </div>
+                    <div class="timestamp-item">
+                        <span class="time">4:20</span>
+                        <span>Why curbside recycling was officially suspended.</span>
+                    </div>
+                    <div class="timestamp-item">
+                        <span class="time">12:45</span>
+                        <span>How the new "Drop-Off" locations are being monitored.</span>
+                    </div>
+                    <div class="timestamp-item">
+                        <span class="time">18:10</span>
+                        <span>Advice for student activists at Metro High.</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Metro High School Sustainability Club | St. Louis, MO</p>
+        </footer>
+    </div>
+
+</body>
+</html>
