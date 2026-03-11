@@ -3,55 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle STL | Metro HS Project</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <title>Recycle St. Louis</title>
+    <style>
+        /* CSS STYLES */
+        body {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        /* Nav Fixes: Spacing and Touch Targets */
+        nav {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #0000EE;
+            font-size: 14px;
+            padding: 10px 5px; /* Larger hit target for mobile */
+        }
+
+        header h2 {
+            font-weight: normal;
+            font-size: 16px;
+            margin: 0 0 20px 0;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-style: italic;
+            margin-bottom: 40px;
+        }
+
+        /* Stats Cards Fix: Contrast Improvement */
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background-color: #1a1a1a;
+            color: white; /* Fixed contrast from dark gray to white */
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .card h2 {
+            font-size: 48px;
+            margin: 0;
+        }
+
+        .card p {
+            margin: 5px 0 0 0;
+            font-size: 18px;
+            color: #cccccc; /* Light gray for labels */
+        }
+
+        section {
+            margin-bottom: 40px;
+        }
+
+        h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .pro-tip {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 5px solid #0056b3;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 60px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
 
-    <div id="custom-popup" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center;">
-        <div style="background: #161616; padding: 40px; border-radius: 24px; border: 1px solid #39FF14; text-align: center; max-width: 400px;">
-            <h2 style="color: #39FF14; margin-top: 0;">404</h2>
-            <p>Page not found. Returning to Home.</p>
-            <button onclick="closePopup()" style="background: #39FF14; color: #000; border: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; cursor: pointer;">Got it</button>
-        </div>
-    </div>
-
-    <nav>
-        <a href="#" data-page="home">Home</a>
-        <a href="/interviews" data-page="interviews">Interviews</a>
-        <a href="/map" data-page="map">STL Map</a>
-        <a href="/about" data-page="about">About</a>
-    </nav>
-
-    <header class="hero">
-        <span class="badge">Metro Academic & Classical High School</span>
-        <h1>Recycle St. Louis</h1>
-        <p>A student-led initiative to fix the 314 waste stream.</p>
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="interviews.html">Interviews</a>
+            <a href="map.html">STL Map</a>
+            <a href="about.html">About</a>
+        </nav>
+        <h2>Metro Academic & Classical High School</h2>
     </header>
 
-    <section class="stats-container">
-        <div class="stat-card">
-            <h2 class="counter" data-target="25">0</h2>
-            <p>% STL Diversion Rate</p>
-        </div>
-        <div class="stat-card">
-            <h2 class="counter" data-target="30">0</h2>
-            <p>% Contamination Avg</p>
-        </div>
-        <div class="stat-card">
-            <h2 class="counter" data-target="1500">0</h2>
-            <p>Tons Processed Daily</p>
-        </div>
-    </section>
+    <main>
+        <h1>Recycle St. Louis</h1>
+        <p class="tagline">A student-led initiative to fix the 314 waste stream.</p>
 
-    <main class="bento-grid" id="content">
-        </main>
+        <div class="stats-container">
+            <div class="card">
+                <h2>25</h2>
+                <p>% STL Diversion Rate</p>
+            </div>
+            <div class="card">
+                <h2>30</h2>
+                <p>% Contamination Avg</p>
+            </div>
+            <div class="card">
+                <h2>1500</h2>
+                <p>Tons Processed Daily</p>
+            </div>
+        </div>
 
-    <footer style="text-align: center; padding: 60px; color: #444;">
-        <p>&copy; 2026 Metro High School Sustainability Club</p>
+        <section>
+            <p>The Problem</p>
+            <h3>Why Recycling is Failing in STL</h3>
+            <p>St. Louis currently faces a "Single-Stream Crisis." Because residents put everything in one bin, glass shards often contaminate paper, and plastic bags tangle sorting machines. This project aims to educate Metro High students on <strong>Wish-cycling</strong>—the act of putting non-recyclable items in the bin hoping they'll be recycled.</p>
+        </section>
+
+        <section class="pro-tip">
+            <h3>Pro Tip: The Tap Test</h3>
+            <p>If a plastic item is crinkly or soft (like a grocery bag), it <strong>CANNOT</strong> go in the blue bin. Take it to Schnucks or Target instead!</p>
+        </section>
+
+        <section>
+            <h3>Metro HS Impact</h3>
+            <p>Our school produces roughly 200lbs of paper waste weekly. Proper sorting could save 10 trees per semester.</p>
+        </section>
+
+        <section>
+            <h3>Where does it go?</h3>
+            <p>Most STL recycling goes to the Republic Services Materials Recovery Facility (MRF). If a load is more than 10% trash, the whole truck is sent to the landfill.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Metro High School<br>Sustainability Club</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        // JAVASCRIPT
+        // This log helps you confirm the JS is loading on your phone
+        console.log("Recycle STL Site Loaded Successfully");
+
+        // Optional: Alert the user if they click a link that doesn't exist yet
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Since you haven't made the other files yet, 
+                // this is a reminder for when you test it.
+                if(this.getAttribute('href') !== "index.html") {
+                    console.log("Note: Ensure " + this.getAttribute('href') + " exists in your folder.");
+                }
+            });
+        });
+    </script>
 </body>
 </html>
