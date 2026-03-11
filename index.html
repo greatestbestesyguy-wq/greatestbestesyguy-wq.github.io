@@ -3,169 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle St. Louis | Metro HS</title>
+    <title>Recycle STL | Metro HS</title>
     <style>
-        /* GLOBAL DARK THEME */
+        /* CORE MODERN DARK THEME */
         :root {
-            --bg-color: #0a0a0a;
-            --card-bg: #1a1a1a;
-            --text-main: #ffffff;
-            --text-dim: #a0a0a0;
-            --accent: #3b82f6; 
-            --alert-bg: #2563eb;
+            --bg: #050505;
+            --card-bg: #121212;
+            --accent: #3b82f6;
+            --text: #ffffff;
+            --text-dim: #999;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
             padding: 0;
             line-height: 1.6;
+            text-align: center; /* Centers the majority of text elements */
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 40px 20px;
         }
 
-        /* NAVIGATION */
+        /* CENTERED NAVIGATION */
         nav {
             display: flex;
-            gap: 30px;
-            margin-bottom: 10px;
+            justify-content: center; /* Centers the links */
+            gap: 40px;
+            margin-bottom: 20px;
         }
 
         nav a {
-            color: var(--accent);
+            color: var(--text-dim);
             text-decoration: none;
             font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
+            font-weight: 500;
             letter-spacing: 1px;
-            padding: 10px 0;
+            transition: color 0.3s;
         }
+
+        nav a:hover { color: var(--accent); }
 
         header h2 {
             font-size: 14px;
-            color: var(--text-dim);
-            font-weight: 400;
-            margin: 0 0 50px 0;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 60px;
         }
 
-        /* HERO SECTION */
+        /* HERO AREA */
         h1 {
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            margin: 0 0 10px 0;
-            letter-spacing: -1px;
+            font-size: clamp(3rem, 10vw, 5rem);
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: -2px;
         }
 
         .tagline {
             font-size: 1.2rem;
             color: var(--text-dim);
-            margin-bottom: 60px;
+            max-width: 600px;
+            margin: 20px auto 60px;
         }
 
-        /* STATS GRID */
+        /* UPDATED STATS GRID */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-bottom: 80px;
         }
 
         .stat-card {
             background-color: var(--card-bg);
-            padding: 60px 20px;
-            border-radius: 30px;
-            text-align: center;
-            border: 1px solid #333;
+            padding: 50px 20px;
+            border-radius: 24px;
+            border: 1px solid #222;
         }
 
         .stat-card h2 {
-            font-size: 80px;
+            font-size: 64px;
             margin: 0;
-            color: var(--text-main);
+            color: var(--text);
         }
 
         .stat-card p {
             color: var(--text-dim);
+            font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 2px;
-            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* INTERVIEW SECTION WITH IMAGE placeholder */
+        .interview-section {
+            background-color: var(--card-bg);
+            border-radius: 30px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 80px;
+            border: 1px solid #222;
+        }
+
+        .interview-img {
+            width: 100%;
+            height: 400px;
+            background-color: #333;
+            background-image: url('https://via.placeholder.com/1000x500/1a1a1a/ffffff?text=STL+Mayor+Cara+Spencer+Interview'); /* Replace with your actual image file */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .interview-content {
+            padding: 40px;
+        }
+
+        .btn-play {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: var(--accent);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
         }
 
         /* NOTIFICATION POPUP */
         #popup-notif {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            max-width: 350px;
-            background-color: var(--card-bg);
+            bottom: 30px;
+            right: 30px;
+            max-width: 360px;
+            background-color: #111;
             border: 1px solid #333;
-            border-left: 5px solid var(--accent);
+            border-top: 4px solid #ef4444; /* Red for alert */
             color: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: left;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
             z-index: 1000;
-            display: none; /* Hidden by default, shown by JS */
-            animation: slideUp 0.5s ease-out;
+            display: none;
+            animation: popUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        #popup-notif p {
-            margin: 0 0 15px 0;
-            font-size: 15px;
-            color: var(--text-main);
+        @keyframes popUp {
+            from { transform: translateY(50px) scale(0.9); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
 
         .popup-btn {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            font-weight: bold;
+            display: block;
+            text-align: center;
+            background-color: var(--text);
+            color: black;
+            padding: 10px;
+            border-radius: 8px;
             text-decoration: none;
-            display: inline-block;
-            cursor: pointer;
-            font-size: 13px;
+            font-weight: bold;
+            margin-top: 15px;
         }
 
         .close-notif {
             position: absolute;
             top: 10px;
-            right: 10px;
+            right: 15px;
             background: none;
             border: none;
-            color: var(--text-dim);
-            font-size: 18px;
+            color: #666;
+            font-size: 20px;
             cursor: pointer;
         }
 
-        /* CONTENT SECTIONS */
-        section {
-            max-width: 800px;
-            margin-bottom: 60px;
-        }
-
-        h3 { font-size: 32px; margin-bottom: 20px; }
-
         footer {
-            margin-top: 100px;
-            padding: 40px 0;
+            padding: 60px 0;
             border-top: 1px solid #222;
-            text-align: center;
             color: var(--text-dim);
+            font-size: 13px;
         }
 
         @media (max-width: 600px) {
+            nav { gap: 15px; }
             #popup-notif { left: 20px; right: 20px; max-width: none; }
         }
     </style>
@@ -174,8 +201,8 @@
 
     <div id="popup-notif">
         <button class="close-notif" onclick="closePopup()">&times;</button>
-        <p><strong>Did you know?</strong> If you live in St. Louis, your recycling often gets put in the trash due to contamination.</p>
-        <a href="map.html" class="popup-btn">Find a Nearby Spot</a>
+        <p><strong>🚨 Important Update:</strong> Residential recycling is no longer being picked up in many STL neighborhoods. To ensure your items are recycled, they <strong>must</strong> be taken to an official drop-off station.</p>
+        <a href="map.html" class="popup-btn">Find a Station Near You</a>
     </div>
 
     <div class="container">
@@ -183,7 +210,7 @@
             <nav>
                 <a href="index.html">Home</a>
                 <a href="interviews.html">Interviews</a>
-                <a href="map.html">STL Map</a>
+                <a href="map.html">Map</a>
                 <a href="about.html">About</a>
             </nav>
             <h2>Metro Academic & Classical High School</h2>
@@ -191,40 +218,49 @@
 
         <main>
             <h1>Recycle St. Louis</h1>
-            <p class="tagline">A student-led initiative to fix the 314 waste stream.</p>
+            <p class="tagline">The system is broken. We're here to help the Metro community navigate the new waste stream reality.</p>
 
             <div class="stats-grid">
                 <div class="stat-card">
-                    <h2>25</h2>
-                    <p>% STL Diversion Rate</p>
+                    <h2>0</h2>
+                    <p>Curbside Pickups Active</p>
                 </div>
                 <div class="stat-card">
-                    <h2>30</h2>
-                    <p>% Contamination Avg</p>
+                    <h2>14</h2>
+                    <p>Drop-Off Locations</p>
                 </div>
                 <div class="stat-card">
-                    <h2>1500</h2>
-                    <p>Tons Processed Daily</p>
+                    <h2>100%</h2>
+                    <p>User Responsibility</p>
                 </div>
             </div>
 
-            <section>
-                <h3>Why Recycling is Failing in STL</h3>
-                <p>St. Louis currently faces a <strong>"Single-Stream Crisis."</strong> Because residents put everything in one bin, glass shards often contaminate paper, and plastic bags tangle sorting machines.</p>
+            <section class="interview-section">
+                <div class="interview-img"></div>
+                <div class="interview-content">
+                    <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">Exclusive Interview</span>
+                    <h3>Talking Policy with Mayor Cara Spencer</h3>
+                    <p>We sat down with St. Louis Mayor Cara Spencer to discuss the suspension of curbside recycling and what the city's long-term plan is for sustainable waste management.</p>
+                    <a href="interviews.html" class="btn-play">Watch the Interview</a>
+                </div>
+            </section>
+
+            <section style="max-width:700px; margin: 0 auto 80px;">
+                <h3>The Curbside Crisis</h3>
+                <p>Due to labor shortages and high contamination rates, St. Louis has officially pivoted to a "Drop-Off" model. Placing recyclables in your alley bin now almost guarantees they end up in a landfill. Our mission is to provide the maps and info needed to keep our community green.</p>
             </section>
         </main>
 
         <footer>
-            <p>&copy; 2026 Metro High School | Sustainability Club</p>
+            <p>&copy; 2026 Metro High School Sustainability Club | St. Louis, MO</p>
         </footer>
     </div>
 
     <script>
-        // Show the popup after 2 seconds
         window.onload = function() {
             setTimeout(function() {
                 document.getElementById('popup-notif').style.display = 'block';
-            }, 2000);
+            }, 1500);
         };
 
         function closePopup() {
