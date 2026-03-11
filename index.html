@@ -3,189 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle St. Louis</title>
+    <title>Recycle St. Louis | Metro HS</title>
     <style>
-        /* BASE STYLES */
-        body {
-            font-family: 'Times New Roman', serif;
-            line-height: 1.6;
-            margin: 0 auto;
-            padding: 20px;
-            color: #1a1a1a;
-            max-width: 900px; /* Prevents the 'messed up' stretched look on computers */
-            background-color: #ffffff;
+        /* GLOBAL DARK THEME */
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --accent: #3b82f6; /* Modern Blue */
         }
 
-        /* NAVIGATION: Fixed spacing and touch targets */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* CONTAINER: Prevents the "messed up" stretched look */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* NAVIGATION */
         nav {
             display: flex;
-            gap: 25px;
-            margin-bottom: 5px;
-            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 10px;
         }
 
         nav a {
+            color: var(--accent);
             text-decoration: none;
-            color: #0000EE;
-            font-size: 15px;
-            padding: 8px 0; /* Vertical padding for easier tapping */
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 0;
         }
 
         header h2 {
-            font-weight: normal;
-            font-size: 16px;
-            margin: 0 0 40px 0;
-            color: #333;
+            font-size: 14px;
+            color: var(--text-dim);
+            font-weight: 400;
+            margin: 0 0 50px 0;
         }
 
-        /* TYPOGRAPHY */
+        /* HERO SECTION */
         h1 {
-            font-size: 42px;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
+            font-size: clamp(2.5rem, 8vw, 4rem); /* Responsive font size */
+            margin: 0 0 10px 0;
+            letter-spacing: -1px;
         }
 
         .tagline {
-            font-style: italic;
-            font-size: 18px;
-            margin-bottom: 40px;
-            color: #444;
-        }
-
-        /* STATS CARDS: Fixed contrast and responsive grid */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            font-size: 1.2rem;
+            color: var(--text-dim);
             margin-bottom: 60px;
         }
 
-        .card {
-            background-color: #0f0f0f;
-            color: #ffffff; /* High contrast white text */
-            border-radius: 24px;
-            padding: 40px 20px;
+        /* DYNAMIC STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 80px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 60px 20px;
+            border-radius: 30px;
             text-align: center;
-            transition: transform 0.2s;
+            border: 1px solid #333;
+            transition: transform 0.3s ease;
         }
 
-        .card h2 {
-            font-size: 56px;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .stat-card h2 {
+            font-size: 80px;
             margin: 0;
-            font-weight: bold;
+            line-height: 1;
+            color: var(--text-main);
         }
 
-        .card p {
-            margin: 10px 0 0 0;
-            font-size: 16px;
-            color: #bbbbbb; /* Light gray for readability */
+        .stat-card p {
+            color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-size: 14px;
+            margin-top: 15px;
         }
 
         /* CONTENT SECTIONS */
         section {
-            margin-bottom: 45px;
+            max-width: 800px; /* Keeps text readable */
+            margin-bottom: 60px;
         }
 
-        .label {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 5px;
+        .section-label {
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
             display: block;
+            margin-bottom: 10px;
         }
 
         h3 {
-            font-size: 28px;
-            margin-top: 5px;
-            margin-bottom: 15px;
+            font-size: 32px;
+            margin-bottom: 20px;
         }
 
-        .pro-tip {
-            background-color: #f4f4f4;
-            padding: 25px;
-            border-radius: 12px;
-            border-left: 6px solid #0056b3;
+        p {
+            font-size: 18px;
+            color: #d1d1d1;
+        }
+
+        .highlight-box {
+            background: linear-gradient(145deg, #1e1e1e, #141414);
+            padding: 30px;
+            border-radius: 20px;
+            border-left: 4px solid var(--accent);
         }
 
         footer {
+            margin-top: 100px;
+            padding-top: 40px;
+            border-top: 1px solid #222;
             text-align: center;
+            color: var(--text-dim);
             font-size: 14px;
-            margin-top: 80px;
-            padding-bottom: 40px;
-            color: #888;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
         }
 
-        /* MOBILE OPTIMIZATION */
+        /* MOBILE FIXES */
         @media (max-width: 600px) {
-            h1 { font-size: 32px; }
-            .card h2 { font-size: 48px; }
+            .container { padding: 20px; }
             nav { gap: 15px; }
+            .stat-card { padding: 40px 10px; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="interviews.html">Interviews</a>
-            <a href="map.html">STL Map</a>
-            <a href="about.html">About</a>
-        </nav>
-        <h2>Metro Academic & Classical High School</h2>
-    </header>
+    <div class="container">
+        <header>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="interviews.html">Interviews</a>
+                <a href="map.html">STL Map</a>
+                <a href="about.html">About</a>
+            </nav>
+            <h2>Metro Academic & Classical High School</h2>
+        </header>
 
-    <main>
-        <h1>Recycle St. Louis</h1>
-        <p class="tagline">A student-led initiative to fix the 314 waste stream.</p>
+        <main>
+            <h1>Recycle St. Louis</h1>
+            <p class="tagline">A student-led initiative to fix the 314 waste stream.</p>
 
-        <div class="stats-container">
-            <div class="card">
-                <h2>25</h2>
-                <p>% STL Diversion Rate</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h2>25</h2>
+                    <p>% STL Diversion Rate</p>
+                </div>
+                <div class="stat-card">
+                    <h2>30</h2>
+                    <p>% Contamination Avg</p>
+                </div>
+                <div class="stat-card">
+                    <h2>1500</h2>
+                    <p>Tons Processed Daily</p>
+                </div>
             </div>
-            <div class="card">
-                <h2>30</h2>
-                <p>% Contamination Avg</p>
-            </div>
-            <div class="card">
-                <h2>1500</h2>
-                <p>Tons Processed Daily</p>
-            </div>
-        </div>
 
-        <section>
-            <span class="label">The Problem</span>
-            <h3>Why Recycling is Failing in STL</h3>
-            <p>St. Louis currently faces a "Single-Stream Crisis." Because residents put everything in one bin, glass shards often contaminate paper, and plastic bags tangle sorting machines. This project aims to educate Metro High students on <strong>Wish-cycling</strong>—the act of putting non-recyclable items in the bin hoping they'll be recycled.</p>
-        </section>
+            <section>
+                <span class="section-label">The Problem</span>
+                <h3>Why Recycling is Failing in STL</h3>
+                <p>St. Louis currently faces a <strong>"Single-Stream Crisis."</strong> Because residents put everything in one bin, glass shards often contaminate paper, and plastic bags tangle sorting machines.</p>
+            </section>
 
-        <section class="pro-tip">
-            <h3>Pro Tip: The Tap Test</h3>
-            <p>If a plastic item is crinkly or soft (like a grocery bag), it <strong>CANNOT</strong> go in the blue bin. Take it to Schnucks or Target instead!</p>
-        </section>
+            <section class="highlight-box">
+                <span class="section-label">Pro Tip</span>
+                <h3>The Tap Test</h3>
+                <p>If a plastic item is crinkly or soft (like a grocery bag), it <strong>CANNOT</strong> go in the blue bin. Take it to Schnucks or Target instead!</p>
+            </section>
 
-        <section>
-            <h3>Metro HS Impact</h3>
-            <p>Our school produces roughly 200lbs of paper waste weekly. Proper sorting could save 10 trees per semester.</p>
-        </section>
+            <section>
+                <h3>Where does it go?</h3>
+                <p>Most STL recycling goes to the Republic Services Materials Recovery Facility (MRF). If a load is more than 10% trash, the whole truck is sent to the landfill.</p>
+            </section>
+        </main>
 
-        <section>
-            <h3>Where does it go?</h3>
-            <p>Most STL recycling goes to the Republic Services Materials Recovery Facility (MRF). If a load is more than 10% trash, the whole truck is sent to the landfill.</p>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2026 Metro High School<br>Sustainability Club</p>
-    </footer>
+        <footer>
+            <p>&copy; 2026 Metro High School | Sustainability Club</p>
+        </footer>
+    </div>
 
     <script>
-        // Confirms the script is active and links are ready for your future pages
-        console.log("Recycle STL Site: Ready. Ensure interviews.html, map.html, and about.html are in this same folder.");
+        // JS included as requested
+        console.log("Dark Mode Recycle STL Loaded");
     </script>
 </body>
 </html>
