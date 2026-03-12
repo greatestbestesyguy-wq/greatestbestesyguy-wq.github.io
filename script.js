@@ -5,7 +5,6 @@
 window.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch and Inject Shared HTML
     try {
-        // Using a relative path works on GitHub Pages and Local Servers
         const response = await fetch('./shared.html');
         if (!response.ok) throw new Error('Could not find shared.html');
         
@@ -26,13 +25,11 @@ window.addEventListener('DOMContentLoaded', async () => {
             footerTarget.innerHTML = footerSource.innerHTML;
         }
 
-        // 2. Initialize Navigation logic AFTER injection is successful
         initNavigation();
         initPopup();
         
     } catch (err) {
         console.error("Navigation load error:", err);
-        // If fetch fails (like opening locally), we try to init anyway in case the HTML is hardcoded
         initNavigation();
         initPopup();
     }
@@ -66,7 +63,6 @@ function initNavigation() {
         el.style.color = 'var(--text)';
     };
 
-    // Ensure layout is calculated
     setTimeout(() => updateIndicator(activeLink), 200);
 
     links.forEach(link => {
@@ -108,19 +104,39 @@ window.shareCurrentPage = async () => {
             console.log("Share cancelled");
         }
     } else {
-        // Fallback for desktop: Copy to clipboard
-        const el = document.createElement('textarea');
-        el.value = shareData.text + " " + shareData.url;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        
-        // Custom message box since we don't use alerts
-        const msg = document.createElement('div');
-        msg.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--accent); color:black; padding:15px 25px; border-radius:10px; font-weight:bold; z-index:9999;";
-        msg.innerText = "Link copied! Paste it on social media to spread the word.";
-        document.body.appendChild(msg);
-        setTimeout(() => msg.remove(), 3000);
+        copyToClipboard(shareData.text + " " + shareData.url);
     }
 };
+
+/**
+ * Social Media Platform Sharing Logic
+ */
+window.socialShare = (platform) => {
+    const text = encodeURIComponent(`I scored well on the STL Recycling Challenge! ♻️ Can you beat my score? Check out this Metro High project:`);
+    const url = encodeURIComponent(window.location.href);
+    let finalUrl = '';
+
+    if (platform === 'tw') finalUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+    if (platform === 'wa') finalUrl = `https://api.whatsapp.com/send?text=${text}%20${url}`;
+    if (platform === 'fb') finalUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+
+    if (finalUrl) window.open(finalUrl, '_blank');
+};
+
+/**
+ * Helper: Copy to Clipboard with UI feedback
+ */
+function copyToClipboard(content) {
+    const el = document.createElement('textarea');
+    el.value = content;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    
+    const msg = document.createElement('div');
+    msg.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--accent); color:white; padding:15px 25px; border-radius:10px; font-weight:bold; z-index:9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3);";
+    msg.innerText = "Link copied! Paste it on social media to spread the word.";
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 3000);
+}
