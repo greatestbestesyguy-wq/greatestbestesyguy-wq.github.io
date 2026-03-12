@@ -57,7 +57,11 @@
             gap: 5px;
             transition: color 0.2s;
         }
-        .home-btn:hover { color: var(--accent); }
+        
+        /* Desktop Hover only for Home Link */
+        @media (hover: hover) {
+            .home-btn:hover { color: var(--accent); }
+        }
 
         .option-btn {
             display: block;
@@ -72,8 +76,23 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
-        .option-btn:hover { border-color: var(--accent); background: #252525; }
+
+        /* FIX: Apply hover effects ONLY to desktop devices with a mouse */
+        @media (hover: hover) {
+            .option-btn:hover { 
+                border-color: var(--accent); 
+                background: #252525; 
+            }
+        }
+        
+        /* Active state for mobile touch feedback without sticking */
+        .option-btn:active {
+            background: #333;
+            border-color: var(--accent);
+        }
         
         .nav-btn {
             background: var(--accent);
@@ -118,7 +137,10 @@
             box-shadow: 0 4px 15px rgba(255,255,255,0.1);
             transition: transform 0.2s;
         }
-        .share-btn:hover { transform: scale(1.02); }
+
+        @media (hover: hover) {
+            .share-btn:hover { transform: scale(1.02); }
+        }
 
         .discovery-grid {
             margin-top: 30px;
@@ -140,10 +162,14 @@
             align-items: center;
             transition: transform 0.2s, border-color 0.2s;
         }
-        .discovery-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent);
+
+        @media (hover: hover) {
+            .discovery-card:hover {
+                transform: translateY(-2px);
+                border-color: var(--accent);
+            }
         }
+
         .discovery-card span { font-size: 14px; color: var(--dim); }
         .discovery-card strong { display: block; font-size: 16px; }
 
@@ -213,46 +239,26 @@
 
     function showResults() {
         document.getElementById('progress-bar').style.width = '100%';
-        let rank = "";
-        let icon = "";
-        
-        if (score >= 7) {
-            rank = "Recycling Legend";
-            icon = "👑";
-        } else if (score >= 5) {
-            rank = "Sustainability Scholar";
-            icon = "🌱";
-        } else {
-            rank = "Waste Warrior";
-            icon = "🛡️";
-        }
+        let rank = score >= 7 ? "Recycling Legend" : score >= 5 ? "Sustainability Scholar" : "Waste Warrior";
+        let icon = score >= 7 ? "👑" : score >= 5 ? "🌱" : "🛡️";
 
         document.getElementById('display').innerHTML = `
             <span class="badge-icon">${icon}</span>
             <h1 style="color:var(--accent); margin-bottom: 5px;">${rank}</h1>
             <p style="font-size: 1.2rem; margin-bottom: 10px;">You scored ${score} / ${data.length}</p>
-            
             <div class="share-incentive">
                 <strong>Help save STL recycling!</strong><br>
                 Share your score to challenge your friends and help stop bin contamination in our city.
             </div>
-
             <button class="share-btn" onclick="share()">📣 Share My Rank & Challenge Friends</button>
-
             <div class="discovery-grid">
                 <p style="color:var(--dim); font-size: 14px; margin-bottom: 5px; text-align: center;">Keep Exploring</p>
                 <a href="/map" class="discovery-card">
-                    <div>
-                        <strong>Find a Drop-Off</strong>
-                        <span>Locate your nearest station</span>
-                    </div>
+                    <div><strong>Find a Drop-Off</strong><span>Locate your nearest station</span></div>
                     <span>→</span>
                 </a>
                 <a href="/interviews" class="discovery-card">
-                    <div>
-                        <strong>Watch Interviews</strong>
-                        <span>Hear from Mayor Cara Spencer</span>
-                    </div>
+                    <div><strong>Watch Interviews</strong><span>Hear from Mayor Cara Spencer</span></div>
                     <span>→</span>
                 </a>
                 <a href="/" class="nav-btn" style="text-align: center; margin-top: 10px;">Return Home</a>
@@ -262,8 +268,7 @@
 
     window.share = () => {
         const rank = score >= 7 ? "Recycling Legend" : score >= 5 ? "Sustainability Scholar" : "Waste Warrior";
-        const text = `I just earned the ${rank} rank on the STL Recycling Challenge (${score}/${data.length})! Can you beat my score and help save our city's recycling? ♻️`;
-        
+        const text = `I just earned the ${rank} rank on the STL Recycling Challenge (${score}/${data.length})! Can you beat my score? ♻️`;
         if (navigator.share) {
             navigator.share({ title: 'Recycle STL Challenge', text: text, url: window.location.href });
         } else {
