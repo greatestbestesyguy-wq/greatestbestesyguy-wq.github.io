@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STL Recycling Quiz</title>
+    <title>STL Recycling Challenge</title>
     <style>
         :root {
             --bg: #0a0a0a;
@@ -11,8 +11,8 @@
             --accent: #00ff88;
             --text: #ffffff;
             --dim: #a0a0a0;
+            --wrong: #ff4444;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
@@ -24,111 +24,137 @@
             margin: 0;
             padding: 20px;
         }
-
         #quiz-box {
             background: var(--card);
             padding: 40px;
             border-radius: 28px;
             border: 1px solid #222;
-            max-width: 500px;
+            max-width: 550px;
             width: 100%;
             text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-
         .option-btn {
             display: block;
             width: 100%;
-            padding: 15px;
-            margin: 10px 0;
+            padding: 16px;
+            margin: 12px 0;
             background: #1e1e1e;
             border: 1px solid #333;
-            border-radius: 12px;
+            border-radius: 14px;
             color: white;
             font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
-
-        .option-btn:hover { border-color: var(--accent); }
-
+        .option-btn:hover { border-color: var(--accent); background: #252525; }
         .nav-btn {
             background: var(--accent);
             color: black;
             border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
+            padding: 14px 34px;
+            border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
             text-decoration: none;
+            display: inline-block;
             margin-top: 20px;
         }
-
-        #progress {
-            height: 4px;
+        .share-btn {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+        #progress-container {
+            height: 6px;
             background: #222;
             width: 100%;
-            margin-bottom: 30px;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            overflow: hidden;
         }
-
-        #bar {
+        #progress-bar {
             height: 100%;
             background: var(--accent);
             width: 0%;
+            transition: width 0.4s ease;
         }
     </style>
 </head>
 <body>
-
 <div id="quiz-box">
-    <div id="progress"><div id="bar"></div></div>
+    <div id="progress-container"><div id="progress-bar"></div></div>
     <div id="display"></div>
 </div>
-
 <script>
     const data = [
-        { q: "Is a greasy pizza box recyclable in STL?", a: "No", info: "Grease ruins the paper fibers. Trash it!" },
-        { q: "Can you put plastic bags in city bins?", a: "No", info: "They jam the machines. Take them to a store!" },
-        { q: "Should you leave caps on plastic bottles?", a: "Yes", info: "Keep them on to ensure the small plastic is captured." }
+        { q: "Is a greasy pizza box recyclable in STL?", a: "No", info: "Grease ruins paper. Recycle only the clean lid!" },
+        { q: "Can plastic bags go in blue bins?", a: "No", info: "They jam sorting machines. Return them to grocery stores." },
+        { q: "Do you need to rinse out food jars?", a: "Yes", info: "Residue contaminates batches. Give it a quick scrub!" },
+        { q: "Should you leave the caps on plastic bottles?", a: "Yes", info: "Keep them on! Modern machines capture them better that way." },
+        { q: "Is shredded paper okay for the blue bin?", a: "No", info: "Small bits fall through equipment. Compost it instead." },
+        { q: "Can you recycle mirrors or lightbulbs in the bin?", a: "No", info: "This glass has different melting points and ruins the batch." },
+        { q: "Are aluminum cans infinitely recyclable?", a: "Yes", info: "Aluminum never loses quality no matter how many times it's reused!" },
+        { q: "Does STL currently have curbside pickup city-wide?", a: "No", info: "Most residents must use drop-off stations to ensure recycling happens." }
     ];
-
     let idx = 0;
     let score = 0;
-
     function render() {
         const item = data[idx];
-        document.getElementById('bar').style.width = `${(idx / data.length) * 100}%`;
+        document.getElementById('progress-bar').style.width = `${(idx / data.length) * 100}%`;
         document.getElementById('display').innerHTML = `
-            <h2 style="color:var(--accent)">Question ${idx + 1}</h2>
-            <p>${item.q}</p>
+            <p style="color:var(--dim)">Question ${idx + 1} of ${data.length}</p>
+            <h2 style="margin-bottom: 30px;">${item.q}</h2>
             <button class="option-btn" onclick="check('Yes')">Yes</button>
             <button class="option-btn" onclick="check('No')">No</button>
         `;
     }
-
     window.check = (choice) => {
         const correct = choice === data[idx].a;
         if (correct) score++;
         document.getElementById('display').innerHTML = `
-            <h2 style="color:${correct ? '#00ff88' : '#ff4444'}">${correct ? 'Correct!' : 'Wrong'}</h2>
-            <p>${data[idx].info}</p>
+            <h2 style="color:${correct ? 'var(--accent)' : 'var(--wrong)'}">${correct ? '✓ Correct!' : '✗ Incorrect'}</h2>
+            <p style="margin: 20px 0;">${data[idx].info}</p>
             <button class="nav-btn" onclick="next()">Continue</button>
         `;
     };
-
     window.next = () => {
         idx++;
         if (idx < data.length) render();
         else {
-            document.getElementById('bar').style.width = '100%';
+            document.getElementById('progress-bar').style.width = '100%';
+            let rank = score > 6 ? "Recycling Legend" : score > 4 ? "Sustainability Scholar" : "Waste Warrior";
             document.getElementById('display').innerHTML = `
-                <h2>Final Score: ${score}/${data.length}</h2>
-                <a href="index.html" class="nav-btn">Back to Site</a>
+                <h1 style="color:var(--accent)">${rank}</h1>
+                <p>You scored ${score} / ${data.length}</p>
+                <button class="nav-btn" onclick="location.href='index.html'">Finish</button>
+                <button class="share-btn" onclick="share()">Share Result</button>
             `;
         }
     };
-
+    window.share = () => {
+        const text = `I scored ${score}/${data.length} on the STL Recycling Challenge! Can you beat me? ♻️`;
+        const url = window.location.href;
+        if (navigator.share) {
+            navigator.share({ title: 'Recycling Quiz', text: text, url: url });
+        } else {
+            const el = document.createElement('textarea');
+            el.value = text + " " + url;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert("Score copied to clipboard!");
+        }
+    };
     render();
 </script>
-
 </body>
 </html>
