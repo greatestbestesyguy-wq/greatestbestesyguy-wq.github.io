@@ -1,12 +1,15 @@
 <div id="shared-header">
     <header>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="interviews.html">Interviews</a>
-            <a href="map.html">Map</a>
-            <a href="about.html">About</a>
-            <a href="quiz.html">Quiz</a>
-            <a href="#" onclick="shareCurrentPage(); return false;" style="color: var(--accent); font-weight: bold; border: 1px solid var(--accent); padding: 2px 8px; border-radius: 5px; margin-left: 10px;">Share Site</a>
+        <nav aria-label="Main Navigation">
+            <a href="index.html" aria-label="Go to Home Page">Home</a>
+            <a href="interviews.html" aria-label="Read Interviews">Interviews</a>
+            <a href="map.html" aria-label="View Recycling Map">Map</a>
+            <a href="about.html" aria-label="About the Project">About</a>
+            <a href="quiz.html" aria-label="Take the Quiz">Quiz</a>
+            <a href="#" onclick="shareCurrentPage(); return false;" 
+               style="color: var(--accent); font-weight: bold; border: 1px solid var(--accent); padding: 2px 8px; border-radius: 5px; margin-left: 10px;">
+               Share Site
+            </a>
         </nav>
         <h2>Metro Academic & Classical High School</h2>
     </header>
@@ -15,5 +18,10 @@
 <div id="shared-footer">
     <footer>
         <p>&copy; 2026 Metro High School Sustainability Club | St. Louis, MO</p>
+        <!-- Back to Top Button -->
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+                style="background: transparent; border: 1px solid #333; color: var(--text-dim); padding: 8px 15px; border-radius: 20px; cursor: pointer; margin-top: 20px; font-size: 12px;">
+            ↑ Back to Top
+        </button>
     </footer>
 </div>
