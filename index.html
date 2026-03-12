@@ -1,38 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Primary Meta Tags -->
-<title>Recycle St. Louis | Metro High School Advocacy</title>
-<meta name="title" content="Recycle St. Louis | Metro High School Advocacy">
-<meta name="description" content="0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL.">
-
-<!-- Open Graph / Facebook / WhatsApp -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://stl.planet-recycling.pl/">
-<meta property="og:title" content="Recycle St. Louis | Metro High School Advocacy">
-<meta property="og:description" content="A student advocacy project bringing awareness to the state of recycling in St. Louis. Explore the data and view the map.">
-<meta property="og:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
-
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://stl.planet-recycling.pl/">
-<meta property="twitter:title" content="Recycle St. Louis | Metro High School Advocacy">
-<meta property="twitter:description" content="Explore the reality of the St. Louis recycling crisis through our interactive map and student-led interviews.">
-<meta property="twitter:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-R1Y5DRSP21"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R1Y5DRSP21"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-R1Y5DRSP21');
+    </script>
 
-  gtag('config', 'G-R1Y5DRSP21');
-</script>
+    <!-- Netlify Identity Widget (Required for CMS Sign-in) -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recycle St. Louis | Home</title>
-    <!-- Link to your external CSS file -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="Recycle St. Louis | Metro High School Advocacy">
+    <meta name="description" content="0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stl.planet-recycling.pl/">
+    <meta property="og:title" content="Recycle St. Louis | Metro High School Advocacy">
+    <meta property="og:description" content="A student advocacy project bringing awareness to the state of recycling in St. Louis.">
+    <meta property="og:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
 </head>
 <body>
 
@@ -44,8 +39,16 @@
     </div>
 
     <div class="container">
-        <!-- Placeholder for Shared Header from Canvas -->
-        <div id="header-placeholder"></div>
+        <header>
+            <!-- Updated with ID for script.js compatibility -->
+            <nav id="main-nav">
+                <a href="index.html">Home</a>
+                <a href="interviews.html">Interviews</a>
+                <a href="map.html">Map</a>
+                <a href="about.html">About</a>
+            </nav>
+            <h2>Metro Academic & Classical High School</h2>
+        </header>
 
         <main>
             <h1>Recycle St. Louis</h1>
@@ -82,12 +85,26 @@
             </section>
         </main>
 
-        <!-- Placeholder for Shared Footer from Canvas -->
-        <div id="footer-placeholder"></div>
+        <footer>
+            <p>&copy; 2026 Metro High School Sustainability Club | St. Louis, MO</p>
+            <!-- Optional: Admin Login Link for your group -->
+            <p style="margin-top: 20px;"><a href="/admin/" style="color: var(--text-dim); text-decoration: none; font-size: 12px;">Admin Login</a></p>
+        </footer>
     </div>
 
-    <!-- Link to your external JS file -->
     <script src="script.js"></script>
 
+    <!-- Identity Listener for Redirecting to Admin -->
+    <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+    </script>
 </body>
 </html>
