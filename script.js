@@ -1,5 +1,5 @@
 /**
- * Global JavaScript for Recycle STL
+ * Global JavaScript for Recycle St. Louis
  */
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -101,20 +101,22 @@ function closePopup() {
  * Uses the Web Share API with specific advocacy text
  */
 window.shareCurrentPage = async () => {
+    // Explicitly defining the shared content to ensure it overrides defaults
     const shareData = {
-        title: 'Recycle St. Louis - Metro High School',
+        title: 'Recycle St. Louis',
         text: '0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL! ♻️',
         url: 'https://stl.planet-recycling.pl/' 
     };
 
-    if (navigator.share) {
-        try {
+    try {
+        if (navigator.share) {
             await navigator.share(shareData);
-        } catch (err) {
-            console.log("Share cancelled");
+        } else {
+            // Desktop fallback: Copy to clipboard
+            copyToClipboard(shareData.text + " " + shareData.url);
         }
-    } else {
-        copyToClipboard(shareData.text + " " + shareData.url);
+    } catch (err) {
+        console.log("Share interaction cancelled");
     }
 };
 
@@ -130,7 +132,12 @@ window.socialShare = (platform) => {
     if (platform === 'wa') finalUrl = `https://api.whatsapp.com/send?text=${text}%20${url}`;
     if (platform === 'fb') finalUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
 
-    if (finalUrl) window.open(finalUrl, '_blank');
+    if (finalUrl) {
+        window.open(finalUrl, '_blank');
+    } else {
+        // Default to the native share if no platform specified
+        window.shareCurrentPage();
+    }
 };
 
 /**
