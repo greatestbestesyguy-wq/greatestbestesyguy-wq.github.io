@@ -7,7 +7,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     const headerTarget = document.getElementById('header-placeholder');
     const footerTarget = document.getElementById('footer-placeholder');
 
-    // Only attempt fetch if placeholders exist on the current page
     if (headerTarget || footerTarget) {
         try {
             const response = await fetch('./shared.html');
@@ -27,17 +26,16 @@ window.addEventListener('DOMContentLoaded', async () => {
                 footerTarget.innerHTML = footerSource.innerHTML;
             }
 
-            // Initialize navigation/popups AFTER injection
+            // Initialize features after HTML is injected
             initNavigation();
             initPopup();
             
         } catch (err) {
-            console.error("Shared HTML load error:", err);
+            console.error("Navigation load error:", err);
             initNavigation();
             initPopup();
         }
     } else {
-        // If placeholders are missing (like on the Quiz), still try to run other features
         initNavigation();
         initPopup();
     }
@@ -45,6 +43,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 /**
  * Sliding Navigation Bar Logic
+ * Optimized for Mobile: Hides the bar if links wrap to multiple lines
  */
 function initNavigation() {
     const nav = document.querySelector('nav');
@@ -62,18 +61,35 @@ function initNavigation() {
     if (currentPath === "" || currentPath === "/") currentPath = "index.html";
 
     let activeLink = Array.from(links).find(link => 
-        link.getAttribute('href') === currentPath
+        link.getAttribute('href') === currentPath || link.getAttribute('href') === "/" + currentPath
     );
 
     if (!activeLink) activeLink = links[0];
 
     const updateIndicator = (el) => {
+        // Mobile Fix: Check if links have wrapped by comparing top offsets
+        const firstLink = links[0];
+        const lastLink = links[links.length - 1];
+        const isWrapped = firstLink.offsetTop !== lastLink.offsetTop;
+
+        if (isWrapped) {
+            indicator.style.opacity = '0';
+            links.forEach(l => l.style.color = 'var(--text-dim)');
+            // Highlight text only on mobile when wrapped
+            if (el) el.style.color = 'var(--text)';
+            return;
+        }
+
+        indicator.style.opacity = '1';
         indicator.style.width = `${el.offsetWidth}px`;
         indicator.style.left = `${el.offsetLeft}px`;
+        indicator.style.top = `${el.offsetTop + el.offsetHeight}px`;
+        
         links.forEach(l => l.style.color = 'var(--text-dim)');
         el.style.color = 'var(--text)';
     };
 
+    // Initial position
     setTimeout(() => updateIndicator(activeLink), 200);
 
     links.forEach(link => {
@@ -103,7 +119,6 @@ function closePopup() {
 
 /**
  * Persuasive Site Sharing Logic
- * Specifically tuned for the stl.planet-recycling.pl domain
  */
 window.shareCurrentPage = async () => {
     const shareData = {
@@ -116,30 +131,10 @@ window.shareCurrentPage = async () => {
         if (navigator.share) {
             await navigator.share(shareData);
         } else {
-            // Desktop fallback: Copy to clipboard
             copyToClipboard(shareData.text + " " + shareData.url);
         }
     } catch (err) {
-        console.log("Share cancelled or failed");
-    }
-};
-
-/**
- * Social Media Platform Specific Sharing
- */
-window.socialShare = (platform) => {
-    const text = encodeURIComponent(`0 curbside pickups. 14 drop-off sites. Help Metro High students educate STL! ♻️`);
-    const url = encodeURIComponent('https://stl.planet-recycling.pl/');
-    let finalUrl = '';
-
-    if (platform === 'tw') finalUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-    if (platform === 'wa') finalUrl = `https://api.whatsapp.com/send?text=${text}%20${url}`;
-    if (platform === 'fb') finalUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-
-    if (finalUrl) {
-        window.open(finalUrl, '_blank');
-    } else {
-        window.shareCurrentPage();
+        console.log("Share interaction cancelled");
     }
 };
 
