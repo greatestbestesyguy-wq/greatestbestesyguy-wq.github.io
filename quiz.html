@@ -62,16 +62,17 @@
             margin-top: 20px;
         }
         .share-btn {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 12px 24px;
+            background: white;
+            color: black;
+            border: none;
+            padding: 14px 34px;
             border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
-            margin-left: 10px;
+            transition: transform 0.2s;
         }
+        .share-btn:hover { transform: scale(1.05); }
         #progress-container {
             height: 6px;
             background: #222;
@@ -85,6 +86,15 @@
             background: var(--accent);
             width: 0%;
             transition: width 0.4s ease;
+        }
+        .share-pitch {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px dashed var(--accent);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -133,17 +143,23 @@
             let rank = score > 6 ? "Recycling Legend" : score > 4 ? "Sustainability Scholar" : "Waste Warrior";
             document.getElementById('display').innerHTML = `
                 <h1 style="color:var(--accent)">${rank}</h1>
-                <p>You scored ${score} / ${data.length}</p>
-                <button class="nav-btn" onclick="location.href='index.html'">Finish</button>
-                <button class="share-btn" onclick="share()">Share Result</button>
+                <p style="font-size: 1.2rem;">You scored ${score} / ${data.length}</p>
+                
+                <div class="share-pitch">
+                    <p><strong>Help spread the word!</strong> St. Louis recycling is in a crisis. By sharing your score, you help educate your friends and family so less trash ends up in our landfills. One share can prevent hundreds of bags of contamination!</p>
+                </div>
+
+                <button class="share-btn" onclick="share()">📣 Share My Score</button>
+                <br>
+                <button class="nav-btn" onclick="location.href='index.html'" style="background:transparent; color:var(--dim); border:1px solid #333; margin-top:10px;">Return Home</button>
             `;
         }
     };
     window.share = () => {
-        const text = `I scored ${score}/${data.length} on the STL Recycling Challenge! Can you beat me? ♻️`;
+        const text = `I scored ${score}/${data.length} on the STL Recycling Challenge! Did you know curbside recycling is struggling? Take the quiz to help save our city:`;
         const url = window.location.href;
         if (navigator.share) {
-            navigator.share({ title: 'Recycling Quiz', text: text, url: url });
+            navigator.share({ title: 'Help STL Recycle', text: text, url: url });
         } else {
             const el = document.createElement('textarea');
             el.value = text + " " + url;
@@ -151,7 +167,7 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            alert("Score copied to clipboard!");
+            alert("Score & message copied to clipboard! Paste it to your social media to help spread the word.");
         }
     };
     render();
