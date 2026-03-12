@@ -1,13 +1,65 @@
+<!-- Updated Shared Header -->
 <div id="shared-header">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --accent: #00ff88;
+            --dim: #a0a0a0;
+            --text-dim: #999;
+        }
+        #shared-header {
+            width: 100%;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 1px solid #222;
+            background: var(--bg);
+        }
+        header nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap; /* Allows links to wrap to a new line on small screens */
+            padding: 0 15px;
+        }
+        header nav a {
+            color: var(--dim);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+            white-space: nowrap; /* Prevents single links from breaking across lines */
+            line-height: 2; /* Provides vertical spacing if they wrap to two lines */
+        }
+        header nav a:hover { 
+            color: var(--accent); 
+        }
+        .share-site-link {
+            color: var(--accent) !important;
+            font-weight: bold;
+            border: 1px solid var(--accent);
+            padding: 4px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        #shared-header h2 { 
+            font-size: 12px; 
+            color: var(--accent); 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
+            margin: 10px 0 0;
+            padding: 0 15px;
+            line-height: 1.4;
+        }
+    </style>
     <header>
         <nav aria-label="Main Navigation">
-            <a href="#" aria-label="Go to Home Page">Home</a>
+            <a href="/" aria-label="Go to Home Page">Home</a>
             <a href="/interviews" aria-label="Read Interviews">Interviews</a>
             <a href="/map" aria-label="View Recycling Map">Map</a>
             <a href="/about" aria-label="About the Project">About</a>
             <a href="/quiz" aria-label="Take the Quiz">Quiz</a>
-            <a href="#" onclick="shareCurrentPage(); return false;" 
-               style="color: var(--accent); font-weight: bold; border: 1px solid var(--accent); padding: 2px 8px; border-radius: 5px; margin-left: 10px;">
+            <a href="#" onclick="shareCurrentPage(); return false;" class="share-site-link">
                Share Site
             </a>
         </nav>
@@ -15,13 +67,61 @@
     </header>
 </div>
 
+<!-- Updated Shared Footer -->
 <div id="shared-footer">
+    <style>
+        #shared-footer {
+            width: 100%;
+            padding: 40px 0;
+            text-align: center;
+            border-top: 1px solid #222;
+            color: var(--text-dim);
+            margin-top: 40px;
+        }
+        #shared-footer p {
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .back-to-top {
+            background: transparent;
+            border: 1px solid #333;
+            color: var(--text-dim);
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .back-to-top:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+    </style>
     <footer>
         <p>&copy; 2026 Metro High School Sustainability Club | St. Louis, MO</p>
-        <!-- Back to Top Button -->
-        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
-                style="background: transparent; border: 1px solid #333; color: var(--text-dim); padding: 8px 15px; border-radius: 20px; cursor: pointer; margin-top: 20px; font-size: 12px;">
+        <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
             ↑ Back to Top
         </button>
     </footer>
 </div>
+
+<script>
+function shareCurrentPage() {
+    const text = "Check out the Recycle St. Louis advocacy project! ♻️";
+    if (navigator.share) {
+        navigator.share({
+            title: 'Recycle STL',
+            text: text,
+            url: window.location.origin
+        });
+    } else {
+        const el = document.createElement('textarea');
+        el.value = text + " " + window.location.origin;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert("Link and message copied to clipboard!");
+    }
+}
+</script>
