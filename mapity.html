@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>STL Recycling Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script src="https://unpkg.com/leaflet-kml@1.0.5/L.KML.js"></script>
+
+    <style>
+        #map { height: 500px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <h2>STL Recycling Drop-Offs</h2>
+    <div id="map"></div>
+
+    <script>
+        // 3. Initialize the Map
+        const map = L.map('map').setView([38.627, -90.199], 11);
+
+        // 4. Add a Map Theme (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 5. Load and Display your KML file
+        fetch('recycling_map.kml')
+            .then(res => res.text())
+            .then(kmltext => {
+                const parser = new DOMParser();
+                const kml = parser.parseFromString(kmltext, 'text/xml');
+                const track = new L.KML(kml);
+                map.addLayer(track);
+
+                // Auto-zoom to show all pins
+                const bounds = track.getBounds();
+                map.fitBounds(bounds);
+            });
+    </script>
+</body>
+</html>
