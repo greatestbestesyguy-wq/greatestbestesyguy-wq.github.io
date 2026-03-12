@@ -90,3 +90,37 @@ function closePopup() {
     const popup = document.getElementById('popup-notif');
     if (popup) popup.style.display = 'none';
 }
+
+/**
+ * Persuasive Site Sharing Logic
+ */
+window.shareCurrentPage = async () => {
+    const shareData = {
+        title: 'STL Recycling Crisis - Metro High School',
+        text: 'Help us spread the word! St. Louis is facing a recycling crisis. Check out our project at Metro High School and learn how to recycle right:',
+        url: window.location.href
+    };
+
+    if (navigator.share) {
+        try {
+            await navigator.share(shareData);
+        } catch (err) {
+            console.log("Share cancelled");
+        }
+    } else {
+        // Fallback for desktop: Copy to clipboard
+        const el = document.createElement('textarea');
+        el.value = shareData.text + " " + shareData.url;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        
+        // Custom message box since we don't use alerts
+        const msg = document.createElement('div');
+        msg.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--accent); color:black; padding:15px 25px; border-radius:10px; font-weight:bold; z-index:9999;";
+        msg.innerText = "Link copied! Paste it on social media to spread the word.";
+        document.body.appendChild(msg);
+        setTimeout(() => msg.remove(), 3000);
+    }
+};
