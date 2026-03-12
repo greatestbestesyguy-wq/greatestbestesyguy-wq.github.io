@@ -6,6 +6,7 @@
     --text: #ffffff;
     --text-dim: #999;
     --alert: #ef4444;
+    --accent-success: #00ff88;
 }
 
 body {
@@ -33,10 +34,12 @@ header {
 nav {
     display: flex;
     justify-content: center;
-    gap: 40px;
+    align-items: center;
+    gap: 30px;
     margin-bottom: 10px;
     position: relative;
     padding-bottom: 10px;
+    flex-wrap: wrap;
 }
 
 nav a {
@@ -216,6 +219,53 @@ h1 {
     color: #666; font-size: 20px; cursor: pointer;
 }
 
+/* QUIZ & SHARE SPECIFIC STYLES */
+.score-card {
+    background: linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 100%);
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid var(--accent-success);
+    margin-bottom: 20px;
+}
+
+.share-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.social-btn {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    transition: opacity 0.2s;
+}
+
+.social-btn:hover { opacity: 0.8; }
+.btn-tw { background: #000000; }
+.btn-wa { background: #25D366; }
+.btn-fb { background: #1877F2; }
+
+.discovery-card {
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: white;
+    border: 1px solid #333;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.discovery-card:hover {
+    border-color: var(--accent);
+    background: #252525;
+}
+
 footer {
     padding: 60px 0;
     border-top: 1px solid #222;
@@ -226,4 +276,5 @@ footer {
 @media (max-width: 600px) {
     nav { gap: 15px; }
     #popup-notif { left: 20px; right: 20px; max-width: none; }
+    .stats-grid { grid-template-columns: 1fr; }
 }
