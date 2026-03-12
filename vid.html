@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Video Player</title>
+    <style>
+        .video-container {
+            max-width: 800px;
+            margin: 20px auto;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: #000;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        .controls-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-container:hover .controls-overlay {
+            opacity: 1;
+        }
+
+        button {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1b5e20;
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-filled {
+            height: 100%;
+            background: #81c784;
+            width: 0%;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="video-container" id="videoPlayer">
+    <video id="mainVideo">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="controls-overlay">
+        <button id="playPause">Play</button>
+        <div class="progress-bar" id="progress">
+            <div class="progress-filled" id="progressFilled"></div>
+        </div>
+        <button id="muteBtn">Mute</button>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('mainVideo');
+    const playBtn = document.getElementById('playPause');
+    const progress = document.getElementById('progress');
+    const progressFilled = document.getElementById('progressFilled');
+    const muteBtn = document.getElementById('muteBtn');
+
+    // Play/Pause toggle
+    playBtn.addEventListener('click', () => {
+        if (video.paused) {
+            video.play();
+            playBtn.textContent = 'Pause';
+        } else {
+            video.pause();
+            playBtn.textContent = 'Play';
+        }
+    });
+
+    // Update progress bar
+    video.addEventListener('timeupdate', () => {
+        const percentage = (video.currentTime / video.duration) * 100;
+        progressFilled.style.width = percentage + '%';
+    });
+
+    // Click on progress bar to seek
+    progress.addEventListener('click', (e) => {
+        const scrubTime = (e.offsetX / progress.offsetWidth) * video.duration;
+        video.currentTime = scrubTime;
+    });
+
+    // Mute toggle
+    muteBtn.addEventListener('click', () => {
+        video.muted = !video.muted;
+        muteBtn.textContent = video.muted ? 'Unmute' : 'Mute';
+    });
+</script>
+
+</body>
+</html>
