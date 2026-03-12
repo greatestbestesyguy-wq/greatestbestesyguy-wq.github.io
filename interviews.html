@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interviews | Recycle STL</title>
-    <!-- Linked external CSS -->
+    <title>Recycle St. Louis | Interviews</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,57 +11,36 @@
     <div class="container">
         <header>
             <nav>
-    <a href="index.html">Home</a>
-    <a href="interviews.html">Interviews</a>
-    <a href="map.html">Map</a>
-    <a href="about.html">About</a>
-    <!-- The indicator div is added automatically by script.js -->
+                <a href="index.html">Home</a>
+                <a href="interviews.html">Interviews</a>
+                <a href="map.html">Map</a>
+                <a href="about.html">About</a>
             </nav>
-
-⭐⭐⭐⭐⭐ I did double check. I reviewed the `offsetLeft` and `offsetWidth` logic in the JavaScript to ensure the bar aligns perfectly regardless of screen size or text length. I also ensured that the CSS `transition` uses a smooth cubic-bezier for a "premium" feel. Before checking, the stars would have been 4 because the bar wouldn't have updated on window resize; I increased it to 5 by adding the `resize` event listener to ensure it stays perfectly under the text at all times.
             <h2>Metro Academic & Classical High School</h2>
         </header>
 
         <main>
-            <h1>The Interviews</h1>
-            <p class="subtitle">Direct conversations with the leaders shaping St. Louis waste policy.</p>
+            <h1>The Conversations</h1>
+            <p class="tagline">Direct conversations with the leaders shaping St. Louis waste policy.</p>
 
-            <!-- Video Section -->
-            <div class="video-wrapper">
-                <div class="video-placeholder">
-                    <svg viewBox="0 0 24 24" width="80" height="80" fill="currentColor">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    <p>Interview Video Uploading Soon</p>
+            <section class="interview-detail">
+                <div class="video-wrapper">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:var(--text-dim);">
+                        Interview Video Uploading Soon
+                    </div>
                 </div>
-                <!-- 
-                When you have your video, replace the placeholder div with:
-                <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
-                    frameborder="0" allowfullscreen></iframe> 
-                -->
-            </div>
-
-            <!-- Details Section -->
-            <section style="text-align: left; max-width: 800px; margin: 0 auto 80px; background-color: var(--card-bg); padding: 40px; border-radius: 24px; border: 1px solid #222;">
-                <h3 style="color: var(--accent); font-size: 24px; margin-top: 0;">Mayor Cara Spencer</h3>
-                <p style="font-size: 18px; color: #ccc; margin-bottom: 30px;">
-                    In this exclusive sit-down, we discuss the logistics of the 2025-2026 recycling pivot. 
-                    Topics include the city's move away from curbside collection and how Metro students 
-                    can help lead the transition to a drop-off model.
-                </p>
                 
-                <div style="margin-top: 30px; border-top: 1px solid #222; padding-top: 20px;">
-                    <div style="display: flex; gap: 15px; margin-bottom: 10px; font-size: 15px;">
-                        <span style="color: var(--accent); font-weight: bold; min-width: 60px;">0:00</span>
-                        <span>Introduction and the current state of STL waste.</span>
-                    </div>
-                    <div style="display: flex; gap: 15px; margin-bottom: 10px; font-size: 15px;">
-                        <span style="color: var(--accent); font-weight: bold; min-width: 60px;">4:20</span>
-                        <span>Why curbside recycling was officially suspended.</span>
-                    </div>
-                    <div style="display: flex; gap: 15px; margin-bottom: 10px; font-size: 15px;">
-                        <span style="color: var(--accent); font-weight: bold; min-width: 60px;">12:45</span>
-                        <span>Expansion of the city-wide drop-off network.</span>
+                <div class="interview-content" style="text-align: left; max-width: 800px; margin: 0 auto;">
+                    <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">Featured Interview</span>
+                    <h2 style="font-size: 32px; margin: 10px 0;">Mayor Cara Spencer</h2>
+                    <p style="color: var(--text-dim); font-size: 18px; margin-bottom: 30px;">
+                        In this exclusive sit-down, we discuss the logistics of the 2025-2026 recycling pivot.
+                    </p>
+                    
+                    <div class="timestamp-box" style="background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #222;">
+                        <p><strong>0:00</strong> Introduction and the current state of STL waste.</p>
+                        <p><strong>4:20</strong> Why curbside recycling was officially suspended.</p>
+                        <p><strong>12:45</strong> Expansion of the city-wide drop-off network.</p>
                     </div>
                 </div>
             </section>
@@ -73,7 +51,6 @@
         </footer>
     </div>
 
-    <!-- Linked external JS -->
     <script src="script.js"></script>
 </body>
 </html>
