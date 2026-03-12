@@ -3,7 +3,7 @@
  */
 
 window.addEventListener('DOMContentLoaded', async () => {
-    // 1. Fetch and Inject Shared HTML
+    // 1. Fetch and Inject Shared HTML (Header/Footer)
     try {
         const response = await fetch('./shared.html');
         if (!response.ok) throw new Error('Could not find shared.html');
@@ -25,16 +25,21 @@ window.addEventListener('DOMContentLoaded', async () => {
             footerTarget.innerHTML = footerSource.innerHTML;
         }
 
+        // Initialize features after HTML is injected
         initNavigation();
         initPopup();
         
     } catch (err) {
         console.error("Navigation load error:", err);
+        // Fallback: try to initialize anyway if elements already exist in static HTML
         initNavigation();
         initPopup();
     }
 });
 
+/**
+ * Sliding Navigation Bar Logic
+ */
 function initNavigation() {
     const nav = document.querySelector('nav');
     if (!nav) return;
@@ -63,6 +68,7 @@ function initNavigation() {
         el.style.color = 'var(--text)';
     };
 
+    // Initial position with slight delay for layout calculation
     setTimeout(() => updateIndicator(activeLink), 200);
 
     links.forEach(link => {
@@ -73,6 +79,9 @@ function initNavigation() {
     window.addEventListener('resize', () => updateIndicator(activeLink));
 }
 
+/**
+ * Popup Notification Controls
+ */
 function initPopup() {
     const popup = document.getElementById('popup-notif');
     if (popup) {
@@ -89,12 +98,13 @@ function closePopup() {
 
 /**
  * Persuasive Site Sharing Logic
+ * Uses the Web Share API with specific advocacy text
  */
 window.shareCurrentPage = async () => {
     const shareData = {
-        title: 'STL Recycling Crisis - Metro High School',
-        text: 'Help us spread the word! St. Louis is facing a recycling crisis. Check out our project at Metro High School and learn how to recycle right:',
-        url: window.location.href
+        title: 'Recycle St. Louis - Metro High School',
+        text: '0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL! ♻️',
+        url: 'https://stl.planet-recycling.pl/' 
     };
 
     if (navigator.share) {
@@ -109,11 +119,11 @@ window.shareCurrentPage = async () => {
 };
 
 /**
- * Social Media Platform Sharing Logic
+ * Social Media Platform Specific Sharing
  */
 window.socialShare = (platform) => {
-    const text = encodeURIComponent(`I scored well on the STL Recycling Challenge! ♻️ Can you beat my score? Check out this Metro High project:`);
-    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(`0 curbside pickups. 14 drop-off sites. Help Metro High students educate STL! ♻️`);
+    const url = encodeURIComponent('https://stl.planet-recycling.pl/');
     let finalUrl = '';
 
     if (platform === 'tw') finalUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
