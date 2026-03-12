@@ -52,7 +52,7 @@ nav a {
 
 nav a:hover { color: var(--text); }
 
-/* The Sliding Bar */
+/* The Sliding Bar Indicator */
 #nav-indicator {
     position: absolute;
     bottom: 0;
@@ -115,7 +115,7 @@ h1 {
     margin-top: 10px;
 }
 
-/* INTERVIEW SECTION (HOME) */
+/* INTERVIEW SECTION */
 .interview-section {
     background-color: var(--card-bg);
     border-radius: 30px;
@@ -140,7 +140,7 @@ h1 {
     padding: 40px;
 }
 
-/* VIDEO CONTAINER (INTERVIEWS PAGE) */
+/* VIDEO CONTAINER */
 .video-wrapper {
     position: relative;
     padding-bottom: 56.25%;
@@ -153,21 +153,9 @@ h1 {
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 
-.video-wrapper iframe, .video-placeholder {
+.video-wrapper iframe {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-}
-
-.video-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    color: #444;
-}
-
-.video-placeholder svg {
-    width: 80px; height: 80px; margin-bottom: 20px; fill: currentColor;
 }
 
 /* BUTTONS */
