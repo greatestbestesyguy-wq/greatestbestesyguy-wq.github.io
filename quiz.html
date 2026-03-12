@@ -11,27 +11,9 @@
     </script>
 
     <!-- Primary Meta Tags -->
-    <title>Recycle St. Louis | Metro High School Advocacy</title>
-    <meta name="title" content="Recycle St. Louis | Metro High School Advocacy">
-    <meta name="description" content="0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL.">
-
-    <!-- Open Graph / Facebook / WhatsApp -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://stl.planet-recycling.pl/">
-    <meta property="og:title" content="Recycle St. Louis | Metro High School Advocacy">
-    <meta property="og:description" content="A student advocacy project bringing awareness to the state of recycling in St. Louis. Explore the data and view the map.">
-    <meta property="og:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://stl.planet-recycling.pl/">
-    <meta property="twitter:title" content="Recycle St. Louis | Metro High School Advocacy">
-    <meta property="twitter:description" content="Explore the reality of the St. Louis recycling crisis through our interactive map and student-led interviews.">
-    <meta property="twitter:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
-
+    <title>STL Recycling Challenge</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STL Recycling Challenge</title>
     <style>
         :root {
             --bg: #0a0a0a;
@@ -45,24 +27,13 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
-        /* Navbar Spacing Fix */
-        #header-placeholder { min-height: 70px; }
-
-        #quiz-container {
-            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            margin: 0;
             padding: 20px;
         }
-
         #quiz-box {
             background: var(--card);
             padding: 40px;
@@ -72,7 +43,22 @@
             width: 100%;
             text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
         }
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: var(--dim);
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+        .home-btn:hover { color: var(--accent); }
+
         .option-btn {
             display: block;
             width: 100%;
@@ -100,23 +86,12 @@
             display: inline-block;
             margin-top: 20px;
         }
-        .share-btn {
-            background: white;
-            color: black;
-            border: none;
-            padding: 14px 34px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.2s;
-        }
-        .share-btn:hover { transform: scale(1.05); }
         #progress-container {
             height: 6px;
             background: #222;
             width: 100%;
             border-radius: 10px;
+            margin-top: 15px;
             margin-bottom: 35px;
             overflow: hidden;
         }
@@ -126,14 +101,15 @@
             width: 0%;
             transition: width 0.4s ease;
         }
-        .share-pitch {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px dashed var(--accent);
-            padding: 15px;
-            border-radius: 12px;
-            margin: 20px 0;
-            font-size: 14px;
-            line-height: 1.5;
+        .share-btn {
+            background: white;
+            color: black;
+            border: none;
+            padding: 14px 34px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
         }
         .discovery-card {
             background: #1e1e1e;
@@ -142,27 +118,18 @@
             text-decoration: none;
             color: white;
             border: 1px solid #333;
-            transition: border-color 0.2s;
             display: block;
+            margin-top: 10px;
         }
-        .discovery-card:hover { border-color: var(--accent); }
     </style>
 </head>
 <body>
 
-<div id="header-placeholder"></div>
-
-<div id="quiz-container">
-    <div id="quiz-box">
-        <div id="progress-container"><div id="progress-bar"></div></div>
-        <div id="display"></div>
-    </div>
+<div id="quiz-box">
+    <a href="index.html" class="home-btn">← Home</a>
+    <div id="progress-container"><div id="progress-bar"></div></div>
+    <div id="display"></div>
 </div>
-
-<div id="footer-placeholder"></div>
-
-<!-- Link global JS first -->
-<script src="script.js"></script>
 
 <script>
     const data = [
@@ -173,15 +140,14 @@
         { q: "Is shredded paper okay for the blue bin?", a: "No", info: "Small bits fall through equipment. Compost it instead." },
         { q: "Can you recycle mirrors or lightbulbs in the bin?", a: "No", info: "This glass has different melting points and ruins the batch." },
         { q: "Are aluminum cans infinitely recyclable?", a: "Yes", info: "Aluminum never loses quality no matter how many times it's reused!" },
-        { q: "Does STL currently have curbside pickup city-wide?", a: "No", info: "Most residents must use drop-off stations to ensure recycling happens." }
+        { q: "Does STL currently have curbside pickup city-wide?", a: "No", info: "Most residents must use drop-off stations." }
     ];
     let idx = 0;
     let score = 0;
 
     function render() {
         const item = data[idx];
-        const progressBar = document.getElementById('progress-bar');
-        if (progressBar) progressBar.style.width = `${(idx / data.length) * 100}%`;
+        document.getElementById('progress-bar').style.width = `${(idx / data.length) * 100}%`;
         document.getElementById('display').innerHTML = `
             <p style="color:var(--dim)">Question ${idx + 1} of ${data.length}</p>
             <h2 style="margin-bottom: 30px;">${item.q}</h2>
@@ -212,29 +178,22 @@
         document.getElementById('display').innerHTML = `
             <h1 style="color:var(--accent)">${rank}</h1>
             <p style="font-size: 1.2rem;">You scored ${score} / ${data.length}</p>
-            
-            <div class="share-pitch">
-                <p><strong>Help spread the word!</strong> St. Louis recycling is in a crisis. Sharing your score helps educate friends!</p>
-            </div>
-
-            <button class="share-btn" onclick="window.shareCurrentPage()">📣 Share My Score</button>
-            
+            <button class="share-btn" onclick="share()">📣 Share My Score</button>
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
-                <p style="color:var(--dim); font-size: 14px; margin-bottom: 15px;">EXPLORE THE REST OF THE PROJECT:</p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-                    <a href="map.html" class="discovery-card">
-                        📍 <strong>View Map</strong><br><span style="font-size:11px; color:var(--dim)">Find drop-off sites</span>
-                    </a>
-                    <a href="interviews.html" class="discovery-card">
-                        🎤 <strong>Interviews</strong><br><span style="font-size:11px; color:var(--dim)">Hear from experts</span>
-                    </a>
-                </div>
-                <a href="index.html" class="nav-btn" style="width: 80%; margin-top: 0;">Take Action Home</a>
+                <a href="index.html" class="nav-btn" style="width: 80%;">Back to Home</a>
             </div>
         `;
     }
 
-    // Initialize the quiz
+    window.share = () => {
+        const text = `I scored ${score}/${data.length} on the STL Recycling Challenge!`;
+        if (navigator.share) {
+            navigator.share({ title: 'Recycle STL', text: text, url: window.location.href });
+        } else {
+            alert("Score copied to clipboard!");
+        }
+    };
+
     render();
 </script>
 </body>
