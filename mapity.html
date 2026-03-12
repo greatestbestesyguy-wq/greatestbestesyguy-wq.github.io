@@ -2,28 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STL Recycling Drop-Off Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STL Recycling Map</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        body { margin: 0; padding: 20px; font-family: sans-serif; }
-        #map { 
-            height: 600px; 
-            width: 100%; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        /* 2. Fullscreen Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Prevents scrollbars */
         }
-        .info { margin-bottom: 20px; }
+
+        #map { 
+            height: 100vh; /* 100% of the Viewport Height */
+            width: 100vw;  /* 100% of the Viewport Width */
+        }
     </style>
 </head>
 <body>
-
-    <div class="info">
-        <h1>STL Recycling Drop-Off Locations</h1>
-        <p>Pins are loaded from <strong>recycling_map.kml</strong>. Most sites are open 24/7.</p>
-    </div>
 
     <div id="map"></div>
 
@@ -32,49 +32,44 @@
     <script src="https://unpkg.com/leaflet-kml@1.0.5/L.KML.js"></script>
 
     <script>
-        // Initialize Map centered on St. Louis
-        const map = L.map('map').setView([38.627, -90.199], 11);
+        // Initialize Map
+        const map = L.map('map', {
+            zoomControl: true,
+            tap: false // Helps with mobile interaction
+        }).setView([38.627, -90.199], 11);
 
-        // Add Map Tiles (OpenStreetMap)
+        // Add Tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // --- TEST MARKER ---
-        // If you see this Blue Pin but no others, your KML file isn't loading!
-        L.marker([38.627, -90.199]).addTo(map)
-            .bindPopup('Map is working! If you only see this pin, check your KML file path.');
+        // Load KML Function
+        function loadRecyclingMap() {
+            if (typeof L.KML !== 'function') {
+                setTimeout(loadRecyclingMap, 300);
+                return;
+            }
 
-        // 4. Load the KML File
-        fetch('recycling_map.kml')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
-                }
-                return response.text();
-            })
-            .then(kmltext => {
-                const parser = new DOMParser();
-                const kml = parser.parseFromString(kmltext, 'text/xml');
-                
-                // Confirm L.KML exists before using it
-                if (typeof L.KML === 'function') {
+            fetch('recycling_map.kml')
+                .then(res => {
+                    if (!res.ok) throw new Error("File not found");
+                    return res.text();
+                })
+                .then(kmltext => {
+                    const parser = new DOMParser();
+                    const kml = parser.parseFromString(kmltext, 'text/xml');
                     const track = new L.KML(kml);
                     map.addLayer(track);
 
-                    // Adjust view to fit all recycling pins
                     const bounds = track.getBounds();
                     if (bounds.isValid()) {
                         map.fitBounds(bounds);
                     }
-                } else {
-                    console.error("Error: L.KML plugin did not load correctly.");
-                }
-            })
-            .catch(error => {
-                console.error('Error loading KML:', error);
-                alert("Could not load recycling_map.kml. Make sure you are using a local server (like Live Server) and the file name is exact.");
-            });
+                })
+                .catch(err => console.error("KML Load Error:", err));
+        }
+
+        loadRecyclingMap();
     </script>
 </body>
 </html>
