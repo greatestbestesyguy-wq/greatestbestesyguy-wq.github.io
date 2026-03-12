@@ -1,0 +1,846 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Recycle St. Louis</name>
+    <description><![CDATA[Map designed for https://stl.planet-recycling.pl/ based upon the dropoff location list on https://www.stlouis-mo.gov/government/departments/street/refuse/recycle/dropoff.cfm<br><br>Updated 3/12/2026]]></description>
+    <Style id="icon-1850-097138-normal">
+      <IconStyle>
+        <color>ff387109</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+    </Style>
+    <Style id="icon-1850-097138-highlight">
+      <IconStyle>
+        <color>ff387109</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+    </Style>
+    <StyleMap id="icon-1850-097138">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1850-097138-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1850-097138-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder>
+      <name>Untitled layer</name>
+    </Folder>
+    <Folder>
+      <name>Site Name,Full Address,Access Notes.csv</name>
+      <Placemark>
+        <name>Engine House #9</name>
+        <address>814 Labeaume Ave St. Louis MO 63102</address>
+        <description><![CDATA[Full Address: 814 Labeaume Ave St. Louis MO 63102<br>Access Notes: Access from 9th Street<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>814 Labeaume Ave St. Louis MO 63102</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from 9th Street</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address><![CDATA[Delmar Blvd & 14th St St. Louis MO 63103]]></address>
+        <description><![CDATA[Full Address: Delmar Blvd & 14th St St. Louis MO 63103<br>Access Notes: Between 14th & 15th<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value><![CDATA[Delmar Blvd & 14th St St. Louis MO 63103]]></value>
+          </Data>
+          <Data name="Access Notes">
+            <value><![CDATA[Between 14th & 15th]]></value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #7</name>
+        <address>2600 LaSalle St St. Louis MO 63104</address>
+        <description><![CDATA[Full Address: 2600 LaSalle St St. Louis MO 63104<br>Access Notes: Access from Ohio Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>2600 LaSalle St St. Louis MO 63104</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from Ohio Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #11</name>
+        <address>2224 S 7th St St. Louis MO 63104</address>
+        <description><![CDATA[Full Address: 2224 S 7th St St. Louis MO 63104<br>Access Notes: Access on Shenandoah<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>2224 S 7th St St. Louis MO 63104</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access on Shenandoah</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Buder Rec Center</name>
+        <address>2900 Hickory St St. Louis MO 63104</address>
+        <description><![CDATA[Full Address: 2900 Hickory St St. Louis MO 63104<br>Access Notes: Access from Montrose Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>2900 Hickory St St. Louis MO 63104</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from Montrose Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[12th & Park Rec]]></name>
+        <address>1410 S Tucker Blvd St. Louis MO 63104</address>
+        <description><![CDATA[Full Address: 1410 S Tucker Blvd St. Louis MO 63104<br>Access Notes: Parking lot off Tucker<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>1410 S Tucker Blvd St. Louis MO 63104</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Parking lot off Tucker</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address><![CDATA[13th St & Montgomery St St. Louis MO 63106]]></address>
+        <description><![CDATA[Full Address: 13th St & Montgomery St St. Louis MO 63106<br>Access Notes: Cans on 13th St<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value><![CDATA[13th St & Montgomery St St. Louis MO 63106]]></value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans on 13th St</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #5</name>
+        <address>2123 N Market St St. Louis MO 63106</address>
+        <description><![CDATA[Full Address: 2123 N Market St St. Louis MO 63106<br>Access Notes: Access from 21st St<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>2123 N Market St St. Louis MO 63106</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from 21st St</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #17</name>
+        <address>3238 Dr. MLK Dr St. Louis MO 63106</address>
+        <description><![CDATA[Full Address: 3238 Dr. MLK Dr St. Louis MO 63106<br>Access Notes: Cans on N Leonard Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>3238 Dr. MLK Dr St. Louis MO 63106</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans on N Leonard Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Fire Dept.</name>
+        <address>1421 N Jefferson Ave St. Louis MO 63106</address>
+        <description><![CDATA[Full Address: 1421 N Jefferson Ave St. Louis MO 63106<br>Access Notes: Access from Leffingwell<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>1421 N Jefferson Ave St. Louis MO 63106</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from Leffingwell</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address><![CDATA[13th St & Branch St St. Louis MO 63107]]></address>
+        <description><![CDATA[Full Address: 13th St & Branch St St. Louis MO 63107<br>Access Notes: Access from Branch St<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value><![CDATA[13th St & Branch St St. Louis MO 63107]]></value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from Branch St</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #8</name>
+        <address>1501 Salisbury St St. Louis MO 63107</address>
+        <description><![CDATA[Full Address: 1501 Salisbury St St. Louis MO 63107<br>Access Notes: Cans on Blair; access via Ferror<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>1501 Salisbury St St. Louis MO 63107</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans on Blair; access via Ferror</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Behind Schnucks</name>
+        <address>4115 McPherson Ave St. Louis MO 63108</address>
+        <description><![CDATA[Full Address: 4115 McPherson Ave St. Louis MO 63108<br>Access Notes: Access from Whittier<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>4115 McPherson Ave St. Louis MO 63108</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from Whittier</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #28</name>
+        <address>4810 Enright Ave St. Louis MO 63108</address>
+        <description><![CDATA[Full Address: 4810 Enright Ave St. Louis MO 63108<br>Access Notes: Access Enright; cans on Bayard<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>4810 Enright Ave St. Louis MO 63108</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access Enright; cans on Bayard</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address><![CDATA[Clayton Ave & N Sarah St St. Louis MO 63108]]></address>
+        <description><![CDATA[Full Address: Clayton Ave & N Sarah St St. Louis MO 63108<br>Access Notes: Near intersection<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value><![CDATA[Clayton Ave & N Sarah St St. Louis MO 63108]]></value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Near intersection</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address><![CDATA[Washington Blvd & N Sarah St St. Louis MO 63108]]></address>
+        <description><![CDATA[Full Address: Washington Blvd & N Sarah St St. Louis MO 63108<br>Access Notes: Near intersection<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value><![CDATA[Washington Blvd & N Sarah St St. Louis MO 63108]]></value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Near intersection</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #31</name>
+        <address>4408 Donovan Ave St. Louis MO 63109</address>
+        <description><![CDATA[Full Address: 4408 Donovan Ave St. Louis MO 63109<br>Access Notes: Alley behind Firehouse<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>4408 Donovan Ave St. Louis MO 63109</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Alley behind Firehouse</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address><![CDATA[Wherry Ave & Macklind Ave St. Louis MO 63109]]></address>
+        <description><![CDATA[Full Address: Wherry Ave & Macklind Ave St. Louis MO 63109<br>Access Notes: Site is on Wherry<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value><![CDATA[Wherry Ave & Macklind Ave St. Louis MO 63109]]></value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Site is on Wherry</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Firehouse #36</name>
+        <address>5000 S Kingshighway Blvd St. Louis MO 63109</address>
+        <description><![CDATA[Full Address: 5000 S Kingshighway Blvd St. Louis MO 63109<br>Access Notes: On Christy Blvd next to house<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>5000 S Kingshighway Blvd St. Louis MO 63109</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>On Christy Blvd next to house</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Behind Target</name>
+        <address>4227 Clifton Ave St. Louis MO 63109</address>
+        <description><![CDATA[Full Address: 4227 Clifton Ave St. Louis MO 63109<br>Access Notes: Behind store off Chippewa<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>4227 Clifton Ave St. Louis MO 63109</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Behind store off Chippewa</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Water Division</name>
+        <address>1660 S Kingshighway Blvd St. Louis MO 63110</address>
+        <description><![CDATA[Full Address: 1660 S Kingshighway Blvd St. Louis MO 63110<br>Access Notes: Lot next to I-44<br>Hours: Mon–Sat 8am–4pm]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>1660 S Kingshighway Blvd St. Louis MO 63110</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Lot next to I-44</value>
+          </Data>
+          <Data name="Hours">
+            <value>Mon–Sat 8am–4pm</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Sarah Street</name>
+        <address>606 Sarah St St. Louis MO 63110</address>
+        <description><![CDATA[Full Address: 606 Sarah St St. Louis MO 63110<br>Access Notes: Near Forest Park Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>606 Sarah St St. Louis MO 63110</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Near Forest Park Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address>4200 Detonty St St. Louis MO 63110</address>
+        <description><![CDATA[Full Address: 4200 Detonty St St. Louis MO 63110<br>Access Notes: Access off Detonty<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>4200 Detonty St St. Louis MO 63110</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access off Detonty</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #23</name>
+        <address>6500 Michigan Ave St. Louis MO 63111</address>
+        <description><![CDATA[Full Address: 6500 Michigan Ave St. Louis MO 63111<br>Access Notes: Cans on Soper St<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>6500 Michigan Ave St. Louis MO 63111</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans on Soper St</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Firehouse #34</name>
+        <address>8227 S Broadway St. Louis MO 63111</address>
+        <description><![CDATA[Full Address: 8227 S Broadway St. Louis MO 63111<br>Access Notes: Cans on Hurck St<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>8227 S Broadway St. Louis MO 63111</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans on Hurck St</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #13</name>
+        <address>1400 Shawmut Pl St. Louis MO 63112</address>
+        <description><![CDATA[Full Address: 1400 Shawmut Pl St. Louis MO 63112<br>Access Notes: Cans on Ridge Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>1400 Shawmut Pl St. Louis MO 63112</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans on Ridge Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Des Peres Side</name>
+        <address>506 Des Peres Ave St. Louis MO 63112</address>
+        <description><![CDATA[Full Address: 506 Des Peres Ave St. Louis MO 63112<br>Access Notes: At Westminster Pl<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>506 Des Peres Ave St. Louis MO 63112</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>At Westminster Pl</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Page Blvd Lot</name>
+        <address>5732 Page Blvd St. Louis MO 63112</address>
+        <description><![CDATA[Full Address: 5732 Page Blvd St. Louis MO 63112<br>Access Notes: Cans in parking lot<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>5732 Page Blvd St. Louis MO 63112</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans in parking lot</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address><![CDATA[N Spring Ave & N Market St St. Louis MO 63113]]></address>
+        <description><![CDATA[Full Address: N Spring Ave & N Market St St. Louis MO 63113<br>Access Notes: Cans on N Spring<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value><![CDATA[N Spring Ave & N Market St St. Louis MO 63113]]></value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans on N Spring</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #10</name>
+        <address>4161 Kennerly Ave St. Louis MO 63113</address>
+        <description><![CDATA[Full Address: 4161 Kennerly Ave St. Louis MO 63113<br>Access Notes: Near Firehouse<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>4161 Kennerly Ave St. Louis MO 63113</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Near Firehouse</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address>1596 Academy Ave St. Louis MO 63113</address>
+        <description><![CDATA[Full Address: 1596 Academy Ave St. Louis MO 63113<br>Access Notes: Near Firehouse<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>1596 Academy Ave St. Louis MO 63113</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Near Firehouse</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #26</name>
+        <address>4520 Margaretta Ave St. Louis MO 63115</address>
+        <description><![CDATA[Full Address: 4520 Margaretta Ave St. Louis MO 63115<br>Access Notes: Access from Dryden Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>4520 Margaretta Ave St. Louis MO 63115</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from Dryden Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Alley Site</name>
+        <address><![CDATA[Roger Pl & Parker Ave St. Louis MO 63116]]></address>
+        <description><![CDATA[Full Address: Roger Pl & Parker Ave St. Louis MO 63116<br>Access Notes: Alley west of Roger<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value><![CDATA[Roger Pl & Parker Ave St. Louis MO 63116]]></value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Alley west of Roger</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Firehouse #19</name>
+        <address>6624 Morganford Rd St. Louis MO 63116</address>
+        <description><![CDATA[Full Address: 6624 Morganford Rd St. Louis MO 63116<br>Access Notes: Cans on Haven St<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>6624 Morganford Rd St. Louis MO 63116</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans on Haven St</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Itaska Street</name>
+        <address>3850 Itaska St St. Louis MO 63116</address>
+        <description><![CDATA[Full Address: 3850 Itaska St St. Louis MO 63116<br>Access Notes: Near Gravois<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>3850 Itaska St St. Louis MO 63116</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Near Gravois</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address>4408 Donovan Ave St. Louis MO 63116</address>
+        <description><![CDATA[Full Address: 4408 Donovan Ave St. Louis MO 63116<br>Access Notes: Secondary bin at Donovan<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>4408 Donovan Ave St. Louis MO 63116</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Secondary bin at Donovan</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #22</name>
+        <address>1229 McCausland Ave St. Louis MO 63117</address>
+        <description><![CDATA[Full Address: 1229 McCausland Ave St. Louis MO 63117<br>Access Notes: Access on West Park Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>1229 McCausland Ave St. Louis MO 63117</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access on West Park Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #1</name>
+        <address>2910 S Jefferson Ave St. Louis MO 63118</address>
+        <description><![CDATA[Full Address: 2910 S Jefferson Ave St. Louis MO 63118<br>Access Notes: Access on Pestalozzi<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>2910 S Jefferson Ave St. Louis MO 63118</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access on Pestalozzi</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Meramec Alley</name>
+        <address>3201 Meramec St St. Louis MO 63118</address>
+        <description><![CDATA[Full Address: 3201 Meramec St St. Louis MO 63118<br>Access Notes: Near S Compton<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>3201 Meramec St St. Louis MO 63118</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Near S Compton</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Cherokee Rec</name>
+        <address>3200 S Jefferson Ave St. Louis MO 63118</address>
+        <description><![CDATA[Full Address: 3200 S Jefferson Ave St. Louis MO 63118<br>Access Notes: Alley off Utah<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>3200 S Jefferson Ave St. Louis MO 63118</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Alley off Utah</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>South Transfer</name>
+        <address>4100 S 1st St St. Louis MO 63118</address>
+        <description><![CDATA[Full Address: 4100 S 1st St St. Louis MO 63118<br>Access Notes: At Gasconade<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>4100 S 1st St St. Louis MO 63118</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>At Gasconade</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #27</name>
+        <address>5435 Partridge Ave St. Louis MO 63120</address>
+        <description><![CDATA[Full Address: 5435 Partridge Ave St. Louis MO 63120<br>Access Notes: Access from Harney Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>5435 Partridge Ave St. Louis MO 63120</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from Harney Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Side</name>
+        <address><![CDATA[Union Blvd & Lillian Ave St. Louis MO 63120]]></address>
+        <description><![CDATA[Full Address: Union Blvd & Lillian Ave St. Louis MO 63120<br>Access Notes: Cans on Lillian Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value><![CDATA[Union Blvd & Lillian Ave St. Louis MO 63120]]></value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Cans on Lillian Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Behind Schnucks</name>
+        <address>3400 Arlington Ave St. Louis MO 63120</address>
+        <description><![CDATA[Full Address: 3400 Arlington Ave St. Louis MO 63120<br>Access Notes: Access from Ashland Ave<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>3400 Arlington Ave St. Louis MO 63120</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Access from Ashland Ave</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Street Dept</name>
+        <address>1900 Hampton Ave St. Louis MO 63139</address>
+        <description><![CDATA[Full Address: 1900 Hampton Ave St. Louis MO 63139<br>Access Notes: Next to EV charging station<br>Hours: Mon–Fri 6am–6pm]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>1900 Hampton Ave St. Louis MO 63139</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Next to EV charging station</value>
+          </Data>
+          <Data name="Hours">
+            <value>Mon–Fri 6am–6pm</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Engine House #35</name>
+        <address>5450 Arsenal St St. Louis MO 63139</address>
+        <description><![CDATA[Full Address: 5450 Arsenal St St. Louis MO 63139<br>Access Notes: At Sublette<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>5450 Arsenal St St. Louis MO 63139</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>At Sublette</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+      <Placemark>
+        <name>Hickey Park</name>
+        <address>8570 Lowell St St. Louis MO 63147</address>
+        <description><![CDATA[Full Address: 8570 Lowell St St. Louis MO 63147<br>Access Notes: Dead end south of park<br>Hours: 24/7]]></description>
+        <styleUrl>#icon-1850-097138</styleUrl>
+        <ExtendedData>
+          <Data name="Full Address">
+            <value>8570 Lowell St St. Louis MO 63147</value>
+          </Data>
+          <Data name="Access Notes">
+            <value>Dead end south of park</value>
+          </Data>
+          <Data name="Hours">
+            <value>24/7</value>
+          </Data>
+        </ExtendedData>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>
