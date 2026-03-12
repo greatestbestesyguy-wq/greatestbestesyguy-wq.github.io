@@ -74,6 +74,7 @@
             transition: all 0.2s ease;
         }
         .option-btn:hover { border-color: var(--accent); background: #252525; }
+        
         .nav-btn {
             background: var(--accent);
             color: black;
@@ -86,6 +87,7 @@
             display: inline-block;
             margin-top: 20px;
         }
+        
         #progress-container {
             height: 6px;
             background: #222;
@@ -101,6 +103,7 @@
             width: 0%;
             transition: width 0.4s ease;
         }
+        
         .share-btn {
             background: white;
             color: black;
@@ -110,16 +113,52 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
+            width: 100%;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+            transition: transform 0.2s;
         }
+        .share-btn:hover { transform: scale(1.02); }
+
+        .discovery-grid {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+        }
+
         .discovery-card {
             background: #1e1e1e;
-            padding: 15px;
-            border-radius: 12px;
+            padding: 15px 20px;
+            border-radius: 14px;
             text-decoration: none;
             color: white;
             border: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .discovery-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+        .discovery-card span { font-size: 14px; color: var(--dim); }
+        .discovery-card strong { display: block; font-size: 16px; }
+
+        .badge-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
             display: block;
-            margin-top: 10px;
+        }
+        .share-incentive {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px dashed var(--accent);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -161,7 +200,7 @@
         if (correct) score++;
         document.getElementById('display').innerHTML = `
             <h2 style="color:${correct ? 'var(--accent)' : 'var(--wrong)'}">${correct ? '✓ Correct!' : '✗ Incorrect'}</h2>
-            <p style="margin: 20px 0;">${data[idx].info}</p>
+            <p style="margin: 20px 0; line-height: 1.5;">${data[idx].info}</p>
             <button class="nav-btn" onclick="next()">Continue</button>
         `;
     };
@@ -174,23 +213,69 @@
 
     function showResults() {
         document.getElementById('progress-bar').style.width = '100%';
-        let rank = score > 6 ? "Recycling Legend" : score > 4 ? "Sustainability Scholar" : "Waste Warrior";
+        let rank = "";
+        let icon = "";
+        
+        if (score >= 7) {
+            rank = "Recycling Legend";
+            icon = "👑";
+        } else if (score >= 5) {
+            rank = "Sustainability Scholar";
+            icon = "🌱";
+        } else {
+            rank = "Waste Warrior";
+            icon = "🛡️";
+        }
+
         document.getElementById('display').innerHTML = `
-            <h1 style="color:var(--accent)">${rank}</h1>
-            <p style="font-size: 1.2rem;">You scored ${score} / ${data.length}</p>
-            <button class="share-btn" onclick="share()">📣 Share My Score</button>
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
-                <a href="index.html" class="nav-btn" style="width: 80%;">Back to Home</a>
+            <span class="badge-icon">${icon}</span>
+            <h1 style="color:var(--accent); margin-bottom: 5px;">${rank}</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 10px;">You scored ${score} / ${data.length}</p>
+            
+            <div class="share-incentive">
+                <strong>Help save STL recycling!</strong><br>
+                Share your score to challenge your friends and help stop bin contamination in our city.
+            </div>
+
+            <button class="share-btn" onclick="share()">📣 Share My Rank & Challenge Friends</button>
+
+            <div class="discovery-grid">
+                <p style="color:var(--dim); font-size: 14px; margin-bottom: 5px; text-align: center;">Keep Exploring</p>
+                <a href="map.html" class="discovery-card">
+                    <div>
+                        <strong>Find a Drop-Off</strong>
+                        <span>Locate your nearest station</span>
+                    </div>
+                    <span>→</span>
+                </a>
+                <a href="interviews.html" class="discovery-card">
+                    <div>
+                        <strong>Watch Interviews</strong>
+                        <span>Hear from Mayor Cara Spencer</span>
+                    </div>
+                    <span>→</span>
+                </a>
+                <a href="index.html" class="nav-btn" style="text-align: center; margin-top: 10px;">Return Home</a>
             </div>
         `;
     }
 
     window.share = () => {
-        const text = `I scored ${score}/${data.length} on the STL Recycling Challenge!`;
+        const rank = score >= 7 ? "Recycling Legend" : score >= 5 ? "Sustainability Scholar" : "Waste Warrior";
+        const text = `I just earned the ${rank} rank on the STL Recycling Challenge (${score}/${data.length})! Can you beat my score and help save our city's recycling? ♻️`;
+        
         if (navigator.share) {
-            navigator.share({ title: 'Recycle STL', text: text, url: window.location.href });
+            navigator.share({ title: 'Recycle STL Challenge', text: text, url: window.location.href });
         } else {
-            alert("Score copied to clipboard!");
+            const el = document.createElement('textarea');
+            el.value = text + " " + window.location.href;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            const btn = document.querySelector('.share-btn');
+            btn.innerText = "✓ Score & Challenge Copied!";
+            setTimeout(() => btn.innerText = "📣 Share My Rank & Challenge Friends", 2000);
         }
     };
 
