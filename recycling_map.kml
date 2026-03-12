@@ -1,57 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
-    <name>Recycle St. Louis Full</name>
-    <description>Complete 2026 City Dropoff List</description>
-    <Style id="p"><IconStyle><color>ff387109</color><Icon><href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href></Icon></IconStyle></Style>
+    <name>Recycle St Louis Official 2026</name>
     <Folder>
-      <name>Recycle Sites</name>
-      <Placemark><name>Engine House #9</name><address>814 Labeaume Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.187373,38.646545</coordinates></Point></Placemark>
-      <Placemark><name>Delmar &amp; 14th</name><address>Delmar Blvd &amp; 14th St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.198335,38.632707</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #7</name><address>2600 LaSalle St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.222301,38.618648</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #11</name><address>2224 S 7th St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.203770,38.607425</coordinates></Point></Placemark>
-      <Placemark><name>Buder Rec Center</name><address>2900 Hickory St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.225732,38.619024</coordinates></Point></Placemark>
-      <Placemark><name>12th &amp; Park Rec</name><address>1410 S Tucker Blvd</address><styleUrl>#p</styleUrl><Point><coordinates>-90.203875,38.617415</coordinates></Point></Placemark>
-      <Placemark><name>13th &amp; Montgomery</name><address>13th St &amp; Montgomery St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.198273,38.650058</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #5</name><address>2123 N Market St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.211750,38.644158</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #17</name><address>3238 Dr. MLK Dr</address><styleUrl>#p</styleUrl><Point><coordinates>-90.228182,38.642995</coordinates></Point></Placemark>
-      <Placemark><name>Fire Dept (Jefferson)</name><address>1421 N Jefferson Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.216631,38.643336</coordinates></Point></Placemark>
-      <Placemark><name>13th &amp; Branch</name><address>13th &amp; Branch St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.198950,38.660120</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #8</name><address>1501 Salisbury St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.204554,38.658864</coordinates></Point></Placemark>
-      <Placemark><name>Behind Schnucks (McPherson)</name><address>4115 McPherson Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.243553,38.638550</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #28</name><address>4810 Enright Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.258451,38.651152</coordinates></Point></Placemark>
-      <Placemark><name>Clayton &amp; Sarah</name><address>Clayton Ave &amp; N Sarah St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.241560,38.632240</coordinates></Point></Placemark>
-      <Placemark><name>Washington &amp; Sarah</name><address>Washington Blvd &amp; N Sarah St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.239840,38.640150</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #31</name><address>4408 Donovan Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.301593,38.587884</coordinates></Point></Placemark>
-      <Placemark><name>Wherry &amp; Macklind</name><address>Wherry Ave &amp; Macklind Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.288540,38.588210</coordinates></Point></Placemark>
-      <Placemark><name>Firehouse #36</name><address>5000 S Kingshighway Blvd</address><styleUrl>#p</styleUrl><Point><coordinates>-90.273410,38.581230</coordinates></Point></Placemark>
-      <Placemark><name>Behind Target (Clifton)</name><address>4227 Clifton Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.284320,38.591540</coordinates></Point></Placemark>
-      <Placemark><name>Water Division</name><address>1660 S Kingshighway Blvd</address><styleUrl>#p</styleUrl><Point><coordinates>-90.262590,38.618641</coordinates></Point></Placemark>
-      <Placemark><name>Sarah St</name><address>606 Sarah St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.240560,38.635810</coordinates></Point></Placemark>
-      <Placemark><name>Street Side (Detonty)</name><address>4200 Detonty St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.252340,38.614560</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #23</name><address>6500 Michigan Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.245840,38.557451</coordinates></Point></Placemark>
-      <Placemark><name>Firehouse #34</name><address>8227 S Broadway</address><styleUrl>#p</styleUrl><Point><coordinates>-90.246710,38.541230</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #13</name><address>1400 Shawmut Pl</address><styleUrl>#p</styleUrl><Point><coordinates>-90.276686,38.665798</coordinates></Point></Placemark>
-      <Placemark><name>Des Peres Side</name><address>506 Des Peres Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.288410,38.651230</coordinates></Point></Placemark>
-      <Placemark><name>Page Blvd Lot</name><address>5732 Page Blvd</address><styleUrl>#p</styleUrl><Point><coordinates>-90.278450,38.669810</coordinates></Point></Placemark>
-      <Placemark><name>Spring &amp; Market</name><address>N Spring Ave &amp; N Market St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.231240,38.647560</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #10</name><address>4161 Kennerly Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.241851,38.660604</coordinates></Point></Placemark>
-      <Placemark><name>Academy Ave</name><address>1596 Academy Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.264320,38.661230</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #26</name><address>4520 Margaretta Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.239330,38.679198</coordinates></Point></Placemark>
-      <Placemark><name>Roger &amp; Parker Alley</name><address>Roger Pl &amp; Parker Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.261230,38.601230</coordinates></Point></Placemark>
-      <Placemark><name>Firehouse #19</name><address>6624 Morganford Rd</address><styleUrl>#p</styleUrl><Point><coordinates>-90.276481,38.563969</coordinates></Point></Placemark>
-      <Placemark><name>Itaska St</name><address>3850 Itaska St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.253410,38.582340</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #22</name><address>1229 McCausland Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.304031,38.625345</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #1</name><address>2910 S Jefferson Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.228574,38.601974</coordinates></Point></Placemark>
-      <Placemark><name>Meramec Alley</name><address>3201 Meramec St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.238450,38.584320</coordinates></Point></Placemark>
-      <Placemark><name>Cherokee Rec</name><address>3200 S Jefferson Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.231210,38.596540</coordinates></Point></Placemark>
-      <Placemark><name>South Transfer</name><address>4100 S 1st St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.220120,38.581230</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #27</name><address>5435 Partridge Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.248318,38.700147</coordinates></Point></Placemark>
-      <Placemark><name>Union &amp; Lillian</name><address>Union Blvd &amp; Lillian Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.264120,38.687540</coordinates></Point></Placemark>
-      <Placemark><name>Behind Schnucks (Arlington)</name><address>3400 Arlington Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.268450,38.682340</coordinates></Point></Placemark>
-      <Placemark><name>Street Dept</name><address>1900 Hampton Ave</address><styleUrl>#p</styleUrl><Point><coordinates>-90.287540,38.620120</coordinates></Point></Placemark>
-      <Placemark><name>Engine House #35</name><address>5450 Arsenal St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.284120,38.608450</coordinates></Point></Placemark>
-      <Placemark><name>Hickey Park</name><address>8570 Lowell St</address><styleUrl>#p</styleUrl><Point><coordinates>-90.228450,38.710120</coordinates></Point></Placemark>
+      <name>Dropoff Locations</name>
+      <Placemark><name>Engine House #9</name><address>814 Labeaume Ave, St. Louis, MO 63102</address><Point><coordinates>-90.187373,38.646545</coordinates></Point></Placemark>
+      <Placemark><name>Delmar &amp; 14th</name><address>Delmar Blvd &amp; 14th St, St. Louis, MO 63103</address><Point><coordinates>-90.198335,38.632707</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #7</name><address>2600 LaSalle St, St. Louis, MO 63104</address><Point><coordinates>-90.222301,38.618648</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #11</name><address>2224 S 7th St, St. Louis, MO 63104</address><Point><coordinates>-90.203770,38.607425</coordinates></Point></Placemark>
+      <Placemark><name>Buder Rec Center</name><address>2900 Hickory St, St. Louis, MO 63104</address><Point><coordinates>-90.225732,38.619024</coordinates></Point></Placemark>
+      <Placemark><name>12th &amp; Park Rec</name><address>1410 S Tucker Blvd, St. Louis, MO 63104</address><Point><coordinates>-90.203875,38.617415</coordinates></Point></Placemark>
+      <Placemark><name>13th &amp; Montgomery</name><address>13th St &amp; Montgomery St, St. Louis, MO 63106</address><Point><coordinates>-90.198273,38.650058</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #5</name><address>2123 N Market St, St. Louis, MO 63106</address><Point><coordinates>-90.211750,38.644158</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #17</name><address>3238 Dr MLK Dr, St. Louis, MO 63106</address><Point><coordinates>-90.228182,38.642995</coordinates></Point></Placemark>
+      <Placemark><name>Fire Dept (Jefferson)</name><address>1421 N Jefferson Ave, St. Louis, MO 63106</address><Point><coordinates>-90.216631,38.643336</coordinates></Point></Placemark>
+      <Placemark><name>13th &amp; Branch</name><address>13th St &amp; Branch St, St. Louis, MO 63107</address><Point><coordinates>-90.198950,38.660120</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #8</name><address>1501 Salisbury St, St. Louis, MO 63107</address><Point><coordinates>-90.204554,38.658864</coordinates></Point></Placemark>
+      <Placemark><name>Behind Schnucks (McPherson)</name><address>4115 McPherson Ave, St. Louis, MO 63108</address><Point><coordinates>-90.243553,38.638550</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #28</name><address>4810 Enright Ave, St. Louis, MO 63108</address><Point><coordinates>-90.258451,38.651152</coordinates></Point></Placemark>
+      <Placemark><name>Clayton &amp; Sarah</name><address>Clayton Ave &amp; N Sarah St, St. Louis, MO 63108</address><Point><coordinates>-90.241560,38.632240</coordinates></Point></Placemark>
+      <Placemark><name>Washington &amp; Sarah</name><address>Washington Blvd &amp; N Sarah St, St. Louis, MO 63108</address><Point><coordinates>-90.239840,38.640150</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #31</name><address>4408 Donovan Ave, St. Louis, MO 63109</address><Point><coordinates>-90.301593,38.587884</coordinates></Point></Placemark>
+      <Placemark><name>Wherry &amp; Macklind</name><address>Wherry Ave &amp; Macklind Ave, St. Louis, MO 63109</address><Point><coordinates>-90.288540,38.588210</coordinates></Point></Placemark>
+      <Placemark><name>Firehouse #36</name><address>5000 S Kingshighway Blvd, St. Louis, MO 63109</address><Point><coordinates>-90.273410,38.581230</coordinates></Point></Placemark>
+      <Placemark><name>Behind Target (Clifton)</name><address>4227 Clifton Ave, St. Louis, MO 63109</address><Point><coordinates>-90.284320,38.591540</coordinates></Point></Placemark>
+      <Placemark><name>Water Division</name><address>1660 S Kingshighway Blvd, St. Louis, MO 63110</address><Point><coordinates>-90.262590,38.618641</coordinates></Point></Placemark>
+      <Placemark><name>Sarah St</name><address>606 Sarah St, St. Louis, MO 63110</address><Point><coordinates>-90.240560,38.635810</coordinates></Point></Placemark>
+      <Placemark><name>Detonty St</name><address>4200 Detonty St, St. Louis, MO 63110</address><Point><coordinates>-90.252340,38.614560</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #23</name><address>6500 Michigan Ave, St. Louis, MO 63111</address><Point><coordinates>-90.245840,38.557451</coordinates></Point></Placemark>
+      <Placemark><name>Firehouse #34</name><address>8227 S Broadway, St. Louis, MO 63111</address><Point><coordinates>-90.246710,38.541230</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #13</name><address>1400 Shawmut Pl, St. Louis, MO 63112</address><Point><coordinates>-90.276686,38.665798</coordinates></Point></Placemark>
+      <Placemark><name>Des Peres Ave</name><address>506 Des Peres Ave, St. Louis, MO 63112</address><Point><coordinates>-90.288410,38.651230</coordinates></Point></Placemark>
+      <Placemark><name>Page Blvd Lot</name><address>5732 Page Blvd, St. Louis, MO 63112</address><Point><coordinates>-90.278450,38.669810</coordinates></Point></Placemark>
+      <Placemark><name>Spring &amp; Market</name><address>N Spring Ave &amp; N Market St, St. Louis, MO 63113</address><Point><coordinates>-90.231240,38.647560</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #10</name><address>4161 Kennerly Ave, St. Louis, MO 63113</address><Point><coordinates>-90.241851,38.660604</coordinates></Point></Placemark>
+      <Placemark><name>Academy Ave</name><address>1596 Academy Ave, St. Louis, MO 63113</address><Point><coordinates>-90.264320,38.661230</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #26</name><address>4520 Margaretta Ave, St. Louis, MO 63115</address><Point><coordinates>-90.239330,38.679198</coordinates></Point></Placemark>
+      <Placemark><name>Roger &amp; Parker</name><address>Roger Pl &amp; Parker Ave, St. Louis, MO 63116</address><Point><coordinates>-90.261230,38.601230</coordinates></Point></Placemark>
+      <Placemark><name>Firehouse #19</name><address>6624 Morganford Rd, St. Louis, MO 63116</address><Point><coordinates>-90.276481,38.563969</coordinates></Point></Placemark>
+      <Placemark><name>Itaska St</name><address>3850 Itaska St, St. Louis, MO 63116</address><Point><coordinates>-90.253410,38.582340</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #22</name><address>1229 McCausland Ave, St. Louis, MO 63117</address><Point><coordinates>-90.304031,38.625345</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #1</name><address>2910 S Jefferson Ave, St. Louis, MO 63118</address><Point><coordinates>-90.228574,38.601974</coordinates></Point></Placemark>
+      <Placemark><name>Meramec St</name><address>3201 Meramec St, St. Louis, MO 63118</address><Point><coordinates>-90.238450,38.584320</coordinates></Point></Placemark>
+      <Placemark><name>Cherokee Rec</name><address>3200 S Jefferson Ave, St. Louis, MO 63118</address><Point><coordinates>-90.231210,38.596540</coordinates></Point></Placemark>
+      <Placemark><name>South Transfer</name><address>4100 S 1st St, St. Louis, MO 63118</address><Point><coordinates>-90.220120,38.581230</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #27</name><address>5435 Partridge Ave, St. Louis, MO 63120</address><Point><coordinates>-90.248318,38.700147</coordinates></Point></Placemark>
+      <Placemark><name>Union &amp; Lillian</name><address>Union Blvd &amp; Lillian Ave, St. Louis, MO 63120</address><Point><coordinates>-90.264120,38.687540</coordinates></Point></Placemark>
+      <Placemark><name>Behind Schnucks (Arlington)</name><address>3400 Arlington Ave, St. Louis, MO 63120</address><Point><coordinates>-90.268450,38.682340</coordinates></Point></Placemark>
+      <Placemark><name>Street Dept (Hampton)</name><address>1900 Hampton Ave, St. Louis, MO 63139</address><Point><coordinates>-90.287540,38.620120</coordinates></Point></Placemark>
+      <Placemark><name>Engine House #35</name><address>5450 Arsenal St, St. Louis, MO 63139</address><Point><coordinates>-90.284120,38.608450</coordinates></Point></Placemark>
+      <Placemark><name>Hickey Park</name><address>8570 Lowell St, St. Louis, MO 63147</address><Point><coordinates>-90.228450,38.710120</coordinates></Point></Placemark>
     </Folder>
   </Document>
 </kml>
