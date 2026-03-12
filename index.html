@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle St. Louis | Interviews</title>
+    <title>Recycle St. Louis | Home</title>
+    <!-- Link to your external CSS file -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- Notification Popup -->
+    <div id="popup-notif">
+        <button class="close-notif" onclick="closePopup()">&times;</button>
+        <p><strong>🚨 Important Update:</strong> Residential recycling is no longer being picked up in many STL neighborhoods. To ensure your items are recycled, they <strong>must</strong> be taken to an official drop-off station.</p>
+        <a href="map.html" class="popup-btn">Find a Station Near You</a>
+    </div>
 
     <div class="container">
         <header>
@@ -20,31 +28,37 @@
         </header>
 
         <main>
-            <h1>The Conversations</h1>
-            <p class="tagline">We spoke with city leaders and experts to understand why recycling is failing in St. Louis and how we can fix it.</p>
+            <h1>Recycle St. Louis</h1>
+            <p class="tagline">A student advocacy project bringing awareness to the state of recycling in our city.</p>
 
-            <section class="interview-detail">
-                <div class="video-wrapper">
-                    <!-- Replace the src with your actual YouTube/Vimeo link -->
-                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h2>0</h2>
+                    <p>Curbside Pickups Active</p>
                 </div>
-                
-                <div class="interview-content" style="text-align: left; max-width: 800px; margin: 0 auto;">
-                    <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">Featured Interview</span>
-                    <h2 style="font-size: 32px; margin: 10px 0;">Mayor Cara Spencer</h2>
-                    <p style="color: var(--text-dim); font-size: 18px; margin-bottom: 30px;">
-                        The Mayor discusses the transition to the "Drop-Off" model and the future of the city's Refuse Division.
-                    </p>
-                    
-                    <hr style="border: 0; border-top: 1px solid #222; margin: 40px 0;">
-                    
-                    <h3 style="color: var(--text);">Key Discussion Points</h3>
-                    <ul style="color: var(--text-dim); text-align: left; list-style-type: none; padding: 0;">
-                        <li style="margin-bottom: 15px;">📍 <strong>The 14 Drop-Off Stations:</strong> Why these were chosen and how they are monitored.</li>
-                        <li style="margin-bottom: 15px;">👷 <strong>Labor Shortage:</strong> The impact of CDL driver shortages on curbside collection.</li>
-                        <li style="margin-bottom: 15px;">♻️ <strong>Contamination:</strong> How "Wish-cycling" ruined the city's ability to sell recyclables.</li>
-                    </ul>
+                <div class="stat-card">
+                    <h2>14</h2>
+                    <p>Drop-Off Locations</p>
                 </div>
+                <div class="stat-card">
+                    <h2>100%</h2>
+                    <p>User Responsibility</p>
+                </div>
+            </div>
+
+            <section class="interview-section">
+                <div class="interview-img"></div>
+                <div class="interview-content">
+                    <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">Exclusive Interview</span>
+                    <h3>Talking Policy with Mayor Cara Spencer</h3>
+                    <p>We sat down with St. Louis Mayor Cara Spencer to discuss the suspension of curbside recycling and what the city's long-term plan is for sustainable waste management.</p>
+                    <a href="interviews.html" class="btn-play">Watch the Interview</a>
+                </div>
+            </section>
+
+            <section style="max-width:700px; margin: 0 auto 80px;">
+                <h3>The Curbside Crisis</h3>
+                <p>Due to labor shortages and high contamination rates, St. Louis has officially pivoted to a "Drop-Off" model. Placing recyclables in your alley bin now almost guarantees they end up in a landfill.</p>
             </section>
         </main>
 
@@ -53,6 +67,8 @@
         </footer>
     </div>
 
+    <!-- Link to your external JS file -->
     <script src="script.js"></script>
+
 </body>
 </html>
