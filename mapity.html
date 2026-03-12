@@ -1,42 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>STL Recycling Map</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <script src="https://unpkg.com/leaflet-kml@1.0.5/L.KML.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STL Recycling Drop-Off Map</title>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <style>
-        #map { height: 500px; width: 100%; }
+        body { margin: 0; padding: 20px; font-family: sans-serif; }
+        #map { 
+            height: 600px; 
+            width: 100%; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .info { margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <h2>STL Recycling Drop-Offs</h2>
+    <div class="info">
+        <h1>STL Recycling Drop-Off Locations</h1>
+        <p>Pins are loaded from <strong>recycling_map.kml</strong>. Most sites are open 24/7.</p>
+    </div>
+
     <div id="map"></div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script src="https://unpkg.com/leaflet-kml@1.0.5/L.KML.js"></script>
+
     <script>
-        // 3. Initialize the Map
+        // Initialize Map centered on St. Louis
         const map = L.map('map').setView([38.627, -90.199], 11);
 
-        // 4. Add a Map Theme (OpenStreetMap)
+        // Add Map Tiles (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // 5. Load and Display your KML file
+        // --- TEST MARKER ---
+        // If you see this Blue Pin but no others, your KML file isn't loading!
+        L.marker([38.627, -90.199]).addTo(map)
+            .bindPopup('Map is working! If you only see this pin, check your KML file path.');
+
+        // 4. Load the KML File
         fetch('recycling_map.kml')
-            .then(res => res.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.text();
+            })
             .then(kmltext => {
                 const parser = new DOMParser();
                 const kml = parser.parseFromString(kmltext, 'text/xml');
-                const track = new L.KML(kml);
-                map.addLayer(track);
+                
+                // Confirm L.KML exists before using it
+                if (typeof L.KML === 'function') {
+                    const track = new L.KML(kml);
+                    map.addLayer(track);
 
-                // Auto-zoom to show all pins
-                const bounds = track.getBounds();
-                map.fitBounds(bounds);
+                    // Adjust view to fit all recycling pins
+                    const bounds = track.getBounds();
+                    if (bounds.isValid()) {
+                        map.fitBounds(bounds);
+                    }
+                } else {
+                    console.error("Error: L.KML plugin did not load correctly.");
+                }
+            })
+            .catch(error => {
+                console.error('Error loading KML:', error);
+                alert("Could not load recycling_map.kml. Make sure you are using a local server (like Live Server) and the file name is exact.");
             });
     </script>
 </body>
