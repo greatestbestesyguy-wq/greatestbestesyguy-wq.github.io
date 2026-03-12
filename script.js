@@ -26,26 +26,34 @@ function initNavigation() {
     const links = nav.querySelectorAll('a');
     
     // Find active link by checking the URL path
+    let currentPath = window.location.pathname.split("/").pop();
+    if (currentPath === "" || currentPath === "/") currentPath = "index.html";
+
     let activeLink = Array.from(links).find(link => 
-        window.location.pathname.endsWith(link.getAttribute('href')) ||
-        (window.location.pathname === '/' && link.getAttribute('href') === 'index.html')
+        link.getAttribute('href') === currentPath
     );
 
-    // Fallback to the first link (Home) if no match found
+    // Fallback to Home if no match found
     if (!activeLink) activeLink = links[0];
 
-    // Function to move the bar
+    // Function to move the bar and update link colors
     function updateIndicator(el) {
         indicator.style.width = `${el.offsetWidth}px`;
         indicator.style.left = `${el.offsetLeft}px`;
         
-        // Update active text color
+        // Reset all links to dim, then highlight the "active" one
         links.forEach(l => l.style.color = 'var(--text-dim)');
         el.style.color = 'var(--text)';
     }
 
-    // Set initial position with a tiny delay to ensure layout is calculated correctly
-    setTimeout(() => updateIndicator(activeLink), 50);
+    // Set initial position
+    setTimeout(() => updateIndicator(activeLink), 100);
+
+    // HOVER LOGIC: Slides to the hovered link, returns to active on leave
+    links.forEach(link => {
+        link.addEventListener('mouseenter', () => updateIndicator(link));
+        link.addEventListener('mouseleave', () => updateIndicator(activeLink));
+    });
 
     // Handle window resizing
     window.addEventListener('resize', () => updateIndicator(activeLink));
