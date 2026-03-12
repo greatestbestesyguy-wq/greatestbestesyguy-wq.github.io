@@ -4,6 +4,7 @@
 
 window.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch and Inject Shared HTML (Header/Footer)
+    // This handles pages like about.html or map.html that use placeholders
     const headerTarget = document.getElementById('header-placeholder');
     const footerTarget = document.getElementById('footer-placeholder');
 
@@ -32,10 +33,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             
         } catch (err) {
             console.error("Navigation load error:", err);
+            // Fallback initialization if fetch fails
             initNavigation();
             initPopup();
         }
     } else {
+        // If no placeholders exist (like on the CMS-ready Homepage), init immediately
         initNavigation();
         initPopup();
     }
@@ -43,10 +46,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 /**
  * Sliding Navigation Bar Logic
- * Optimized for Mobile: Hides the bar if links wrap to multiple lines
+ * Works for both #main-nav (Homepage) and standard <nav> (Shared)
  */
 function initNavigation() {
-    const nav = document.querySelector('nav');
+    // Use the specific ID for the homepage, or fall back to the generic nav tag
+    const nav = document.getElementById('main-nav') || document.querySelector('nav');
     if (!nav) return;
 
     let indicator = document.getElementById('nav-indicator');
@@ -67,6 +71,8 @@ function initNavigation() {
     if (!activeLink) activeLink = links[0];
 
     const updateIndicator = (el) => {
+        if (!el) return;
+        
         // Mobile Fix: Check if links have wrapped by comparing top offsets
         const firstLink = links[0];
         const lastLink = links[links.length - 1];
@@ -75,7 +81,6 @@ function initNavigation() {
         if (isWrapped) {
             indicator.style.opacity = '0';
             links.forEach(l => l.style.color = 'var(--text-dim)');
-            // Highlight text only on mobile when wrapped
             if (el) el.style.color = 'var(--text)';
             return;
         }
@@ -89,7 +94,7 @@ function initNavigation() {
         el.style.color = 'var(--text)';
     };
 
-    // Initial position
+    // Initial position with slight delay to ensure layout is ready
     setTimeout(() => updateIndicator(activeLink), 200);
 
     links.forEach(link => {
