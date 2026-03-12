@@ -1,165 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro Video Player</title>
-    <link rel="stylesheet" href="https://unpkg.com/lucide-static@0.321.0/font/lucide.css" />
-    <style>
-        :root { --yt-red: #ff0000; }
-        body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; overflow: hidden; }
-        
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 900px;
-            aspect-ratio: 16 / 9;
-            background: #000;
-            overflow: hidden;
-            user-select: none;
-            touch-action: none;
-        }
+// --- ADD THIS TO YOUR SCRIPT SECTION ---
 
-        video { width: 100%; height: 100%; pointer-events: none; }
+window.addEventListener('keydown', (e) => {
+    // Check if the user is typing in an input or textarea
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-        .controls {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            padding: 20px 15px 10px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            opacity: 0;
-            transition: opacity 0.2s;
-            z-index: 10;
-        }
-
-        .video-container:hover .controls, .video-container.paused .controls, .video-container.scrubbing .controls { opacity: 1; }
-
-        /* Modern Draggable Scrubber */
-        .progress-area { 
-            height: 4px; background: rgba(255,255,255,0.2); 
-            cursor: pointer; display: flex; align-items: center; 
-            margin-bottom: 10px; position: relative;
-            transition: height 0.1s;
-        }
-        .video-container.scrubbing .progress-area, .progress-area:hover { height: 6px; }
-
-        .progress-bar { height: 100%; background: var(--yt-red); width: 0%; position: relative; pointer-events: none; }
-        
-        /* The Red Dot (Handle) */
-        .scrub-handle {
-            position: absolute; right: -7px; top: 50%; transform: translateY(-50%);
-            width: 14px; height: 14px; background: var(--yt-red); border-radius: 50%;
-            scale: 0; transition: scale 0.1s;
-        }
-        .progress-area:hover .scrub-handle, .video-container.scrubbing .scrub-handle { scale: 1; }
-
-        .bottom-controls { display: flex; align-items: center; justify-content: space-between; }
-        .left-side, .right-side { display: flex; align-items: center; gap: 20px; }
-        
-        .icon-btn { background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; }
-        .icon-btn svg { width: 24px; height: 24px; fill: white; stroke: white; }
-    </style>
-</head>
-<body>
-
-<div class="video-container paused" id="player">
-    <video id="main-video" playsinline>
-        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-    </video>
-
-    <div class="controls">
-        <div class="progress-area" id="progress-area">
-            <div class="progress-bar" id="progress-bar">
-                <div class="scrub-handle"></div>
-            </div>
-        </div>
-        
-        <div class="bottom-controls">
-            <div class="left-side">
-                <button class="icon-btn" id="play-pause">
-                    <svg id="p-icon" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
-                </button>
-                <button class="icon-btn" id="mute">
-                    <svg id="m-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                </button>
-            </div>
-            <div class="right-side">
-                <button class="icon-btn" id="fullscreen">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const player = document.getElementById('player');
-    const video = document.getElementById('main-video');
-    const playPauseBtn = document.getElementById('play-pause');
-    const pIcon = document.getElementById('p-icon');
-    const progressArea = document.getElementById('progress-area');
-    const progressBar = document.getElementById('progress-bar');
-    const fsBtn = document.getElementById('fullscreen');
-
-    let isDragging = false;
-
-    // Play/Pause
-    function togglePlay() {
-        if (video.paused) {
-            video.play();
-            player.classList.remove('paused');
-            pIcon.innerHTML = '<path d="M6 4h4v16H6zm8 0h4v16h-4z"/>';
-        } else {
-            video.pause();
-            player.classList.add('paused');
-            pIcon.innerHTML = '<path d="M5 3l14 9-14 9V3z"/>';
-        }
+    if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault(); // This stops the page from jumping down
+        togglePlay();
     }
-
-    playPauseBtn.addEventListener('click', togglePlay);
-    player.addEventListener('click', (e) => { if(e.target === player || e.target === video) togglePlay(); });
-
-    // Scrubbing & Dragging Logic
-    function updateScrub(e) {
-        const rect = progressArea.getBoundingClientRect();
-        let x = (e.pageX || e.touches[0].pageX) - rect.left;
-        x = Math.max(0, Math.min(x, rect.width));
-        const perc = x / rect.width;
-        progressBar.style.width = (perc * 100) + '%';
-        video.currentTime = perc * video.duration;
+    
+    // Bonus: Arrow keys for seeking (YouTube style)
+    if (e.key === 'ArrowRight') {
+        video.currentTime += 5;
     }
+    if (e.key === 'ArrowLeft') {
+        video.currentTime -= 5;
+    }
+});
 
-    progressArea.addEventListener('pointerdown', (e) => {
-        isDragging = true;
-        player.classList.add('scrubbing');
-        updateScrub(e);
+// Fix for button focus: prevents Space from re-triggering the last clicked button
+document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        btn.blur(); 
     });
-
-    window.addEventListener('pointermove', (e) => {
-        if (isDragging) updateScrub(e);
-    });
-
-    window.addEventListener('pointerup', () => {
-        isDragging = false;
-        player.classList.remove('scrubbing');
-    });
-
-    video.addEventListener('timeupdate', () => {
-        if (!isDragging) {
-            const perc = (video.currentTime / video.duration) * 100;
-            progressBar.style.width = perc + '%';
-        }
-    });
-
-    // Fullscreen
-    fsBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            player.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-    });
-</script>
-
-</body>
-</html>
+});
