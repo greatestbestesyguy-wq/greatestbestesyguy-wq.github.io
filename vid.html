@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sleek Video Player</title>
+    <title>Pro Video Player</title>
+    <link rel="stylesheet" href="https://unpkg.com/lucide-static@0.321.0/font/lucide.css" />
     <style>
-        :root { --yt-red: #ff0000; --overlay: rgba(0, 0, 0, 0.6); }
-        body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+        :root { --yt-red: #ff0000; }
+        body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; overflow: hidden; }
         
         .video-container {
             position: relative;
@@ -15,52 +16,48 @@
             aspect-ratio: 16 / 9;
             background: #000;
             overflow: hidden;
-            cursor: pointer;
             user-select: none;
+            touch-action: none;
         }
 
-        video { width: 100%; height: 100%; object-fit: contain; }
+        video { width: 100%; height: 100%; pointer-events: none; }
 
-        /* Controls Overlay */
         .controls {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 10px 15px 5px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            bottom: 0; left: 0; right: 0;
+            padding: 20px 15px 10px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
             opacity: 0;
             transition: opacity 0.2s;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
             z-index: 10;
         }
 
-        .video-container:hover .controls, .video-container.paused .controls { opacity: 1; }
+        .video-container:hover .controls, .video-container.paused .controls, .video-container.scrubbing .controls { opacity: 1; }
 
-        /* Scrubber Bar */
-        .progress-area { height: 5px; background: rgba(255,255,255,0.3); cursor: pointer; display: flex; align-items: center; transition: height 0.1s; }
-        .progress-area:hover { height: 8px; }
-        .progress-bar { height: 100%; background: var(--yt-red); width: 0%; position: relative; }
-        .progress-bar::after { 
-            content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
-            width: 12px; height: 12px; background: var(--yt-red); border-radius: 50%; scale: 0; transition: scale 0.1s;
+        /* Modern Draggable Scrubber */
+        .progress-area { 
+            height: 4px; background: rgba(255,255,255,0.2); 
+            cursor: pointer; display: flex; align-items: center; 
+            margin-bottom: 10px; position: relative;
+            transition: height 0.1s;
         }
-        .progress-area:hover .progress-bar::after { scale: 1; }
+        .video-container.scrubbing .progress-area, .progress-area:hover { height: 6px; }
 
-        /* Icons & Buttons */
-        .bottom-controls { display: flex; align-items: center; gap: 15px; padding: 5px 0; }
-        .icon-btn { background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
-        .icon-btn svg { width: 28px; height: 28px; fill: white; filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); }
+        .progress-bar { height: 100%; background: var(--yt-red); width: 0%; position: relative; pointer-events: none; }
         
-        /* Mobile Double Tap Ripples */
-        .ripple {
-            position: absolute; top: 0; width: 50%; height: 100%; display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.1); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 5;
+        /* The Red Dot (Handle) */
+        .scrub-handle {
+            position: absolute; right: -7px; top: 50%; transform: translateY(-50%);
+            width: 14px; height: 14px; background: var(--yt-red); border-radius: 50%;
+            scale: 0; transition: scale 0.1s;
         }
-        .ripple.left { left: 0; border-radius: 0 100% 100% 0; }
-        .ripple.right { right: 0; border-radius: 100% 0 0 100%; }
+        .progress-area:hover .scrub-handle, .video-container.scrubbing .scrub-handle { scale: 1; }
+
+        .bottom-controls { display: flex; align-items: center; justify-content: space-between; }
+        .left-side, .right-side { display: flex; align-items: center; gap: 20px; }
+        
+        .icon-btn { background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; }
+        .icon-btn svg { width: 24px; height: 24px; fill: white; stroke: white; }
     </style>
 </head>
 <body>
@@ -70,22 +67,27 @@
         <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
     </video>
 
-    <div class="ripple left" id="ripple-l"><span>⏪ 10s</span></div>
-    <div class="ripple right" id="ripple-r"><span>10s ⏩</span></div>
-
     <div class="controls">
         <div class="progress-area" id="progress-area">
-            <div class="progress-bar" id="progress-bar"></div>
+            <div class="progress-bar" id="progress-bar">
+                <div class="scrub-handle"></div>
+            </div>
         </div>
         
         <div class="bottom-controls">
-            <button class="icon-btn" id="play-pause">
-                <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                <svg id="pause-icon" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-            </button>
-            <button class="icon-btn" id="mute">
-                <svg id="vol-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-            </button>
+            <div class="left-side">
+                <button class="icon-btn" id="play-pause">
+                    <svg id="p-icon" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+                </button>
+                <button class="icon-btn" id="mute">
+                    <svg id="m-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                </button>
+            </div>
+            <div class="right-side">
+                <button class="icon-btn" id="fullscreen">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -94,65 +96,69 @@
     const player = document.getElementById('player');
     const video = document.getElementById('main-video');
     const playPauseBtn = document.getElementById('play-pause');
-    const playIcon = document.getElementById('play-icon');
-    const pauseIcon = document.getElementById('pause-icon');
+    const pIcon = document.getElementById('p-icon');
     const progressArea = document.getElementById('progress-area');
     const progressBar = document.getElementById('progress-bar');
+    const fsBtn = document.getElementById('fullscreen');
 
-    // Toggle Play/Pause
+    let isDragging = false;
+
+    // Play/Pause
     function togglePlay() {
         if (video.paused) {
             video.play();
             player.classList.remove('paused');
-            playIcon.style.display = 'none';
-            pauseIcon.style.display = 'block';
+            pIcon.innerHTML = '<path d="M6 4h4v16H6zm8 0h4v16h-4z"/>';
         } else {
             video.pause();
             player.classList.add('paused');
-            playIcon.style.display = 'block';
-            pauseIcon.style.display = 'none';
+            pIcon.innerHTML = '<path d="M5 3l14 9-14 9V3z"/>';
         }
     }
 
-    playPauseBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
-    player.addEventListener('click', togglePlay);
+    playPauseBtn.addEventListener('click', togglePlay);
+    player.addEventListener('click', (e) => { if(e.target === player || e.target === video) togglePlay(); });
 
-    // Scrubbing Logic
+    // Scrubbing & Dragging Logic
+    function updateScrub(e) {
+        const rect = progressArea.getBoundingClientRect();
+        let x = (e.pageX || e.touches[0].pageX) - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        const perc = x / rect.width;
+        progressBar.style.width = (perc * 100) + '%';
+        video.currentTime = perc * video.duration;
+    }
+
+    progressArea.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        player.classList.add('scrubbing');
+        updateScrub(e);
+    });
+
+    window.addEventListener('pointermove', (e) => {
+        if (isDragging) updateScrub(e);
+    });
+
+    window.addEventListener('pointerup', () => {
+        isDragging = false;
+        player.classList.remove('scrubbing');
+    });
+
     video.addEventListener('timeupdate', () => {
-        const perc = (video.currentTime / video.duration) * 100;
-        progressBar.style.width = perc + '%';
-    });
-
-    progressArea.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const scrubTime = (e.offsetX / progressArea.offsetWidth) * video.duration;
-        video.currentTime = scrubTime;
-    });
-
-    // Mobile Double Tap (YouTube Style)
-    let lastTap = 0;
-    player.addEventListener('touchstart', (e) => {
-        const now = Date.now();
-        const tapGap = now - lastTap;
-        if (tapGap < 300) {
-            const rect = player.getBoundingClientRect();
-            const x = e.touches[0].clientX - rect.left;
-            if (x < rect.width / 2) {
-                video.currentTime -= 10;
-                showRipple('ripple-l');
-            } else {
-                video.currentTime += 10;
-                showRipple('ripple-r');
-            }
+        if (!isDragging) {
+            const perc = (video.currentTime / video.duration) * 100;
+            progressBar.style.width = perc + '%';
         }
-        lastTap = now;
     });
 
-    function showRipple(id) {
-        const el = document.getElementById(id);
-        el.style.opacity = '1';
-        setTimeout(() => el.style.opacity = '0', 400);
-    }
+    // Fullscreen
+    fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            player.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    });
 </script>
 
 </body>
