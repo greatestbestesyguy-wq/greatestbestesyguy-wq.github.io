@@ -4,34 +4,40 @@
 
 window.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch and Inject Shared HTML (Header/Footer)
-    try {
-        const response = await fetch('./shared.html');
-        if (!response.ok) throw new Error('Could not find shared.html');
-        
-        const text = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'text/html');
+    const headerTarget = document.getElementById('header-placeholder');
+    const footerTarget = document.getElementById('footer-placeholder');
 
-        const headerSource = doc.getElementById('shared-header');
-        const footerSource = doc.getElementById('shared-footer');
-        
-        const headerTarget = document.getElementById('header-placeholder');
-        const footerTarget = document.getElementById('footer-placeholder');
+    // Only attempt fetch if placeholders exist on the current page
+    if (headerTarget || footerTarget) {
+        try {
+            const response = await fetch('./shared.html');
+            if (!response.ok) throw new Error('Could not find shared.html');
+            
+            const text = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
 
-        if (headerSource && headerTarget) {
-            headerTarget.innerHTML = headerSource.innerHTML;
+            const headerSource = doc.getElementById('shared-header');
+            const footerSource = doc.getElementById('shared-footer');
+            
+            if (headerSource && headerTarget) {
+                headerTarget.innerHTML = headerSource.innerHTML;
+            }
+            if (footerSource && footerTarget) {
+                footerTarget.innerHTML = footerSource.innerHTML;
+            }
+
+            // Initialize navigation/popups AFTER injection
+            initNavigation();
+            initPopup();
+            
+        } catch (err) {
+            console.error("Shared HTML load error:", err);
+            initNavigation();
+            initPopup();
         }
-        if (footerSource && footerTarget) {
-            footerTarget.innerHTML = footerSource.innerHTML;
-        }
-
-        // Initialize features after HTML is injected
-        initNavigation();
-        initPopup();
-        
-    } catch (err) {
-        console.error("Navigation load error:", err);
-        // Fallback: try to initialize anyway if elements already exist in static HTML
+    } else {
+        // If placeholders are missing (like on the Quiz), still try to run other features
         initNavigation();
         initPopup();
     }
@@ -68,7 +74,6 @@ function initNavigation() {
         el.style.color = 'var(--text)';
     };
 
-    // Initial position with slight delay for layout calculation
     setTimeout(() => updateIndicator(activeLink), 200);
 
     links.forEach(link => {
@@ -98,10 +103,9 @@ function closePopup() {
 
 /**
  * Persuasive Site Sharing Logic
- * Uses the Web Share API with specific advocacy text
+ * Specifically tuned for the stl.planet-recycling.pl domain
  */
 window.shareCurrentPage = async () => {
-    // Explicitly defining the shared content to ensure it overrides defaults
     const shareData = {
         title: 'Recycle St. Louis',
         text: '0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL! ♻️',
@@ -116,7 +120,7 @@ window.shareCurrentPage = async () => {
             copyToClipboard(shareData.text + " " + shareData.url);
         }
     } catch (err) {
-        console.log("Share interaction cancelled");
+        console.log("Share cancelled or failed");
     }
 };
 
@@ -135,7 +139,6 @@ window.socialShare = (platform) => {
     if (finalUrl) {
         window.open(finalUrl, '_blank');
     } else {
-        // Default to the native share if no platform specified
         window.shareCurrentPage();
     }
 };
