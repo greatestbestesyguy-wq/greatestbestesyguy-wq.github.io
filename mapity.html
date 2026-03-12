@@ -8,18 +8,17 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        /* 2. Fullscreen Reset */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             width: 100%;
-            overflow: hidden; /* Prevents scrollbars */
+            overflow: hidden;
         }
 
         #map { 
-            height: 100vh; /* 100% of the Viewport Height */
-            width: 100vw;  /* 100% of the Viewport Width */
+            height: 100vh;
+            width: 100vw;
         }
     </style>
 </head>
@@ -32,18 +31,15 @@
     <script src="https://unpkg.com/leaflet-kml@1.0.5/L.KML.js"></script>
 
     <script>
-        // Initialize Map
         const map = L.map('map', {
             zoomControl: true,
-            tap: false // Helps with mobile interaction
+            tap: false
         }).setView([38.627, -90.199], 11);
 
-        // Add Tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // Load KML Function
         function loadRecyclingMap() {
             if (typeof L.KML !== 'function') {
                 setTimeout(loadRecyclingMap, 300);
@@ -51,15 +47,29 @@
             }
 
             fetch('recycling_map.kml')
-                .then(res => {
-                    if (!res.ok) throw new Error("File not found");
-                    return res.text();
-                })
+                .then(res => res.text())
                 .then(kmltext => {
                     const parser = new DOMParser();
                     const kml = parser.parseFromString(kmltext, 'text/xml');
+                    
+                    // --- THE FIX: Force markers to show if they are missing styles ---
                     const track = new L.KML(kml);
                     map.addLayer(track);
+
+                    // If pins still don't show, we manually extract them
+                    const placemarks = kml.getElementsByTagName('Placemark');
+                    if (track.getLayers().length === 0 && placemarks.length > 0) {
+                        console.log("No layers found in KML object, manually placing pins...");
+                        for (let i = 0; i < placemarks.length; i++) {
+                            const name = placemarks[i].getElementsByTagName('name')[0]?.textContent || "Recycling Bin";
+                            const coords = placemarks[i].getElementsByTagName('coordinates')[0]?.textContent.trim().split(',');
+                            if (coords && coords.length >= 2) {
+                                L.marker([parseFloat(coords[1]), parseFloat(coords[0])])
+                                    .addTo(map)
+                                    .bindPopup(name);
+                            }
+                        }
+                    }
 
                     const bounds = track.getBounds();
                     if (bounds.isValid()) {
