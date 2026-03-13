@@ -1,42 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Primary Meta Tags -->
-<title>Recycle St. Louis | Metro High School Advocacy</title>
-<meta name="title" content="Recycle St. Louis | Metro High School Advocacy">
-<meta name="description" content="0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL.">
+    <title>Recycle St. Louis | Metro High School Advocacy</title>
+    <meta name="title" content="Recycle St. Louis | Metro High School Advocacy">
+    <meta name="description" content="0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL.">
 
-<!-- Open Graph / Facebook / WhatsApp -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://stl.planet-recycling.pl/">
-<meta property="og:title" content="Recycle St. Louis | Metro High School Advocacy">
-<meta property="og:description" content="A student advocacy project bringing awareness to the state of recycling in St. Louis. Explore the data and view the map.">
-<meta property="og:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stl.planet-recycling.pl/">
+    <meta property="og:title" content="Recycle St. Louis | Metro High School Advocacy">
+    <meta property="og:description" content="A student advocacy project bringing awareness to the state of recycling in St. Louis.">
+    <meta property="og:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://stl.planet-recycling.pl/">
-<meta property="twitter:title" content="Recycle St. Louis | Metro High School Advocacy">
-<meta property="twitter:description" content="Explore the reality of the St. Louis recycling crisis through our interactive map and student-led interviews.">
-<meta property="twitter:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-R1Y5DRSP21"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R1Y5DRSP21"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-R1Y5DRSP21');
+    </script>
 
-  gtag('config', 'G-R1Y5DRSP21');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle St. Louis | Interviews</title>
+    
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Modern Video Wrapper */
+        .video-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 40px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #333;
+            background: #000;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        /* Custom Green Theme for the Player */
+        .vjs-matrix.video-js { color: #00ff88; font-family: inherit; }
+        .vjs-matrix .vjs-big-play-button {
+            border-color: #00ff88;
+            background-color: rgba(0, 255, 136, 0.1);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            line-height: 80px;
+            font-size: 3em;
+        }
+        .vjs-matrix .vjs-play-progress, 
+        .vjs-matrix .vjs-volume-level {
+            background-color: #00ff88;
+        }
+        .vjs-matrix .vjs-control-bar {
+            background-color: rgba(10, 10, 10, 0.9);
+        }
+    </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Placeholder for Shared Header -->
         <div id="header-placeholder"></div>
 
         <main>
@@ -44,11 +68,21 @@
             <p class="tagline">Direct conversations with the leaders shaping St. Louis waste policy.</p>
 
             <section class="interview-detail">
-                <div class="video-wrapper">
-                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:var(--text-dim); text-align:center;">
-                        <p style="font-size: 24px;">🎬</p>
-                        <p>Interview Video Uploading Soon</p>
-                    </div>
+                
+                <div class="video-container">
+                    <video
+                        id="interview-video"
+                        class="video-js vjs-matrix vjs-big-play-centered vjs-16-9"
+                        controls
+                        preload="auto"
+                        poster="images/screenshot.png"
+                        data-setup='{}'
+                    >
+                        <source src="images/interview.mp4" type="video/mp4" />
+                        <p class="vjs-no-js">
+                            To view this video please enable JavaScript, and consider upgrading to a web browser that supports HTML5 video.
+                        </p>
+                    </video>
                 </div>
                 
                 <div class="interview-content" style="text-align: left; max-width: 800px; margin: 0 auto;">
@@ -58,7 +92,7 @@
                         In this exclusive sit-down, we discuss the logistics of the 2025-2026 recycling pivot.
                     </p>
                     
-                    <div class="timestamp-box" style="background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #222;">
+                    <div class="timestamp-box" style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid #222;">
                         <p><strong>0:00</strong> Introduction and the current state of STL waste.</p>
                         <p><strong>4:20</strong> Why curbside recycling was officially suspended.</p>
                         <p><strong>12:45</strong> Expansion of the city-wide drop-off network.</p>
@@ -67,10 +101,10 @@
             </section>
         </main>
 
-        <!-- Placeholder for Shared Footer -->
         <div id="footer-placeholder"></div>
     </div>
 
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
