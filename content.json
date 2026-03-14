@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "pageTitle": "Recycle St. Louis | Home",
+    "metaTitle": "Recycle St. Louis | Metro High School Advocacy",
+    "metaDescription": "0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL."
+  },
+  "popup": {
+    "enabled": true,
+    "message": "<strong>🚨 Important Update:</strong> Residential recycling is no longer being picked up in many STL neighborhoods. To ensure your items are recycled, they <strong>must</strong> be taken to an official drop-off station.",
+    "linkText": "Find a Station Near You",
+    "linkUrl": "map.html"
+  },
+  "hero": {
+    "title": "Recycle St. Louis",
+    "tagline": "A student advocacy project bringing awareness to the state of recycling in our city."
+  },
+  "stats": [
+    {
+      "value": "0",
+      "label": "Curbside Pickups Active"
+    },
+    {
+      "value": "14",
+      "label": "Drop-Off Locations"
+    },
+    {
+      "value": "100%",
+      "label": "User Responsibility"
+    }
+  ],
+  "interview": {
+    "visible": true,
+    "label": "Exclusive Interview",
+    "title": "Talking Policy with Mayor Cara Spencer",
+    "description": "We sat down with St. Louis Mayor Cara Spencer to discuss the suspension of curbside recycling and what the city's long-term plan is for sustainable waste management.",
+    "buttonText": "Watch the Interview",
+    "link": "interviews.html",
+    "imageUrl": "path/to/your/image.jpg"
+  },
+  "article": {
+    "title": "The Curbside Crisis",
+    "body": "Due to labor shortages and high contamination rates, St. Louis has officially pivoted to a 'Drop-Off' model. Placing recyclables in your alley bin now almost guarantees they end up in a landfill."
+  }
+}
