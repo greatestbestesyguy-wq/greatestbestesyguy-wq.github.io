@@ -37,8 +37,7 @@
                 <div id="mission-body"></div>
             </section>
 
-            <div id="team-grid" class="stats-grid" style="margin-bottom: 60px;">
-                </div>
+            <div id="team-grid" class="stats-grid" style="margin-bottom: 60px;"></div>
 
             <section style="text-align: left; max-width: 800px; margin: 0 auto 80px; background: var(--card-bg); padding: 40px; border-radius: 24px; border: 1px solid #222;">
                 <h3 id="context-title">Assignment Context</h3>
@@ -53,28 +52,27 @@
 
     <script src="script.js"></script>
     <script>
-        async function loadAboutData() {
-            try {
-                const response = await fetch('./content.json');
-                const data = await response.json();
-                const page = data.aboutPage;
+        // MODULAR RENDER FUNCTION
+        function renderAbout(data) {
+            const page = data.aboutPage;
 
-                // Meta & Titles
-                document.title = page.pageTitle;
-                document.getElementById('meta-title').content = page.metaTitle;
-                document.getElementById('meta-desc').content = page.metaDescription;
-                document.getElementById('og-title').content = page.metaTitle;
-                document.getElementById('og-desc').content = page.metaDescription;
+            // Meta & Titles
+            document.title = page.pageTitle;
+            if(document.getElementById('meta-title')) document.getElementById('meta-title').content = page.metaTitle;
+            if(document.getElementById('meta-desc')) document.getElementById('meta-desc').content = page.metaDescription;
+            if(document.getElementById('og-title')) document.getElementById('og-title').content = page.metaTitle;
+            if(document.getElementById('og-desc')) document.getElementById('og-desc').content = page.metaDescription;
 
-                document.getElementById('about-title').innerText = page.title;
-                document.getElementById('about-tagline').innerText = page.tagline;
+            document.getElementById('about-title').innerText = page.title;
+            document.getElementById('about-tagline').innerText = page.tagline;
 
-                // Mission
-                document.getElementById('mission-title').innerText = page.missionTitle;
-                document.getElementById('mission-body').innerHTML = page.missionBody;
+            // Mission
+            document.getElementById('mission-title').innerText = page.missionTitle;
+            document.getElementById('mission-body').innerHTML = page.missionBody;
 
-                // Team Grid
-                const teamGrid = document.getElementById('team-grid');
+            // Team Grid
+            const teamGrid = document.getElementById('team-grid');
+            if(teamGrid) {
                 teamGrid.innerHTML = '';
                 page.team.forEach(member => {
                     const card = document.createElement('div');
@@ -82,21 +80,37 @@
                     card.innerHTML = `<h2 style="font-size: 2rem; color: var(--accent);">${member.name}</h2><p>${member.role}</p>`;
                     teamGrid.appendChild(card);
                 });
+            }
 
-                // Assignment Context
-                document.getElementById('context-title').innerText = page.contextTitle;
-                document.getElementById('context-details').innerHTML = `
-                    <strong>Course:</strong> ${page.contextCourse}<br>
-                    <strong>Due Date:</strong> ${page.contextDate}<br>
-                    <strong>Focus:</strong> ${page.contextFocus}
-                `;
-                document.getElementById('context-quote').innerText = page.contextQuote;
+            // Assignment Context
+            document.getElementById('context-title').innerText = page.contextTitle;
+            document.getElementById('context-details').innerHTML = `
+                <strong>Course:</strong> ${page.contextCourse}<br>
+                <strong>Due Date:</strong> ${page.contextDate}<br>
+                <strong>Focus:</strong> ${page.contextFocus}
+            `;
+            document.getElementById('context-quote').innerText = page.contextQuote;
+        }
 
+        // INITIAL LOAD
+        async function loadAboutData() {
+            try {
+                const response = await fetch('./content.json');
+                const data = await response.json();
+                renderAbout(data);
             } catch (error) {
                 console.error("Error loading About JSON:", error);
             }
         }
+
         loadAboutData();
+
+        // --- CMS LISTENER ---
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'UPDATE_CONTENT') {
+                renderAbout(event.data.data);
+            }
+        });
     </script>
 </body>
 </html>
