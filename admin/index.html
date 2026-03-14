@@ -3,193 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle STL | Advanced CMS</title>
+    <title>Recycle STL | High-Fidelity CMS</title>
     <style>
-        :root { --bg: #050505; --card: #111; --accent: #00ff88; --text: #eee; --border: #333; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        /* Site Branding & Variables */
+        :root {
+            --bg: #0a0a0a;
+            --card: #141414;
+            --accent: #00ff88;
+            --text: #ffffff;
+            --dim: #a0a0a0;
+            --wrong: #ff4444;
+            --border: #222;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #000; color: #fff;
+            height: 100vh; overflow: hidden;
+        }
+
+        /* Initial Entry Screen */
+        #entry-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; background: var(--bg); z-index: 1000; position: absolute; width: 100%;
+        }
+        .entry-container { width: 90%; max-width: 600px; text-align: center; }
         
-        /* Layout */
-        header { padding: 15px 25px; background: #000; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .main { display: flex; flex: 1; overflow: hidden; }
+        /* Main Workspace */
+        #workspace { display: none; height: 100vh; flex-direction: column; }
         
-        /* Sidebar Editor */
-        .sidebar { width: 400px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .tab-bar { display: flex; background: #000; overflow-x: auto; border-bottom: 1px solid var(--border); }
-        .tab { padding: 12px 20px; cursor: pointer; font-size: 13px; white-space: nowrap; color: #888; border-bottom: 2px solid transparent; }
+        header { 
+            padding: 15px 25px; background: #000; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .layout { display: flex; flex: 1; overflow: hidden; }
+
+        /* Left Sidebar (Editor) */
+        .sidebar { width: 380px; background: #0f0f0f; border-right: 1px solid var(--border); overflow-y: auto; }
+        .tab-bar { display: flex; border-bottom: 1px solid var(--border); background: #000; }
+        .tab { 
+            flex: 1; padding: 12px; text-align: center; font-size: 12px; cursor: pointer;
+            color: #666; border-bottom: 2px solid transparent; transition: 0.2s;
+        }
         .tab.active { color: var(--accent); border-bottom-color: var(--accent); background: #111; }
-        
-        .editor-fields { flex: 1; padding: 20px; overflow-y: auto; }
-        .field-group { margin-bottom: 20px; }
-        label { display: block; font-size: 11px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; font-weight: bold; }
-        input, textarea, select { width: 100%; background: #1a1a1a; border: 1px solid var(--border); border-radius: 6px; padding: 10px; color: #fff; font-size: 14px; box-sizing: border-box; }
-        textarea { height: 80px; resize: vertical; }
 
-        /* Preview Area */
-        .preview-area { flex: 1; padding: 40px; background: #080808; overflow-y: auto; display: flex; justify-content: center; }
-        .browser-mockup { width: 100%; max-width: 900px; background: #fff; border-radius: 12px; height: fit-content; min-height: 100%; color: #000; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
-        .browser-header { background: #f1f1f1; padding: 10px; display: flex; gap: 5px; border-bottom: 1px solid #ddd; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: #ddd; }
+        .editor-content { padding: 20px; }
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-size: 11px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
+        .field input, .field textarea {
+            width: 100%; background: #1a1a1a; border: 1px solid var(--border);
+            border-radius: 8px; padding: 12px; color: #fff; font-size: 14px; box-sizing: border-box;
+        }
+        .field textarea { height: 100px; font-family: inherit; }
 
-        /* UI Elements */
-        .error-toast { background: #ff4444; color: white; padding: 10px; font-size: 12px; display: none; }
-        .btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-secondary { background: #222; color: #fff; margin-right: 10px; }
+        /* Right Side (Simulation) */
+        .preview-pane { flex: 1; background: #050505; padding: 40px; overflow-y: auto; display: flex; justify-content: center; }
+        .phone-frame {
+            width: 100%; max-width: 800px; background: var(--bg); min-height: 100%;
+            border-radius: 30px; border: 8px solid #1a1a1a; padding: 40px; color: var(--text);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8); position: relative;
+        }
+
+        /* Action Buttons */
+        .btn {
+            background: var(--accent); color: #000; border: none; padding: 12px 24px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .btn:hover { transform: scale(1.05); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: #fff; margin-left: 10px; }
+
+        .status-msg { font-size: 12px; margin-top: 10px; color: var(--accent); display: none; }
     </style>
 </head>
 <body>
 
-<header>
-    <div style="display:flex; align-items:center; gap:15px;">
-        <h2 style="margin:0; font-size:18px;">Recycle STL <span style="font-weight:100; color:#666;">CMS</span></h2>
-    </div>
-    <div>
-        <button class="btn btn-secondary" onclick="importJSON()">📥 Paste content.json</button>
-        <button class="btn" onclick="exportJSON()">🚀 Export to Clipboard</button>
-    </div>
-</header>
-
-<div class="error-toast" id="error-display"></div>
-
-<div class="main">
-    <div class="sidebar">
-        <div class="tab-bar" id="page-tabs">
-            <div class="tab active" onclick="switchPage('home')">Home</div>
-            <div class="tab" onclick="switchPage('map')">Map</div>
-            <div class="tab" onclick="switchPage('interviews')">Interviews</div>
-            <div class="tab" onclick="switchPage('quiz')">Quiz</div>
-            <div class="tab" onclick="switchPage('about')">About</div>
-        </div>
-        <div class="editor-fields" id="editor-form">
-            </div>
-    </div>
-
-    <div class="preview-area">
-        <div class="browser-mockup">
-            <div class="browser-header">
-                <div class="dot" style="background:#ff5f56"></div>
-                <div class="dot" style="background:#ffbd2e"></div>
-                <div class="dot" style="background:#27c93f"></div>
-            </div>
-            <div id="live-preview" style="padding: 40px;">
-                </div>
+    <div id="entry-screen">
+        <div class="entry-container">
+            <h1 style="color: var(--accent);">Recycle STL Manager</h1>
+            <p style="color: var(--dim);">Paste your <code>content.json</code> to begin editing.</p>
+            <textarea id="json-input" style="width:100%; height:300px; background:#111; border:1px solid var(--border); border-radius:12px; color:var(--accent); padding:15px; font-family:monospace;" placeholder='{ "HOME_PAGE_DATA": ... }'></textarea>
+            <div id="entry-error" style="color:var(--wrong); margin:10px 0; font-size:14px;"></div>
+            <button class="btn" style="width:100%; margin-top:20px;" onclick="startEditor()">Enter Workspace</button>
         </div>
     </div>
-</div>
 
-<script>
-    let siteData = {};
-    let currentPage = 'home';
+    <div id="workspace">
+        <header>
+            <div style="font-weight: bold; font-size: 1.2rem;">Recycle <span style="color:var(--accent)">STL</span> CMS</div>
+            <div>
+                <span id="save-status" class="status-msg">JSON Copied!</span>
+                <button class="btn" onclick="copyJSON()">Copy for GitHub</button>
+                <button class="btn btn-outline" onclick="location.reload()">Start Over</button>
+            </div>
+        </header>
 
-    const defaultJSON = `{"HOME_PAGE_DATA":"---","metadata":{"pageTitle":"Recycle STL","metaTitle":"Advocacy","metaDescription":"Help us."},"popup":{"enabled":true,"message":"Urgent Update","linkText":"Map","linkUrl":"map.html"},"hero":{"title":"Recycle St. Louis","tagline":"A student project."},"stats":[],"interview":{"visible":true,"title":"Mayor Interview","description":"Text here","buttonText":"Watch","link":"#","imageUrl":""},"article":{"title":"The Crisis","body":"Text here"},"mapPage":{"title":"Find a Station","tagline":"Locations"},"interviewsPage":{"title":"Interviews","tagline":"Voices","entries":[]},"quizPage":{"questions":[]},"aboutPage":{"title":"About","tagline":"Metro High","team":[]}}`;
-
-    // Initialize
-    window.onload = () => {
-        siteData = JSON.parse(defaultJSON);
-        switchPage('home');
-    };
-
-    function importJSON() {
-        const raw = prompt("Paste your current content.json text here:");
-        if (!raw) return;
-        try {
-            siteData = JSON.parse(raw);
-            document.getElementById('error-display').style.display = 'none';
-            switchPage(currentPage);
-        } catch (e) {
-            document.getElementById('error-display').innerText = "JSON Error: " + e.message;
-            document.getElementById('error-display').style.display = 'block';
-        }
-    }
-
-    function switchPage(page) {
-        currentPage = page;
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        event?.target?.classList?.add('active');
-        renderForm();
-        renderPreview();
-    }
-
-    function renderForm() {
-        const container = document.getElementById('editor-form');
-        container.innerHTML = '';
-        
-        const fields = getFieldsForPage(currentPage);
-        fields.forEach(f => {
-            const div = document.createElement('div');
-            div.className = 'field-group';
-            div.innerHTML = `
-                <label>${f.label}</label>
-                ${f.type === 'textarea' 
-                    ? `<textarea oninput="updateData('${f.path}', this.value)">${getValue(f.path)}</textarea>`
-                    : `<input type="text" value="${getValue(f.path)}" oninput="updateData('${f.path}', this.value)">`
-                }
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    function getValue(path) {
-        return path.split('.').reduce((obj, key) => obj?.[key], siteData) || "";
-    }
-
-    function updateData(path, val) {
-        const keys = path.split('.');
-        let lastKey = keys.pop();
-        let target = keys.reduce((obj, key) => obj[key], siteData);
-        target[lastKey] = val;
-        renderPreview();
-    }
-
-    function getFieldsForPage(page) {
-        if (page === 'home') return [
-            { label: 'Hero Title', path: 'hero.title' },
-            { label: 'Hero Tagline', path: 'hero.tagline' },
-            { label: 'Article Title', path: 'article.title' },
-            { label: 'Article Body', path: 'article.body', type: 'textarea' },
-            { label: 'Popup Message', path: 'popup.message', type: 'textarea' }
-        ];
-        if (page === 'map') return [
-            { label: 'Page Title', path: 'mapPage.title' },
-            { label: 'Tagline', path: 'mapPage.tagline' },
-            { label: 'Google Maps Link (src)', path: 'mapPage.mapUrl' }
-        ];
-        if (page === 'interviews') return [
-            { label: 'Main Page Title', path: 'interviewsPage.title' },
-            { label: 'Featured Video Embed URL', path: 'interviewsPage.featuredVideoUrl' }
-        ];
-        return [];
-    }
-
-    function renderPreview() {
-        const view = document.getElementById('live-preview');
-        if (currentPage === 'home') {
-            view.innerHTML = `
-                <div style="background:var(--accent); padding:10px; font-size:12px; border-radius:4px; margin-bottom:20px;">${siteData.popup.message}</div>
-                <h1 style="font-size:48px; margin:0;">${siteData.hero.title}</h1>
-                <p style="color:#666; font-size:18px;">${siteData.hero.tagline}</p>
-                <div style="margin-top:40px; border-top:1px solid #eee; padding-top:20px;">
-                    <h3>${siteData.article.title}</h3>
-                    <p>${siteData.article.body}</p>
+        <div class="layout">
+            <div class="sidebar">
+                <div class="tab-bar">
+                    <div class="tab active" onclick="setTab('home')">Home</div>
+                    <div class="tab" onclick="setTab('map')">Map</div>
+                    <div class="tab" onclick="setTab('quiz')">Quiz</div>
+                    <div class="tab" onclick="setTab('about')">About</div>
                 </div>
-            `;
-        } else if (currentPage === 'map') {
-            view.innerHTML = `
-                <h1>${siteData.mapPage.title}</h1>
-                <p>${siteData.mapPage.tagline}</p>
-                <div style="width:100%; height:300px; background:#eee; display:flex; align-items:center; justify-content:center; border-radius:12px;">
-                    [Google Map Simulation: ${siteData.mapPage.mapUrl}]
-                </div>
-            `;
-        } else {
-            view.innerHTML = `<div style="text-align:center; padding:50px; color:#aaa;">Preview for ${currentPage} coming soon...</div>`;
-        }
-    }
+                <div class="editor-content" id="editor-fields"></div>
+            </div>
 
-    function exportJSON() {
-        const str = JSON.stringify(siteData, null, 2);
-        navigator.clipboard.writeText(str);
-        alert("Success! JSON copied to clipboard. Paste this into your content.json file on GitHub.");
-    }
-</script>
+            <div class="preview-pane">
+                <div class="phone-frame" id="site-sim">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = {};
+        let activeTab = 'home';
+
+        function startEditor() {
+            const raw = document.getElementById('json-input').value;
+            try {
+                db = JSON.parse(raw);
+                document.getElementById('entry-screen').style.display = 'none';
+                document.getElementById('workspace').style.display = 'flex';
+                render();
+            } catch (e) {
+                document.getElementById('entry-error').innerText = "Syntax Error: " + e.message;
+            }
+        }
+
+        function setTab(tab) {
+            activeTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.innerText.toLowerCase() === tab));
+            render();
+        }
+
+        function update(path, val) {
+            const keys = path.split('.');
+            let obj = db;
+            for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
+            obj[keys[keys.length - 1]] = val;
+            renderPreview();
+        }
+
+        function render() {
+            const container = document.getElementById('editor-fields');
+            container.innerHTML = '';
+            
+            const schema = {
+                home: [
+                    { label: 'Hero Title', path: 'hero.title' },
+                    { label: 'Hero Tagline', path: 'hero.tagline', type: 'textarea' },
+                    { label: 'Article Title', path: 'article.title' },
+                    { label: 'Article Body', path: 'article.body', type: 'textarea' }
+                ],
+                map: [
+                    { label: 'Page Title', path: 'mapPage.title' },
+                    { label: 'Tagline', path: 'mapPage.tagline' },
+                    { label: 'Map Link (URL only)', path: 'mapPage.mapUrl' }
+                ],
+                quiz: [
+                    { label: 'Page Title', path: 'quizPage.pageTitle' }
+                    // Complex arrays can be added here
+                ],
+                about: [
+                    { label: 'Mission Title', path: 'aboutPage.missionTitle' },
+                    { label: 'Mission Description', path: 'aboutPage.missionBody', type: 'textarea' }
+                ]
+            };
+
+            schema[activeTab].forEach(f => {
+                const val = f.path.split('.').reduce((o, k) => o[k], db);
+                const fieldHTML = `
+                    <div class="field">
+                        <label>${f.label}</label>
+                        ${f.type === 'textarea' 
+                            ? `<textarea oninput="update('${f.path}', this.value)">${val}</textarea>` 
+                            : `<input type="text" value="${val}" oninput="update('${f.path}', this.value)">`}
+                    </div>`;
+                container.insertAdjacentHTML('beforeend', fieldHTML);
+            });
+            renderPreview();
+        }
+
+        function renderPreview() {
+            const sim = document.getElementById('site-sim');
+            if (activeTab === 'home') {
+                sim.innerHTML = `
+                    <h1 style="font-size: 3rem; margin-bottom: 10px;">${db.hero.title}</h1>
+                    <p style="color: var(--dim); font-size: 1.2rem; line-height: 1.6;">${db.hero.tagline}</p>
+                    <div style="margin-top: 60px; padding: 30px; background: var(--card); border-radius: 20px; border: 1px solid var(--border);">
+                        <h2 style="color: var(--accent);">${db.article.title}</h2>
+                        <p style="line-height: 1.7;">${db.article.body}</p>
+                    </div>
+                `;
+            } else if (activeTab === 'map') {
+                sim.innerHTML = `
+                    <h1 style="text-align:center;">${db.mapPage.title}</h1>
+                    <p style="text-align:center; color: var(--dim);">${db.mapPage.tagline}</p>
+                    <div style="height: 300px; width:100%; border-radius:20px; background:#222; display:flex; align-items:center; justify-content:center; margin-top:30px; border:1px solid var(--border);">
+                        <span style="color:var(--dim); font-size:12px;">IFRAME SOURCE: ${db.mapPage.mapUrl}</span>
+                    </div>
+                `;
+            } else if (activeTab === 'about') {
+                sim.innerHTML = `
+                    <h2 style="color: var(--accent);">${db.aboutPage.missionTitle}</h2>
+                    <div style="line-height:1.6;">${db.aboutPage.missionBody}</div>
+                `;
+            } else {
+                sim.innerHTML = `<h1 style="text-align:center;">${db.quizPage.pageTitle}</h1><p style="text-align:center; color:var(--dim);">Quiz simulation active.</p>`;
+            }
+        }
+
+        function copyJSON() {
+            const out = JSON.stringify(db, null, 2);
+            navigator.clipboard.writeText(out);
+            const msg = document.getElementById('save-status');
+            msg.style.display = 'inline';
+            setTimeout(() => msg.style.display = 'none', 3000);
+        }
+    </script>
 </body>
 </html>
