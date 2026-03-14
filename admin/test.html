@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard HTML Renderer</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #e0e0e0; padding: 40px; display: flex; flex-direction: column; align-items: center; }
+        #output { width: 100%; max-width: 800px; background: white; color: black; padding: 20px; border-radius: 12px; min-height: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn { background: #00ff88; color: black; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
+        .status { margin-bottom: 10px; font-size: 14px; color: #888; }
+    </style>
+</head>
+<body>
+
+    <button class="btn" onclick="readClipboard()">Manual Paste / Grant Access</button>
+    <div class="status" id="status">Status: Ready</div>
+    <div id="output">
+        Your clipboard content will appear here...
+    </div>
+
+    <script>
+        async function readClipboard() {
+            const output = document.getElementById('output');
+            const status = document.getElementById('status');
+            
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    output.innerHTML = text; // This renders the string as HTML
+                    status.innerText = "Status: Successfully rendered!";
+                } else {
+                    status.innerText = "Status: Clipboard was empty.";
+                }
+            } catch (err) {
+                status.innerText = "Status: Error (Check permissions or click the button)";
+                console.error('Failed to read clipboard: ', err);
+            }
+        }
+
+        // Attempt to run on load (Only works if permission was previously granted)
+        window.onload = () => {
+            setTimeout(readClipboard, 100);
+        };
+    </script>
+</body>
+</html>
