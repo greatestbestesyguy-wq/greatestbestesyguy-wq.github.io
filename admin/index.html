@@ -29,13 +29,13 @@
         .btn:hover { background: var(--border); }
         .btn-primary { background: var(--accent); color: #000; border: none; font-weight: bold; }
         .btn-primary:hover { background: var(--accent-hover); }
-        .btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); padding: 4px 8px; font-size: 12px; }
+        .btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); padding: 4px 8px; font-size: 12px; border-radius: 6px; border: 1px solid; cursor: pointer; transition: 0.2s; }
         .btn-danger:hover { background: var(--danger); color: white; }
 
         .workspace { display: flex; flex: 1; overflow: hidden; }
         
         /* Sidebar */
-        .sidebar { width: 450px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar { width: 450px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: transform 0.3s ease; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
         .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
         
@@ -52,21 +52,43 @@
         .array-item-title { font-size: 14px; font-weight: bold; color: var(--accent); }
 
         /* Preview Area */
-        .preview-area { flex: 1; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 20px; }
-        .device-toggle { position: absolute; top: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; overflow: hidden; z-index: 10; }
+        .preview-area { flex: 1; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 20px; transition: all 0.3s ease; }
+        .preview-controls { position: absolute; top: 20px; display: flex; gap: 10px; z-index: 10; }
+        .device-toggle { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; overflow: hidden; }
         .device-toggle button { background: transparent; color: var(--text-dim); border: none; padding: 8px 15px; cursor: pointer; font-size: 12px; }
         .device-toggle button.active { background: var(--border); color: var(--text); }
         
-        .iframe-container { width: 100%; height: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: white; transition: width 0.3s ease; }
+        .iframe-container { width: 100%; height: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: white; transition: width 0.3s ease, border-radius 0.3s ease; }
         iframe { width: 100%; height: 100%; border: none; }
         
-        /* Modal */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 600px; max-width: 90%; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        /* Fullscreen Mode */
+        body.is-fullscreen header, body.is-fullscreen .sidebar { display: none !important; }
+        body.is-fullscreen .preview-area { padding: 0; position: fixed; inset: 0; z-index: 1000; background: var(--bg); }
+        body.is-fullscreen .iframe-container { border-radius: 0; border: none; width: 100% !important; }
+        body.is-fullscreen .device-toggle { display: none; }
+        .exit-fs-btn { display: none; position: absolute; bottom: 30px; right: 30px; z-index: 1010; padding: 12px 24px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 50px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-weight: bold; align-items: center; gap: 8px; }
+        .exit-fs-btn:hover { background: var(--border); }
+        body.is-fullscreen .exit-fs-btn { display: flex; }
+
+        /* Custom Modals */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.2s; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 600px; max-width: 90%; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 0.2s; }
+        .modal-overlay.show .modal { transform: translateY(0); }
         .modal h2 { margin-bottom: 15px; color: var(--accent); }
         .modal p { color: var(--text-dim); margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
-        .modal textarea { height: 300px; font-family: monospace; font-size: 12px; margin-bottom: 20px; }
+        .modal textarea { width: 100%; height: 300px; font-family: monospace; font-size: 12px; margin-bottom: 20px; background: var(--bg); border: 1px solid var(--border); color: var(--accent); padding: 15px; border-radius: 8px; outline: none; resize: none; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+        /* Smaller Confirm Modal */
+        #confirm-modal .modal { width: 400px; }
+
+        /* Toast Notifications */
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 14px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast.show { transform: translateX(0); }
+        .toast-icon { color: var(--accent); font-size: 18px; }
+        .toast.error .toast-icon { color: var(--danger); border-color: var(--danger); }
     </style>
 </head>
 <body>
@@ -74,7 +96,7 @@
     <div id="setup-screen">
         <div class="setup-box">
             <h1>Studio <span>Setup</span></h1>
-            <p>Paste your <strong>content.json</strong> file below. The editor will start automatically once valid JSON is detected.</p>
+            <p id="setup-msg">Paste your <strong>content.json</strong> file below to begin.</p>
             <textarea id="json-loader" class="json-loader" placeholder='{ "metadata": { ... } }' autofocus></textarea>
         </div>
     </div>
@@ -93,7 +115,7 @@
             </div>
             <div class="header-right">
                 <button class="btn" onclick="reloadPreview()">↻ Reload Preview</button>
-                <button class="btn btn-primary" onclick="openGitHubModal()">⚡ Export & GitHub</button>
+                <button class="btn btn-primary" onclick="openGitHubModal()">⚡ Export JSON</button>
             </div>
         </header>
 
@@ -108,13 +130,17 @@
             </aside>
 
             <section class="preview-area">
-                <div class="device-toggle">
-                    <button id="btn-desktop" class="active" onclick="setDevice('desktop')">Desktop</button>
-                    <button id="btn-mobile" onclick="setDevice('mobile')">Mobile</button>
+                <div class="preview-controls">
+                    <div class="device-toggle">
+                        <button id="btn-desktop" class="active" onclick="setDevice('desktop')">Desktop</button>
+                        <button id="btn-mobile" onclick="setDevice('mobile')">Mobile</button>
+                    </div>
+                    <button class="btn" style="background: var(--surface);" onclick="toggleFullscreen()">⛶ Fullscreen</button>
                 </div>
                 <div class="iframe-container" id="iframe-wrap">
-                    <iframe id="preview-frame" src="./index.html"></iframe>
+                    <iframe id="preview-frame" src=""></iframe>
                 </div>
+                <button class="exit-fs-btn" onclick="toggleFullscreen()">↙ Exit Fullscreen</button>
             </section>
         </div>
     </div>
@@ -122,33 +148,78 @@
     <div id="github-modal" class="modal-overlay">
         <div class="modal">
             <h2>Ready to Publish!</h2>
-            <p>Your changes are saved in the text box below. Click "Copy to Clipboard", then click "Open GitHub" to paste your updated JSON file directly into your repository.</p>
+            <p>Your changes are compiled below. Click "Copy JSON", then paste it into your GitHub repository to update your live website.</p>
             <textarea id="export-json" readonly></textarea>
             <div class="modal-actions">
-                <button class="btn" onclick="closeGitHubModal()">Cancel</button>
+                <button class="btn" onclick="closeModal('github-modal')">Cancel</button>
                 <button class="btn" onclick="copyJSON()">📋 Copy JSON</button>
-                <a href="https://github.com/greatestbestesyguy-wq/greatestbestesyguy-wq.github.io/blob/main/content.json" target="_blank" class="btn btn-primary" onclick="closeGitHubModal()">↗ Open GitHub</a>
+                <a href="https://github.com/greatestbestesyguy-wq/greatestbestesyguy-wq.github.io/blob/main/content.json" target="_blank" class="btn btn-primary" onclick="closeModal('github-modal')">↗ Open GitHub</a>
             </div>
         </div>
     </div>
 
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal">
+            <h2>Delete Item?</h2>
+            <p>Are you sure you want to permanently remove this item from your site? This cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('confirm-modal')">Cancel</button>
+                <button class="btn btn-danger" style="background: var(--danger); color: white;" onclick="executeDelete()">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
     <script>
         let db = null;
         let currentPage = 'home';
+        let pendingDeleteInfo = null;
 
-        // --- 1. AUTO-LOADER LOGIC ---
+        // Ensure the editor itself isn't named index.html causing an infinite loop
+        if (window.location.pathname.endsWith('index.html')) {
+            document.getElementById('setup-msg').innerHTML = "<span style='color:var(--danger);'>Warning: You named this file <b>index.html</b>. Please rename it to <b>editor.html</b> so it doesn't try to load itself inside the preview box!</span>";
+        }
+
+        // --- 1. TOAST SYSTEM ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span class="toast-icon">${type === 'success' ? '✓' : '⚠'}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            
+            // Trigger animation
+            requestAnimationFrame(() => toast.classList.add('show'));
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- 2. MODAL SYSTEM ---
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // --- 3. AUTO-LOADER LOGIC ---
         document.getElementById('json-loader').addEventListener('input', function(e) {
             try {
                 db = JSON.parse(e.target.value);
                 document.getElementById('setup-screen').style.display = 'none';
                 document.getElementById('editor-screen').style.display = 'flex';
+                showToast("JSON successfully loaded!");
                 switchPage('home');
             } catch(err) {
-                // Invalid JSON, wait for user to fix it
+                // Invalid JSON, wait silently
             }
         });
 
-        // --- 2. NAVIGATION & PREVIEW LOGIC ---
+        // --- 4. NAVIGATION & PREVIEW LOGIC ---
         const pageConfigs = {
             home: { url: './index.html', title: 'Home Page' },
             map: { url: './map.html', title: 'Map Page' },
@@ -160,14 +231,20 @@
         function switchPage(pageKey) {
             currentPage = pageKey;
             document.getElementById('sidebar-title').innerText = `Editing ${pageConfigs[pageKey].title}`;
+            
+            // Check if the file exists by setting the src. If it fails, the iframe will show the browser's 404.
             document.getElementById('preview-frame').src = pageConfigs[pageKey].url;
             document.getElementById('page-selector').value = pageKey;
             renderForm();
+            
+            // Sync data to the newly loaded iframe after a brief delay
+            setTimeout(syncIframe, 500); 
         }
 
         function reloadPreview() {
             document.getElementById('preview-frame').src = document.getElementById('preview-frame').src;
-            setTimeout(syncIframe, 500); // Sync data after reload
+            setTimeout(syncIframe, 500);
+            showToast("Preview reloaded.");
         }
 
         function setDevice(type) {
@@ -176,12 +253,15 @@
             document.getElementById('iframe-wrap').style.width = type === 'mobile' ? '375px' : '100%';
         }
 
-        // --- 3. DYNAMIC FORM GENERATION ---
+        function toggleFullscreen() {
+            document.body.classList.toggle('is-fullscreen');
+        }
+
+        // --- 5. DYNAMIC FORM GENERATION ---
         function renderForm() {
             const container = document.getElementById('form-container');
             let html = '';
 
-            // Helper to generate a text input
             const input = (label, path, type = 'text') => {
                 const val = getPath(db, path);
                 const isArea = type === 'area';
@@ -197,28 +277,28 @@
 
             if (currentPage === 'home') {
                 html += `<h3>Metadata</h3>${input('Page Title', 'metadata.pageTitle')}${input('Meta Description', 'metadata.metaDescription')}`;
-                html += `<hr style="border:0; border-top:1px solid #333; margin:20px 0;">`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
                 html += `<h3>Hero Section</h3>${input('Hero Title', 'hero.title')}${input('Hero Tagline', 'hero.tagline')}`;
-                html += `<hr style="border:0; border-top:1px solid #333; margin:20px 0;">`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
                 html += `<h3>Article</h3>${input('Article Title', 'article.title')}${input('Article Body', 'article.body', 'area')}`;
                 html += renderArray('stats', 'Statistics Cards', ['value', 'label']);
             } 
             else if (currentPage === 'map') {
                 html += `<h3>Metadata</h3>${input('Page Title', 'mapPage.pageTitle')}`;
-                html += `<hr style="border:0; border-top:1px solid #333; margin:20px 0;">`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
                 html += `<h3>Map Settings</h3>${input('Title', 'mapPage.title')}${input('Tagline', 'mapPage.tagline')}${input('Map Embed URL', 'mapPage.mapUrl')}`;
-                html += `<hr style="border:0; border-top:1px solid #333; margin:20px 0;">`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
                 html += `<h3>Instructions</h3>${input('Instruction Title', 'mapPage.instructionsTitle')}${input('Instruction Body', 'mapPage.instructionsBody', 'area')}`;
             }
             else if (currentPage === 'interviews') {
                 html += `<h3>Metadata & Header</h3>${input('Title', 'interviewsPage.title')}${input('Tagline', 'interviewsPage.tagline')}`;
-                html += `<hr style="border:0; border-top:1px solid #333; margin:20px 0;">`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
                 html += `<h3>Featured Video</h3>${input('YouTube Embed URL', 'interviewsPage.featuredVideoUrl')}`;
                 html += renderArray('interviewsPage.entries', 'Interview Entries', ['label', 'title', 'description']);
             }
             else if (currentPage === 'about') {
                 html += `<h3>Header & Mission</h3>${input('Title', 'aboutPage.title')}${input('Mission Title', 'aboutPage.missionTitle')}${input('Mission Body (HTML allowed)', 'aboutPage.missionBody', 'area')}`;
-                html += `<hr style="border:0; border-top:1px solid #333; margin:20px 0;">`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
                 html += `<h3>Assignment Context</h3>${input('Course', 'aboutPage.contextCourse')}${input('Due Date', 'aboutPage.contextDate')}${input('Focus', 'aboutPage.contextFocus')}`;
                 html += renderArray('aboutPage.team', 'Team Members', ['name', 'role']);
             }
@@ -230,20 +310,20 @@
             container.innerHTML = html;
         }
 
-        // --- 4. ARRAY MANAGEMENT LOGIC ---
+        // --- 6. ARRAY MANAGEMENT LOGIC ---
         function renderArray(path, title, fields) {
             const arr = getPath(db, path) || [];
-            let html = `<hr style="border:0; border-top:1px solid #333; margin:20px 0;">
+            let html = `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                             <h3>${title}</h3>
-                            <button class="btn" onclick="addArrayItem('${path}', '${fields.join(',')}')">+ Add Item</button>
+                            <button class="btn" style="background:var(--bg);" onclick="addArrayItem('${path}', '${fields.join(',')}')">+ Add Item</button>
                         </div>`;
             
             arr.forEach((item, index) => {
                 html += `<div class="array-item">
                             <div class="array-item-header">
                                 <span class="array-item-title">Item ${index + 1}</span>
-                                <button class="btn-danger" onclick="removeArrayItem('${path}', ${index})">Delete</button>
+                                <button class="btn-danger" onclick="promptDelete('${path}', ${index})">Delete</button>
                             </div>`;
                 fields.forEach(field => {
                     const isArea = field === 'description' || field === 'info';
@@ -263,23 +343,32 @@
         function addArrayItem(path, fieldsStr) {
             const fields = fieldsStr.split(',');
             const newObj = {};
-            fields.forEach(f => newObj[f] = f === 'a' ? 'Yes' : ''); // Default answer for quiz
+            fields.forEach(f => newObj[f] = f === 'a' ? 'Yes' : '');
             const arr = getPath(db, path);
             arr.push(newObj);
             renderForm();
             syncIframe();
+            showToast("New item added.");
         }
 
-        function removeArrayItem(path, index) {
-            if(confirm('Are you sure you want to delete this item?')) {
-                const arr = getPath(db, path);
-                arr.splice(index, 1);
+        function promptDelete(path, index) {
+            pendingDeleteInfo = { path, index };
+            openModal('confirm-modal');
+        }
+
+        function executeDelete() {
+            if (pendingDeleteInfo) {
+                const arr = getPath(db, pendingDeleteInfo.path);
+                arr.splice(pendingDeleteInfo.index, 1);
                 renderForm();
                 syncIframe();
+                closeModal('confirm-modal');
+                pendingDeleteInfo = null;
+                showToast("Item deleted.");
             }
         }
 
-        // --- 5. DATA SYNCING LOGIC ---
+        // --- 7. DATA SYNCING LOGIC ---
         function getPath(obj, path) {
             return path.split('.').reduce((o, i) => (o ? o[i] : null), obj);
         }
@@ -299,20 +388,16 @@
             frame.postMessage({ type: 'UPDATE_CONTENT', data: db }, '*');
         }
 
-        // --- 6. MODAL & EXPORT LOGIC ---
+        // --- 8. EXPORT LOGIC ---
         function openGitHubModal() {
             document.getElementById('export-json').value = JSON.stringify(db, null, 2);
-            document.getElementById('github-modal').style.display = 'flex';
-        }
-
-        function closeGitHubModal() {
-            document.getElementById('github-modal').style.display = 'none';
+            openModal('github-modal');
         }
 
         function copyJSON() {
             const text = document.getElementById('export-json').value;
             navigator.clipboard.writeText(text);
-            alert("JSON Copied! You can now paste it into GitHub.");
+            showToast("JSON copied to clipboard!");
         }
     </script>
 </body>
