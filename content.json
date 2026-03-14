@@ -35,7 +35,7 @@
     "description": "We sat down with St. Louis Mayor Cara Spencer to discuss the suspension of curbside recycling and what the city's long-term plan is for sustainable waste management.",
     "buttonText": "Watch the Interview",
     "link": "interviews.html",
-    "imageUrl": "path/to/your/image.jpg"
+    "imageUrl": "https://www.stlmag.com/wp-content/uploads/2025/10/recycling-drop-sites.webp"
   },
   "article": {
     "title": "The Curbside Crisis",
