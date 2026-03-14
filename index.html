@@ -57,52 +57,65 @@
 
     <script src="./script.js"></script>
     <script>
-        // Core Logic to fetch JSON and populate the page
         async function loadPageData() {
             try {
                 const response = await fetch('./content.json');
                 const data = await response.json();
 
-                // Meta & Title
+                // 1. Meta & Title
                 document.title = data.metadata.pageTitle;
-                document.getElementById('meta-title').content = data.metadata.metaTitle;
-                document.getElementById('meta-desc').content = data.metadata.metaDescription;
+                const metaTitle = document.getElementById('meta-title');
+                const metaDesc = document.getElementById('meta-desc');
+                if(metaTitle) metaTitle.content = data.metadata.metaTitle;
+                if(metaDesc) metaDesc.content = data.metadata.metaDescription;
 
-                // Popup
-                if (data.popup.enabled) {
+                // 2. Popup Logic
+                if (data.popup && data.popup.enabled) {
                     const popup = document.getElementById('popup-notif');
-                    document.getElementById('popup-content').innerHTML = `
-                        <p>${data.popup.message}</p>
-                        <a href="${data.popup.linkUrl}" class="popup-btn">${data.popup.linkText}</a>
-                    `;
-                    popup.style.display = 'block';
+                    const popupContent = document.getElementById('popup-content');
+                    if(popupContent) {
+                        popupContent.innerHTML = `
+                            <p>${data.popup.message}</p>
+                            <a href="${data.popup.linkUrl}" class="popup-btn">${data.popup.linkText}</a>
+                        `;
+                    }
+                    if(popup) popup.style.display = 'block';
                 }
 
-                // Hero
+                // 3. Hero Section
                 document.getElementById('hero-title').innerText = data.hero.title;
                 document.getElementById('hero-tagline').innerText = data.hero.tagline;
 
-                // Stats
+                // 4. Stats Grid (Clears placeholder and adds cards)
                 const statsGrid = document.getElementById('stats-grid');
-                data.stats.forEach(stat => {
-                    const card = document.createElement('div');
-                    card.className = 'stat-card';
-                    card.innerHTML = `<h2>${stat.value}</h2><p>${stat.label}</p>`;
-                    statsGrid.appendChild(card);
-                });
+                if(statsGrid) {
+                    statsGrid.innerHTML = ''; 
+                    data.stats.forEach(stat => {
+                        const card = document.createElement('div');
+                        card.className = 'stat-card';
+                        card.innerHTML = `<h2>${stat.value}</h2><p>${stat.label}</p>`;
+                        statsGrid.appendChild(card);
+                    });
+                }
 
-                // Interview
-                if (data.interview.visible) {
-                    document.getElementById('interview-container').style.display = 'grid';
+                // 5. Interview Section
+                if (data.interview && data.interview.visible) {
+                    const container = document.getElementById('interview-container');
+                    if(container) container.style.display = 'grid';
+                    
                     document.getElementById('interview-label').innerText = data.interview.label;
                     document.getElementById('interview-title').innerText = data.interview.title;
                     document.getElementById('interview-text').innerText = data.interview.description;
-                    document.getElementById('interview-link').innerText = data.interview.buttonText;
-                    document.getElementById('interview-link').href = data.interview.link;
-                    document.getElementById('interview-img').style.backgroundImage = `url(${data.interview.imageUrl})`;
+                    
+                    const link = document.getElementById('interview-link');
+                    link.innerText = data.interview.buttonText;
+                    link.href = data.interview.link;
+                    
+                    const img = document.getElementById('interview-img');
+                    img.style.backgroundImage = `url('${data.interview.imageUrl}')`;
                 }
 
-                // Article
+                // 6. Article Section
                 document.getElementById('article-title').innerText = data.article.title;
                 document.getElementById('article-body').innerText = data.article.body;
 
@@ -111,10 +124,8 @@
             }
         }
 
-        // Initialize
         loadPageData();
 
-        // Netlify Identity
         if (window.netlifyIdentity) {
             window.netlifyIdentity.on("init", user => {
                 if (!user) {
@@ -126,7 +137,8 @@
         }
 
         function closePopup() {
-            document.getElementById('popup-notif').style.display = 'none';
+            const popup = document.getElementById('popup-notif');
+            if(popup) popup.style.display = 'none';
         }
     </script>
 </body>
