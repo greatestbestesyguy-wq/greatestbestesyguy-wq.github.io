@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R1Y5DRSP21"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -10,8 +9,7 @@
       gtag('config', 'G-R1Y5DRSP21');
     </script>
 
-    <!-- Primary Meta Tags -->
-    <title>STL Recycling Challenge</title>
+    <title id="page-title">STL Recycling Challenge</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -58,7 +56,6 @@
             transition: color 0.2s;
         }
         
-        /* Desktop Hover only for Home Link */
         @media (hover: hover) {
             .home-btn:hover { color: var(--accent); }
         }
@@ -80,7 +77,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* FIX: Apply hover effects ONLY to desktop devices with a mouse */
         @media (hover: hover) {
             .option-btn:hover { 
                 border-color: var(--accent); 
@@ -88,7 +84,6 @@
             }
         }
         
-        /* Active state for mobile touch feedback without sticking */
         .option-btn:active {
             background: #333;
             border-color: var(--accent);
@@ -191,30 +186,37 @@
 <body>
 
 <div id="quiz-box">
-    <a href="/" class="home-btn">← Home</a>
+    <a href="index.html" class="home-btn">← Home</a>
     <div id="progress-container"><div id="progress-bar"></div></div>
-    <div id="display"></div>
+    <div id="display">Loading Quiz...</div>
 </div>
 
 <script>
-    const data = [
-        { q: "Is a greasy pizza box recyclable in STL?", a: "No", info: "Grease ruins paper. Recycle only the clean lid!" },
-        { q: "Can plastic bags go in blue bins?", a: "No", info: "They jam sorting machines. Return them to grocery stores." },
-        { q: "Do you need to rinse out food jars?", a: "Yes", info: "Residue contaminates batches. Give it a quick scrub!" },
-        { q: "Should you leave the caps on plastic bottles?", a: "Yes", info: "Keep them on! Modern machines capture them better that way." },
-        { q: "Is shredded paper okay for the blue bin?", a: "No", info: "Small bits fall through equipment. Compost it instead." },
-        { q: "Can you recycle mirrors or lightbulbs in the bin?", a: "No", info: "This glass has different melting points and ruins the batch." },
-        { q: "Are aluminum cans infinitely recyclable?", a: "Yes", info: "Aluminum never loses quality no matter how many times it's reused!" },
-        { q: "Does STL currently have curbside pickup city-wide?", a: "No", info: "Most residents must use drop-off stations." }
-    ];
+    let quizData = [];
     let idx = 0;
     let score = 0;
 
+    async function initQuiz() {
+        try {
+            const response = await fetch('./content.json');
+            const data = await response.json();
+            quizData = data.quizPage.questions;
+            
+            // Set Page Title
+            document.title = data.quizPage.pageTitle;
+            
+            render();
+        } catch (error) {
+            console.error("Error loading quiz data:", error);
+            document.getElementById('display').innerText = "Failed to load quiz.";
+        }
+    }
+
     function render() {
-        const item = data[idx];
-        document.getElementById('progress-bar').style.width = `${(idx / data.length) * 100}%`;
+        const item = quizData[idx];
+        document.getElementById('progress-bar').style.width = `${(idx / quizData.length) * 100}%`;
         document.getElementById('display').innerHTML = `
-            <p style="color:var(--dim)">Question ${idx + 1} of ${data.length}</p>
+            <p style="color:var(--dim)">Question ${idx + 1} of ${quizData.length}</p>
             <h2 style="margin-bottom: 30px;">${item.q}</h2>
             <button class="option-btn" onclick="check('Yes')">Yes</button>
             <button class="option-btn" onclick="check('No')">No</button>
@@ -222,18 +224,18 @@
     }
 
     window.check = (choice) => {
-        const correct = choice === data[idx].a;
+        const correct = choice === quizData[idx].a;
         if (correct) score++;
         document.getElementById('display').innerHTML = `
             <h2 style="color:${correct ? 'var(--accent)' : 'var(--wrong)'}">${correct ? '✓ Correct!' : '✗ Incorrect'}</h2>
-            <p style="margin: 20px 0; line-height: 1.5;">${data[idx].info}</p>
+            <p style="margin: 20px 0; line-height: 1.5;">${quizData[idx].info}</p>
             <button class="nav-btn" onclick="next()">Continue</button>
         `;
     };
 
     window.next = () => {
         idx++;
-        if (idx < data.length) render();
+        if (idx < quizData.length) render();
         else showResults();
     };
 
@@ -245,7 +247,7 @@
         document.getElementById('display').innerHTML = `
             <span class="badge-icon">${icon}</span>
             <h1 style="color:var(--accent); margin-bottom: 5px;">${rank}</h1>
-            <p style="font-size: 1.2rem; margin-bottom: 10px;">You scored ${score} / ${data.length}</p>
+            <p style="font-size: 1.2rem; margin-bottom: 10px;">You scored ${score} / ${quizData.length}</p>
             <div class="share-incentive">
                 <strong>Help save STL recycling!</strong><br>
                 Share your score to challenge your friends and help stop bin contamination in our city.
@@ -253,22 +255,22 @@
             <button class="share-btn" onclick="share()">📣 Share My Rank & Challenge Friends</button>
             <div class="discovery-grid">
                 <p style="color:var(--dim); font-size: 14px; margin-bottom: 5px; text-align: center;">Keep Exploring</p>
-                <a href="/map" class="discovery-card">
+                <a href="map.html" class="discovery-card">
                     <div><strong>Find a Drop-Off</strong><span>Locate your nearest station</span></div>
                     <span>→</span>
                 </a>
-                <a href="/interviews" class="discovery-card">
+                <a href="interviews.html" class="discovery-card">
                     <div><strong>Watch Interviews</strong><span>Hear from Mayor Cara Spencer</span></div>
                     <span>→</span>
                 </a>
-                <a href="/" class="nav-btn" style="text-align: center; margin-top: 10px;">Return Home</a>
+                <a href="index.html" class="nav-btn" style="text-align: center; margin-top: 10px;">Return Home</a>
             </div>
         `;
     }
 
     window.share = () => {
         const rank = score >= 7 ? "Recycling Legend" : score >= 5 ? "Sustainability Scholar" : "Waste Warrior";
-        const text = `I just earned the ${rank} rank on the STL Recycling Challenge (${score}/${data.length})! Can you beat my score? ♻️`;
+        const text = `I just earned the ${rank} rank on the STL Recycling Challenge (${score}/${quizData.length})! Can you beat my score? ♻️`;
         if (navigator.share) {
             navigator.share({ title: 'Recycle STL Challenge', text: text, url: window.location.href });
         } else {
@@ -284,7 +286,7 @@
         }
     };
 
-    render();
+    initQuiz();
 </script>
 </body>
 </html>
