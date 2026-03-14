@@ -19,8 +19,71 @@
 
     <meta name="title" id="meta-title" content="">
     <meta name="description" id="meta-desc" content="">
+
+    <style>
+        /* HACKER TERMINAL STYLES */
+        #hacker-terminal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 10, 0, 0.95);
+            z-index: 9999;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            padding: 40px;
+            overflow: hidden;
+            border: 4px solid #050;
+        }
+
+        .terminal-header { border-bottom: 2px solid #050; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .terminal-header span { font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .scanline {
+            width: 100%; height: 2px; background: rgba(0, 255, 0, 0.1); position: absolute;
+            top: 0; left: 0; pointer-events: none; animation: scan 4s linear infinite;
+        }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
+
+        .admin-links { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
+        .admin-links a, .admin-links button {
+            background: transparent; border: 1px solid #0f0; color: #0f0; padding: 12px;
+            text-decoration: none; text-align: left; cursor: pointer; font-family: monospace;
+            transition: 0.2s; max-width: 400px;
+        }
+        .admin-links a:hover, .admin-links button:hover { background: #0f0; color: #000; box-shadow: 0 0 15px #0f0; }
+
+        #code-scroll {
+            position: absolute; right: 40px; top: 80px; width: 45%; height: 80vh;
+            color: rgba(0, 255, 0, 0.4); font-size: 11px; white-space: pre;
+            overflow: hidden; border-left: 1px solid #050; padding-left: 20px;
+        }
+
+        .close-terminal { color: #0f0; background: none; border: none; font-size: 24px; cursor: pointer; }
+    </style>
 </head>
 <body>
+
+    <div id="hacker-terminal">
+        <div class="scanline"></div>
+        <div class="terminal-header">
+            <span>[ SYSTEM OVERRIDE: AUTHORIZED ACCESS ]</span>
+            <button class="close-terminal" onclick="toggleTerminal(false)">&times;</button>
+        </div>
+
+        <div id="terminal-content">
+            <p>> root@recycle-stl:~# access_granted</p>
+            <p>> initializing admin_panel_v3.0...</p>
+            
+            <div class="admin-links">
+                <a href="/admin/test">> 📂 VIEW TEST PAGE</a>
+                <a href="/admin">> ⚡ OPEN ADMIN STUDIO</a>
+                <a href="https://github.com/greatestbestesyguy-wq/greatestbestesyguy-wq.github.io" target="_blank">> 🛠 GITHUB REPOSITORY</a>
+                <button onclick="startHackerTyper()">> 💾 INITIALIZE DECRYPTION SEQUENCER</button>
+            </div>
+        </div>
+
+        <div id="code-scroll"></div>
+    </div>
 
     <div id="popup-notif" style="display:none;">
         <button class="close-notif" onclick="closePopup()">&times;</button>
@@ -57,16 +120,50 @@
 
     <script src="./script.js"></script>
     <script>
-        // MODULARIZED RENDER FUNCTION: This allows the editor to trigger updates
+        // --- ADMIN SEQUENCE LOGIC ---
+        let inputString = "";
+        window.addEventListener("keydown", (e) => {
+            inputString += e.key.toLowerCase();
+            if (inputString.length > 10) inputString = inputString.substring(1);
+            
+            if (inputString.endsWith("admin")) {
+                toggleTerminal(true);
+                inputString = "";
+            }
+        });
+
+        function toggleTerminal(show) {
+            document.getElementById('hacker-terminal').style.display = show ? 'block' : 'none';
+        }
+
+        function startHackerTyper() {
+            const codeBox = document.getElementById('code-scroll');
+            const codeSnippets = [
+                "import os\nimport sys\n# Bypassing firewall...",
+                "def init_hack(ip):\n  return 'SUCCESS' if ping(ip) else 'FAIL'",
+                "GET /admin/v3/config HTTP/1.1\nHost: planet-recycling.pl",
+                "01001000 01100001 01100011 01101011",
+                "const db = connect('stl_prod');\ndb.users.find({ role: 'admin' });",
+                "CRITICAL WARNING: HEURISTIC DETECTION ACTIVE",
+                "sudo rm -rf /var/log/access_logs",
+                "Packet injection successful at port 8080..."
+            ];
+            
+            let i = 0;
+            setInterval(() => {
+                codeBox.innerText += "\n" + codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+                codeBox.scrollTop = codeBox.scrollHeight;
+            }, 80);
+        }
+
+        // --- EXISTING CONTENT LOGIC ---
         function renderContent(data) {
-            // 1. Meta & Title
             document.title = data.metadata.pageTitle;
             const metaTitle = document.getElementById('meta-title');
             const metaDesc = document.getElementById('meta-desc');
             if(metaTitle) metaTitle.content = data.metadata.metaTitle;
             if(metaDesc) metaDesc.content = data.metadata.metaDescription;
 
-            // 2. Popup Logic
             const popup = document.getElementById('popup-notif');
             if (data.popup && data.popup.enabled) {
                 const popupContent = document.getElementById('popup-content');
@@ -81,11 +178,9 @@
                 if(popup) popup.style.display = 'none';
             }
 
-            // 3. Hero Section
             document.getElementById('hero-title').innerText = data.hero.title;
             document.getElementById('hero-tagline').innerText = data.hero.tagline;
 
-            // 4. Stats Grid
             const statsGrid = document.getElementById('stats-grid');
             if(statsGrid) {
                 statsGrid.innerHTML = ''; 
@@ -97,7 +192,6 @@
                 });
             }
 
-            // 5. Interview Section
             const interviewContainer = document.getElementById('interview-container');
             if (data.interview && data.interview.visible) {
                 if(interviewContainer) interviewContainer.style.display = 'grid';
@@ -113,12 +207,10 @@
                 if(interviewContainer) interviewContainer.style.display = 'none';
             }
 
-            // 6. Article Section
             document.getElementById('article-title').innerText = data.article.title;
             document.getElementById('article-body').innerText = data.article.body;
         }
 
-        // INITIAL LOAD
         async function loadPageData() {
             try {
                 const response = await fetch('./content.json');
@@ -131,14 +223,11 @@
 
         loadPageData();
 
-        // --- CMS LISTENER: This is the "bit" for the Pixel-Perfect Editor ---
         window.addEventListener('message', (event) => {
             if (event.data.type === 'UPDATE_CONTENT') {
-                console.log("CMS Update Received:", event.data.data);
                 renderContent(event.data.data);
             }
         });
-        // ------------------------------------------------------------------
 
         if (window.netlifyIdentity) {
             window.netlifyIdentity.on("init", user => {
