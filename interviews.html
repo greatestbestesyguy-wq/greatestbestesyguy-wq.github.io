@@ -65,47 +65,68 @@
 
     <script src="./script.js"></script>
     <script>
+        // MODULAR RENDER FUNCTION
+        function renderInterviews(data) {
+            const page = data.interviewsPage;
+
+            // Meta & Titles
+            document.title = page.pageTitle;
+            if(document.getElementById('meta-title')) document.getElementById('meta-title').content = page.metaTitle;
+            if(document.getElementById('meta-desc')) document.getElementById('meta-desc').content = page.metaDescription;
+            
+            document.getElementById('interviews-title').innerText = page.title;
+            document.getElementById('interviews-tagline').innerText = page.tagline;
+
+            // Featured Video Logic
+            const videoWrap = document.getElementById('featured-video-wrap');
+            const videoIframe = document.getElementById('featured-video-iframe');
+            
+            if (page.featuredVideoUrl && page.featuredVideoUrl.trim() !== "") {
+                videoWrap.style.display = 'block';
+                // Only update src if it changed to avoid iframe flickering
+                if(videoIframe.src !== page.featuredVideoUrl) {
+                    videoIframe.src = page.featuredVideoUrl;
+                }
+            } else {
+                videoWrap.style.display = 'none';
+                videoIframe.src = "";
+            }
+
+            // Dynamic List
+            const listContainer = document.getElementById('interview-list');
+            listContainer.innerHTML = ''; 
+
+            page.entries.forEach(entry => {
+                const section = document.createElement('section');
+                section.className = 'interview-entry';
+                section.innerHTML = `
+                    <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">${entry.label}</span>
+                    <h3>${entry.title}</h3>
+                    <p>${entry.description}</p>
+                `;
+                listContainer.appendChild(section);
+            });
+        }
+
+        // INITIAL LOAD
         async function loadInterviews() {
             try {
                 const response = await fetch('./content.json');
                 const data = await response.json();
-                const page = data.interviewsPage;
-
-                // Meta & Titles
-                document.title = page.pageTitle;
-                if(document.getElementById('meta-title')) document.getElementById('meta-title').content = page.metaTitle;
-                if(document.getElementById('meta-desc')) document.getElementById('meta-desc').content = page.metaDescription;
-                
-                document.getElementById('interviews-title').innerText = page.title;
-                document.getElementById('interviews-tagline').innerText = page.tagline;
-
-                // Featured Video (The actual interview player)
-                if (page.featuredVideoUrl) {
-                    document.getElementById('featured-video-wrap').style.display = 'block';
-                    document.getElementById('featured-video-iframe').src = page.featuredVideoUrl;
-                }
-
-                // Dynamic List of lower entries (Removed the redundant watch buttons)
-                const listContainer = document.getElementById('interview-list');
-                listContainer.innerHTML = ''; 
-
-                page.entries.forEach(entry => {
-                    const section = document.createElement('section');
-                    section.className = 'interview-entry';
-                    section.innerHTML = `
-                        <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">${entry.label}</span>
-                        <h3>${entry.title}</h3>
-                        <p>${entry.description}</p>
-                    `;
-                    listContainer.appendChild(section);
-                });
-
+                renderInterviews(data);
             } catch (error) {
                 console.error("Error loading Interviews JSON:", error);
             }
         }
 
         loadInterviews();
+
+        // --- CMS LISTENER ---
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'UPDATE_CONTENT') {
+                renderInterviews(event.data.data);
+            }
+        });
     </script>
 </body>
 </html>
