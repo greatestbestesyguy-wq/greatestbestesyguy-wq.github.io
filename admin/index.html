@@ -3,144 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle STL | Content Editor</title>
+    <title>Recycle STL | Advanced CMS</title>
     <style>
-        :root {
-            --bg: #0a0a0a;
-            --card: #141414;
-            --accent: #00ff88;
-            --text: #ffffff;
-            --border: #333;
-        }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        header {
-            padding: 20px;
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-        .editor-pane, .preview-pane {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .preview-pane {
-            background: #0f0f0f;
-            border-left: 1px solid var(--border);
-        }
-        textarea {
-            width: 100%;
-            height: 100%;
-            background: #111;
-            color: #00ff88;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            resize: none;
-            outline: none;
-        }
-        .btn {
-            background: var(--accent);
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .btn:hover { transform: translateY(-2px); }
-        .btn-copy { background: white; margin-left: 10px; }
+        :root { --bg: #050505; --card: #111; --accent: #00ff88; --text: #eee; --border: #333; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .instructions {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid var(--accent);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        pre {
-            font-size: 12px;
-            color: #888;
-        }
+        /* Layout */
+        header { padding: 15px 25px; background: #000; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .main { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar Editor */
+        .sidebar { width: 400px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .tab-bar { display: flex; background: #000; overflow-x: auto; border-bottom: 1px solid var(--border); }
+        .tab { padding: 12px 20px; cursor: pointer; font-size: 13px; white-space: nowrap; color: #888; border-bottom: 2px solid transparent; }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); background: #111; }
+        
+        .editor-fields { flex: 1; padding: 20px; overflow-y: auto; }
+        .field-group { margin-bottom: 20px; }
+        label { display: block; font-size: 11px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; font-weight: bold; }
+        input, textarea, select { width: 100%; background: #1a1a1a; border: 1px solid var(--border); border-radius: 6px; padding: 10px; color: #fff; font-size: 14px; box-sizing: border-box; }
+        textarea { height: 80px; resize: vertical; }
+
+        /* Preview Area */
+        .preview-area { flex: 1; padding: 40px; background: #080808; overflow-y: auto; display: flex; justify-content: center; }
+        .browser-mockup { width: 100%; max-width: 900px; background: #fff; border-radius: 12px; height: fit-content; min-height: 100%; color: #000; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+        .browser-header { background: #f1f1f1; padding: 10px; display: flex; gap: 5px; border-bottom: 1px solid #ddd; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #ddd; }
+
+        /* UI Elements */
+        .error-toast { background: #ff4444; color: white; padding: 10px; font-size: 12px; display: none; }
+        .btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-secondary { background: #222; color: #fff; margin-right: 10px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h2 style="margin:0; color:var(--accent);">Recycle STL Content Manager</h2>
+    <div style="display:flex; align-items:center; gap:15px;">
+        <h2 style="margin:0; font-size:18px;">Recycle STL <span style="font-weight:100; color:#666;">CMS</span></h2>
+    </div>
     <div>
-        <button class="btn btn-copy" onclick="copyToClipboard()">📋 Copy Finished JSON</button>
+        <button class="btn btn-secondary" onclick="importJSON()">📥 Paste content.json</button>
+        <button class="btn" onclick="exportJSON()">🚀 Export to Clipboard</button>
     </div>
 </header>
 
-<div class="main-container">
-    <div class="editor-pane">
-        <div class="instructions">
-            <strong>How to update your site:</strong>
-            <ol>
-                <li>Paste the current text from your <code>content.json</code> file below.</li>
-                <li>Edit the text (be careful not to delete quotes <code>"</code> or commas <code>,</code>).</li>
-                <li>Click <strong>Copy Finished JSON</strong> and paste it back into GitHub.</li>
-            </ol>
+<div class="error-toast" id="error-display"></div>
+
+<div class="main">
+    <div class="sidebar">
+        <div class="tab-bar" id="page-tabs">
+            <div class="tab active" onclick="switchPage('home')">Home</div>
+            <div class="tab" onclick="switchPage('map')">Map</div>
+            <div class="tab" onclick="switchPage('interviews')">Interviews</div>
+            <div class="tab" onclick="switchPage('quiz')">Quiz</div>
+            <div class="tab" onclick="switchPage('about')">About</div>
         </div>
-        <textarea id="json-input" placeholder="Paste your content.json here..." oninput="updatePreview()"></textarea>
+        <div class="editor-fields" id="editor-form">
+            </div>
     </div>
 
-    <div class="preview-pane" id="preview-content">
-        <p style="color: #666;">Waiting for valid JSON input...</p>
+    <div class="preview-area">
+        <div class="browser-mockup">
+            <div class="browser-header">
+                <div class="dot" style="background:#ff5f56"></div>
+                <div class="dot" style="background:#ffbd2e"></div>
+                <div class="dot" style="background:#27c93f"></div>
+            </div>
+            <div id="live-preview" style="padding: 40px;">
+                </div>
+        </div>
     </div>
 </div>
 
 <script>
-    function updatePreview() {
-        const input = document.getElementById('json-input').value;
-        const preview = document.getElementById('preview-content');
+    let siteData = {};
+    let currentPage = 'home';
 
+    const defaultJSON = `{"HOME_PAGE_DATA":"---","metadata":{"pageTitle":"Recycle STL","metaTitle":"Advocacy","metaDescription":"Help us."},"popup":{"enabled":true,"message":"Urgent Update","linkText":"Map","linkUrl":"map.html"},"hero":{"title":"Recycle St. Louis","tagline":"A student project."},"stats":[],"interview":{"visible":true,"title":"Mayor Interview","description":"Text here","buttonText":"Watch","link":"#","imageUrl":""},"article":{"title":"The Crisis","body":"Text here"},"mapPage":{"title":"Find a Station","tagline":"Locations"},"interviewsPage":{"title":"Interviews","tagline":"Voices","entries":[]},"quizPage":{"questions":[]},"aboutPage":{"title":"About","tagline":"Metro High","team":[]}}`;
+
+    // Initialize
+    window.onload = () => {
+        siteData = JSON.parse(defaultJSON);
+        switchPage('home');
+    };
+
+    function importJSON() {
+        const raw = prompt("Paste your current content.json text here:");
+        if (!raw) return;
         try {
-            const data = JSON.parse(input);
-            preview.innerHTML = `
-                <h3 style="color:var(--accent)">Live Data Structure</h3>
-                <div style="background:var(--card); padding:15px; border-radius:10px; border:1px solid #333;">
-                    <p><strong>Home Title:</strong> ${data.hero.title}</p>
-                    <p><strong>Pop-up Active:</strong> ${data.popup.enabled ? '✅ Yes' : '❌ No'}</p>
-                    <hr border="0" style="border-top:1px solid #333">
-                    <p><strong>Map URL:</strong> <code style="color:#888">${data.mapPage.mapUrl}</code></p>
-                    <p><strong>Quiz Questions:</strong> ${data.quizPage.questions.length} total</p>
-                </div>
-                <p style="font-size:12px; margin-top:20px; color:var(--accent);">✓ JSON is Valid</p>
-            `;
+            siteData = JSON.parse(raw);
+            document.getElementById('error-display').style.display = 'none';
+            switchPage(currentPage);
         } catch (e) {
-            preview.innerHTML = `<p style="color: #ff4444;">⚠️ Invalid JSON: ${e.message}</p>`;
+            document.getElementById('error-display').innerText = "JSON Error: " + e.message;
+            document.getElementById('error-display').style.display = 'block';
         }
     }
 
-    function copyToClipboard() {
-        const textarea = document.getElementById('json-input');
-        textarea.select();
-        document.execCommand('copy');
-        alert("JSON copied to clipboard! Now go to your content.json file on GitHub, click the 'Pencil' icon (Edit), select all text, paste this over it, and click 'Commit changes'.");
+    function switchPage(page) {
+        currentPage = page;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event?.target?.classList?.add('active');
+        renderForm();
+        renderPreview();
+    }
+
+    function renderForm() {
+        const container = document.getElementById('editor-form');
+        container.innerHTML = '';
+        
+        const fields = getFieldsForPage(currentPage);
+        fields.forEach(f => {
+            const div = document.createElement('div');
+            div.className = 'field-group';
+            div.innerHTML = `
+                <label>${f.label}</label>
+                ${f.type === 'textarea' 
+                    ? `<textarea oninput="updateData('${f.path}', this.value)">${getValue(f.path)}</textarea>`
+                    : `<input type="text" value="${getValue(f.path)}" oninput="updateData('${f.path}', this.value)">`
+                }
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function getValue(path) {
+        return path.split('.').reduce((obj, key) => obj?.[key], siteData) || "";
+    }
+
+    function updateData(path, val) {
+        const keys = path.split('.');
+        let lastKey = keys.pop();
+        let target = keys.reduce((obj, key) => obj[key], siteData);
+        target[lastKey] = val;
+        renderPreview();
+    }
+
+    function getFieldsForPage(page) {
+        if (page === 'home') return [
+            { label: 'Hero Title', path: 'hero.title' },
+            { label: 'Hero Tagline', path: 'hero.tagline' },
+            { label: 'Article Title', path: 'article.title' },
+            { label: 'Article Body', path: 'article.body', type: 'textarea' },
+            { label: 'Popup Message', path: 'popup.message', type: 'textarea' }
+        ];
+        if (page === 'map') return [
+            { label: 'Page Title', path: 'mapPage.title' },
+            { label: 'Tagline', path: 'mapPage.tagline' },
+            { label: 'Google Maps Link (src)', path: 'mapPage.mapUrl' }
+        ];
+        if (page === 'interviews') return [
+            { label: 'Main Page Title', path: 'interviewsPage.title' },
+            { label: 'Featured Video Embed URL', path: 'interviewsPage.featuredVideoUrl' }
+        ];
+        return [];
+    }
+
+    function renderPreview() {
+        const view = document.getElementById('live-preview');
+        if (currentPage === 'home') {
+            view.innerHTML = `
+                <div style="background:var(--accent); padding:10px; font-size:12px; border-radius:4px; margin-bottom:20px;">${siteData.popup.message}</div>
+                <h1 style="font-size:48px; margin:0;">${siteData.hero.title}</h1>
+                <p style="color:#666; font-size:18px;">${siteData.hero.tagline}</p>
+                <div style="margin-top:40px; border-top:1px solid #eee; padding-top:20px;">
+                    <h3>${siteData.article.title}</h3>
+                    <p>${siteData.article.body}</p>
+                </div>
+            `;
+        } else if (currentPage === 'map') {
+            view.innerHTML = `
+                <h1>${siteData.mapPage.title}</h1>
+                <p>${siteData.mapPage.tagline}</p>
+                <div style="width:100%; height:300px; background:#eee; display:flex; align-items:center; justify-content:center; border-radius:12px;">
+                    [Google Map Simulation: ${siteData.mapPage.mapUrl}]
+                </div>
+            `;
+        } else {
+            view.innerHTML = `<div style="text-align:center; padding:50px; color:#aaa;">Preview for ${currentPage} coming soon...</div>`;
+        }
+    }
+
+    function exportJSON() {
+        const str = JSON.stringify(siteData, null, 2);
+        navigator.clipboard.writeText(str);
+        alert("Success! JSON copied to clipboard. Paste this into your content.json file on GitHub.");
     }
 </script>
-
 </body>
 </html>
