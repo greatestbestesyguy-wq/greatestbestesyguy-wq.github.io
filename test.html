@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R1Y5DRSP21"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-R1Y5DRSP21');
+    </script>
+
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Recycle St. Louis</title>
+    
+    <link rel="stylesheet" href="./style.css">
+
+    <meta name="title" id="meta-title" content="">
+    <meta name="description" id="meta-desc" content="">
+</head>
+<body>
+
+    <div id="popup-notif" style="display:none;">
+        <button class="close-notif" onclick="closePopup()">&times;</button>
+        <div id="popup-content"></div>
+    </div>
+
+    <div class="container">
+        <div id="header-placeholder"></div>
+
+        <main id="main-content">
+            <h1 id="hero-title"></h1>
+            <p id="hero-tagline" class="tagline"></p>
+
+            <div id="stats-grid" class="stats-grid"></div>
+
+            <section id="interview-container" class="interview-section" style="display:none;">
+                <div id="interview-img" class="interview-img"></div>
+                <div class="interview-content">
+                    <span id="interview-label" style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;"></span>
+                    <h3 id="interview-title"></h3>
+                    <p id="interview-text"></p>
+                    <a id="interview-link" href="" class="btn-play"></a>
+                </div>
+            </section>
+
+            <section id="article-section" style="max-width:700px; margin: 0 auto 80px;">
+                <h3 id="article-title"></h3>
+                <p id="article-body"></p>
+            </section>
+        </main>
+
+        <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="./script.js"></script>
+    <script>
+        // Core Logic to fetch JSON and populate the page
+        async function loadPageData() {
+            try {
+                const response = await fetch('./content.json');
+                const data = await response.json();
+
+                // Meta & Title
+                document.title = data.metadata.pageTitle;
+                document.getElementById('meta-title').content = data.metadata.metaTitle;
+                document.getElementById('meta-desc').content = data.metadata.metaDescription;
+
+                // Popup
+                if (data.popup.enabled) {
+                    const popup = document.getElementById('popup-notif');
+                    document.getElementById('popup-content').innerHTML = `
+                        <p>${data.popup.message}</p>
+                        <a href="${data.popup.linkUrl}" class="popup-btn">${data.popup.linkText}</a>
+                    `;
+                    popup.style.display = 'block';
+                }
+
+                // Hero
+                document.getElementById('hero-title').innerText = data.hero.title;
+                document.getElementById('hero-tagline').innerText = data.hero.tagline;
+
+                // Stats
+                const statsGrid = document.getElementById('stats-grid');
+                data.stats.forEach(stat => {
+                    const card = document.createElement('div');
+                    card.className = 'stat-card';
+                    card.innerHTML = `<h2>${stat.value}</h2><p>${stat.label}</p>`;
+                    statsGrid.appendChild(card);
+                });
+
+                // Interview
+                if (data.interview.visible) {
+                    document.getElementById('interview-container').style.display = 'grid';
+                    document.getElementById('interview-label').innerText = data.interview.label;
+                    document.getElementById('interview-title').innerText = data.interview.title;
+                    document.getElementById('interview-text').innerText = data.interview.description;
+                    document.getElementById('interview-link').innerText = data.interview.buttonText;
+                    document.getElementById('interview-link').href = data.interview.link;
+                    document.getElementById('interview-img').style.backgroundImage = `url(${data.interview.imageUrl})`;
+                }
+
+                // Article
+                document.getElementById('article-title').innerText = data.article.title;
+                document.getElementById('article-body').innerText = data.article.body;
+
+            } catch (error) {
+                console.error("Error loading JSON content:", error);
+            }
+        }
+
+        // Initialize
+        loadPageData();
+
+        // Netlify Identity
+        if (window.netlifyIdentity) {
+            window.netlifyIdentity.on("init", user => {
+                if (!user) {
+                    window.netlifyIdentity.on("login", () => {
+                        document.location.href = "/admin/";
+                    });
+                }
+            });
+        }
+
+        function closePopup() {
+            document.getElementById('popup-notif').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
