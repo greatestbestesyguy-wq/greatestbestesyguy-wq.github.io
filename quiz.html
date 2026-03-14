@@ -56,10 +56,6 @@
             transition: color 0.2s;
         }
         
-        @media (hover: hover) {
-            .home-btn:hover { color: var(--accent); }
-        }
-
         .option-btn {
             display: block;
             width: 100%;
@@ -74,21 +70,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             outline: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        @media (hover: hover) {
-            .option-btn:hover { 
-                border-color: var(--accent); 
-                background: #252525; 
-            }
-        }
-        
-        .option-btn:active {
-            background: #333;
-            border-color: var(--accent);
-        }
-        
         .nav-btn {
             background: var(--accent);
             color: black;
@@ -129,12 +112,6 @@
             margin-top: 10px;
             width: 100%;
             font-size: 16px;
-            box-shadow: 0 4px 15px rgba(255,255,255,0.1);
-            transition: transform 0.2s;
-        }
-
-        @media (hover: hover) {
-            .share-btn:hover { transform: scale(1.02); }
         }
 
         .discovery-grid {
@@ -155,18 +132,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s, border-color 0.2s;
         }
-
-        @media (hover: hover) {
-            .discovery-card:hover {
-                transform: translateY(-2px);
-                border-color: var(--accent);
-            }
-        }
-
-        .discovery-card span { font-size: 14px; color: var(--dim); }
-        .discovery-card strong { display: block; font-size: 16px; }
 
         .badge-icon {
             font-size: 60px;
@@ -192,75 +158,64 @@
 </div>
 
 <script>
-    let quizData = [];
+    let currentData = null;
     let idx = 0;
     let score = 0;
 
-    async function initQuiz() {
-        try {
-            const response = await fetch('./content.json');
-            const data = await response.json();
-            quizData = data.quizPage.questions;
-            
-            // Set Page Title
-            document.title = data.quizPage.pageTitle;
-            
-            render();
-        } catch (error) {
-            console.error("Error loading quiz data:", error);
-            document.getElementById('display').innerText = "Failed to load quiz.";
+    // MODULAR RENDER FUNCTION
+    function renderQuizQuestion(data) {
+        currentData = data;
+        const quiz = data.quizPage.questions;
+        document.title = data.quizPage.pageTitle;
+
+        if (idx < quiz.length) {
+            const item = quiz[idx];
+            document.getElementById('progress-bar').style.width = `${(idx / quiz.length) * 100}%`;
+            document.getElementById('display').innerHTML = `
+                <p style="color:var(--dim)">Question ${idx + 1} of ${quiz.length}</p>
+                <h2 style="margin-bottom: 30px;">${item.q}</h2>
+                <button class="option-btn" onclick="check('Yes')">Yes</button>
+                <button class="option-btn" onclick="check('No')">No</button>
+            `;
+        } else {
+            showResults();
         }
     }
 
-    function render() {
-        const item = quizData[idx];
-        document.getElementById('progress-bar').style.width = `${(idx / quizData.length) * 100}%`;
-        document.getElementById('display').innerHTML = `
-            <p style="color:var(--dim)">Question ${idx + 1} of ${quizData.length}</p>
-            <h2 style="margin-bottom: 30px;">${item.q}</h2>
-            <button class="option-btn" onclick="check('Yes')">Yes</button>
-            <button class="option-btn" onclick="check('No')">No</button>
-        `;
-    }
-
     window.check = (choice) => {
-        const correct = choice === quizData[idx].a;
+        const quiz = currentData.quizPage.questions;
+        const correct = choice === quiz[idx].a;
         if (correct) score++;
         document.getElementById('display').innerHTML = `
             <h2 style="color:${correct ? 'var(--accent)' : 'var(--wrong)'}">${correct ? '✓ Correct!' : '✗ Incorrect'}</h2>
-            <p style="margin: 20px 0; line-height: 1.5;">${quizData[idx].info}</p>
+            <p style="margin: 20px 0; line-height: 1.5;">${quiz[idx].info}</p>
             <button class="nav-btn" onclick="next()">Continue</button>
         `;
     };
 
     window.next = () => {
         idx++;
-        if (idx < quizData.length) render();
-        else showResults();
+        renderQuizQuestion(currentData);
     };
 
     function showResults() {
         document.getElementById('progress-bar').style.width = '100%';
+        const quiz = currentData.quizPage.questions;
         let rank = score >= 7 ? "Recycling Legend" : score >= 5 ? "Sustainability Scholar" : "Waste Warrior";
         let icon = score >= 7 ? "👑" : score >= 5 ? "🌱" : "🛡️";
 
         document.getElementById('display').innerHTML = `
             <span class="badge-icon">${icon}</span>
             <h1 style="color:var(--accent); margin-bottom: 5px;">${rank}</h1>
-            <p style="font-size: 1.2rem; margin-bottom: 10px;">You scored ${score} / ${quizData.length}</p>
+            <p style="font-size: 1.2rem; margin-bottom: 10px;">You scored ${score} / ${quiz.length}</p>
             <div class="share-incentive">
                 <strong>Help save STL recycling!</strong><br>
-                Share your score to challenge your friends and help stop bin contamination in our city.
+                Share your score to challenge your friends.
             </div>
-            <button class="share-btn" onclick="share()">📣 Share My Rank & Challenge Friends</button>
+            <button class="share-btn" onclick="share()">📣 Share My Rank</button>
             <div class="discovery-grid">
-                <p style="color:var(--dim); font-size: 14px; margin-bottom: 5px; text-align: center;">Keep Exploring</p>
-                <a href="/map" class="discovery-card">
+                <a href="map.html" class="discovery-card">
                     <div><strong>Find a Drop-Off</strong><span>Locate your nearest station</span></div>
-                    <span>→</span>
-                </a>
-                <a href="/interviews" class="discovery-card">
-                    <div><strong>Watch Interviews</strong><span>Hear from Mayor Cara Spencer</span></div>
                     <span>→</span>
                 </a>
                 <a href="/" class="nav-btn" style="text-align: center; margin-top: 10px;">Return Home</a>
@@ -268,25 +223,37 @@
         `;
     }
 
+    // INITIAL LOAD
+    async function initQuiz() {
+        try {
+            const response = await fetch('./content.json');
+            const data = await response.json();
+            renderQuizQuestion(data);
+        } catch (error) {
+            document.getElementById('display').innerText = "Failed to load quiz.";
+        }
+    }
+
     window.share = () => {
+        const quiz = currentData.quizPage.questions;
         const rank = score >= 7 ? "Recycling Legend" : score >= 5 ? "Sustainability Scholar" : "Waste Warrior";
-        const text = `I just earned the ${rank} rank on the STL Recycling Challenge (${score}/${quizData.length})! Can you beat my score? ♻️`;
+        const text = `I just earned the ${rank} rank on the STL Recycling Challenge (${score}/${quiz.length})! ♻️`;
         if (navigator.share) {
-            navigator.share({ title: 'Recycle STL Challenge', text: text, url: window.location.href });
+            navigator.share({ title: 'Recycle STL', text: text, url: window.location.href });
         } else {
-            const el = document.createElement('textarea');
-            el.value = text + " " + window.location.href;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            const btn = document.querySelector('.share-btn');
-            btn.innerText = "✓ Score & Challenge Copied!";
-            setTimeout(() => btn.innerText = "📣 Share My Rank & Challenge Friends", 2000);
+            alert("Score copied to clipboard!");
         }
     };
 
     initQuiz();
+
+    // --- CMS LISTENER ---
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'UPDATE_CONTENT') {
+            // Keep the user on their current question index while editing
+            renderQuizQuestion(event.data.data);
+        }
+    });
 </script>
 </body>
 </html>
