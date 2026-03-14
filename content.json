@@ -33,7 +33,7 @@
     "visible": true,
     "label": "Exclusive Interview",
     "title": "Talking Policy with Mayor Cara Spencer",
-    "description": "We sat down with St. Louis Mayor Cara Spencer to discuss the suspension of curbside recycling and what the city's long-term plan is for sustainable waste management.",
+    "description": "We sit down with St. Louis Mayor Cara Spencer to discuss the suspension of curbside recycling and what the city's long-term plan is for sustainable waste management.",
     "buttonText": "Watch the Interview",
     "link": "interviews.html",
     "imageUrl": "https://www.stlmag.com/wp-content/uploads/2025/10/recycling-drop-sites.webp"
@@ -42,6 +42,7 @@
     "title": "The Curbside Crisis",
     "body": "Due to labor shortages and high contamination rates, St. Louis has officially pivoted to a 'Drop-Off' model. Placing recyclables in your alley bin now almost guarantees they end up in a landfill."
   },
+
   "MAP_PAGE_DATA": "--- Settings for map.html ---",
   "mapPage": {
     "pageTitle": "Recycle St. Louis | Map",
@@ -53,6 +54,7 @@
     "instructionsTitle": "Using the Map",
     "instructionsBody": "Click on the icons above to view the specific address and accepted materials for each location. Most sites are open 24/7, but please ensure your items are clean and sorted according to the posted signs to prevent contamination."
   },
+
   "INTERVIEWS_PAGE_DATA": "--- Settings for interviews.html ---",
   "interviewsPage": {
     "pageTitle": "Recycle St. Louis | Interviews",
@@ -72,6 +74,21 @@
         "title": "Inside the Material Recovery Facility",
         "description": "Ever wonder what happens to your cardboard after you drop it off? We tour the local facility to see the sorting process in action."
       }
+    ]
+  },
+
+  "QUIZ_PAGE_DATA": "--- Settings for quiz.html ---",
+  "quizPage": {
+    "pageTitle": "STL Recycling Challenge",
+    "questions": [
+      { "q": "Is a greasy pizza box recyclable in STL?", "a": "No", "info": "Grease ruins paper. Recycle only the clean lid!" },
+      { "q": "Can plastic bags go in blue bins?", "a": "No", "info": "They jam sorting machines. Return them to grocery stores." },
+      { "q": "Do you need to rinse out food jars?", "a": "Yes", "info": "Residue contaminates batches. Give it a quick scrub!" },
+      { "q": "Should you leave the caps on plastic bottles?", "a": "Yes", "info": "Keep them on! Modern machines capture them better that way." },
+      { "q": "Is shredded paper okay for the blue bin?", "a": "No", "info": "Small bits fall through equipment. Compost it instead." },
+      { "q": "Can you recycle mirrors or lightbulbs in the bin?", "a": "No", "info": "This glass has different melting points and ruins the batch." },
+      { "q": "Are aluminum cans infinitely recyclable?", "a": "Yes", "info": "Aluminum never loses quality no matter how many times it's reused!" },
+      { "q": "Does STL currently have curbside pickup city-wide?", "a": "No", "info": "Most residents must use drop-off stations." }
     ]
   }
 }
