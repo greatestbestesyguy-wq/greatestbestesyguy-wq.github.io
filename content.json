@@ -57,8 +57,35 @@
     "metaDescription": "Find the 14 official recycling drop-off stations in St. Louis city.",
     "title": "Find a Station",
     "tagline": "Official St. Louis City recycling drop-off locations. Use this map to find the station nearest to your neighborhood.",
-    "mapUrl": "https://www.google.com/maps/d/embed?mid=1_QOYr3zEEEjU-LcSlkkSFCpf5gCIkU8&ehbc=2E312F&noprof=1",
+    "mapUrl": "https://www.google.com/maps/d/embed?mid=YOUR_MAP_ID_HERE",
     "instructionsTitle": "Using the Map",
     "instructionsBody": "Click on the icons above to view the specific address and accepted materials for each location. Most sites are open 24/7, but please ensure your items are clean and sorted according to the posted signs to prevent contamination."
+  },
+
+  "================ INTERVIEWS PAGE DATA ================": "",
+
+  "interviewsPage": {
+    "pageTitle": "Recycle St. Louis | Interviews",
+    "metaTitle": "Exclusive Interviews | The Recycling Crisis",
+    "metaDescription": "Watch our exclusive sit-downs with city leaders and experts regarding the future of waste management in St. Louis.",
+    "title": "Interviews",
+    "tagline": "Voices of the city: exploring the policy, the problems, and the potential solutions for our environment.",
+    "featuredVideoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "entries": [
+      {
+        "label": "Government Policy",
+        "title": "A Sit-down with Mayor Cara Spencer",
+        "description": "We discuss the difficult decision to suspend curbside pickup and what metrics the city is looking at to bring it back.",
+        "videoUrl": "https://youtube.com/link-to-video",
+        "buttonText": "Watch Interview"
+      },
+      {
+        "label": "Logistics & Waste",
+        "title": "Inside the Material Recovery Facility",
+        "description": "Ever wonder what happens to your cardboard after you drop it off? We tour the local facility to see the sorting process in action.",
+        "videoUrl": "",
+        "buttonText": "Read Summary"
+      }
+    ]
   }
 }
