@@ -1,74 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Recycle St. Louis | Metro High School Advocacy</title>
-    <meta name="title" content="Recycle St. Louis | Metro High School Advocacy">
-    <meta name="description" content="0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL.">
-
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://stl.planet-recycling.pl/">
-    <meta property="og:title" content="Recycle St. Louis | Metro High School Advocacy">
-    <meta property="og:description" content="A student advocacy project bringing awareness to the state of recycling in St. Louis.">
-    <meta property="og:image" content="https://stl.planet-recycling.pl/images/Interview.jpeg">
-
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R1Y5DRSP21"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-R1Y5DRSP21');
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-R1Y5DRSP21');
     </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Recycle St. Louis | Interviews</title>
     
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">
+
+    <meta name="title" id="meta-title" content="">
+    <meta name="description" id="meta-desc" content="">
 
     <style>
-        /* Video Player Container */
         .video-container {
             width: 100%;
-            max-width: 900px;
-            margin: 0 auto 40px auto;
-            border-radius: 12px;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            border-radius: 24px;
             overflow: hidden;
-            border: 1px solid #333;
-            background: #000;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            margin-bottom: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-
-        /* Custom Green "Matrix" Theme for Video.js */
-        .vjs-matrix.video-js { 
-            color: #00ff88; 
-            font-family: inherit; 
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
-        
-        .vjs-matrix .vjs-big-play-button {
-            border-color: #00ff88;
-            background-color: rgba(0, 255, 136, 0.1);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            line-height: 80px;
-            font-size: 3em;
-            margin-top: -40px;
-            margin-left: -40px;
+        .interview-list {
+            display: grid;
+            gap: 40px;
+            margin-top: 60px;
         }
-
-        .vjs-matrix .vjs-play-progress, 
-        .vjs-matrix .vjs-volume-level {
-            background-color: #00ff88;
-        }
-
-        .vjs-matrix .vjs-control-bar {
-            background-color: rgba(10, 10, 10, 0.9);
-        }
-
-        .interview-content {
-            text-align: left;
-            max-width: 800px;
-            margin: 0 auto;
+        .interview-entry {
+            border-bottom: 1px solid #222;
+            padding-bottom: 40px;
         }
     </style>
 </head>
@@ -78,48 +50,68 @@
         <div id="header-placeholder"></div>
 
         <main>
-            <h1>The Conversations</h1>
-            <p class="tagline">Direct conversations with the leaders shaping St. Louis waste policy.</p>
+            <h1 id="interviews-title"></h1>
+            <p id="interviews-tagline" class="tagline"></p>
 
-            <section class="interview-detail">
-                
-                <div class="video-container">
-                    <video
-                        id="interview-video"
-                        class="video-js vjs-matrix vjs-big-play-centered vjs-16-9"
-                        controls
-                        preload="auto"
-                        poster="images/Interview.jpeg"
-                        data-setup='{}'
-                    >
-                        <source src="images/interview.mp4" type="video/mp4" />
-                        <p class="vjs-no-js">
-                            To view this video please enable JavaScript, and consider upgrading to a web browser that supports HTML5 video.
-                        </p>
-                    </video>
+            <div class="video-container" id="featured-video-wrap" style="display:none;">
+                <iframe id="featured-video-iframe" src="" allowfullscreen></iframe>
+            </div>
+
+            <div id="interview-list" class="interview-list">
                 </div>
-                
-                <div class="interview-content">
-                    <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">Featured Interview</span>
-                    <h2 style="font-size: 32px; margin: 10px 0;">Mayor Cara Spencer</h2>
-                    <p style="color: var(--text-dim); font-size: 18px; margin-bottom: 30px;">
-                        In this exclusive sit-down, we discuss the logistics of the 2025-2026 recycling pivot and the future of waste management in St. Louis.
-                    </p>
-                    
-                    <div class="timestamp-box" style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid #222;">
-                        <h4 style="margin-top:0; color:var(--accent);">Video Chapters</h4>
-                        <p><strong>0:00</strong> Introduction and the current state of STL waste.</p>
-                        <p><strong>4:20</strong> Why curbside recycling was officially suspended.</p>
-                        <p><strong>12:45</strong> Expansion of the city-wide drop-off network.</p>
-                    </div>
-                </div>
-            </section>
         </main>
 
         <div id="footer-placeholder"></div>
     </div>
 
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-    <script src="script.js"></script>
+    <script src="./script.js"></script>
+    <script>
+        async function loadInterviews() {
+            try {
+                const response = await fetch('./content.json');
+                const data = await response.json();
+                const page = data.interviewsPage;
+
+                // 1. Meta & Titles
+                document.title = page.pageTitle;
+                const mTitle = document.getElementById('meta-title');
+                const mDesc = document.getElementById('meta-desc');
+                if(mTitle) mTitle.content = page.metaTitle;
+                if(mDesc) mDesc.content = page.metaDescription;
+                
+                document.getElementById('interviews-title').innerText = page.title;
+                document.getElementById('interviews-tagline').innerText = page.tagline;
+
+                // 2. Featured Video
+                if (page.featuredVideoUrl && page.featuredVideoUrl !== "") {
+                    const videoWrap = document.getElementById('featured-video-wrap');
+                    const videoIframe = document.getElementById('featured-video-iframe');
+                    videoIframe.src = page.featuredVideoUrl;
+                    videoWrap.style.display = 'block';
+                }
+
+                // 3. Dynamic List of Interviews
+                const listContainer = document.getElementById('interview-list');
+                listContainer.innerHTML = ''; 
+
+                page.entries.forEach(entry => {
+                    const section = document.createElement('section');
+                    section.className = 'interview-entry';
+                    section.innerHTML = `
+                        <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">${entry.label}</span>
+                        <h3>${entry.title}</h3>
+                        <p>${entry.description}</p>
+                        ${entry.videoUrl ? `<a href="${entry.videoUrl}" target="_blank" class="btn-play" style="display:inline-block; margin-top:10px;">${entry.buttonText || 'Watch Video'}</a>` : ''}
+                    `;
+                    listContainer.appendChild(section);
+                });
+
+            } catch (error) {
+                console.error("Error loading Interviews JSON:", error);
+            }
+        }
+
+        loadInterviews();
+    </script>
 </body>
 </html>
