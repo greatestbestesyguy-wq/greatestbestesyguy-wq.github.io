@@ -65,16 +65,12 @@
       {
         "label": "Government Policy",
         "title": "A Sit-down with Mayor Cara Spencer",
-        "description": "We discuss the difficult decision to suspend curbside pickup and what metrics the city is looking at to bring it back.",
-        "videoUrl": "https://youtube.com/link-to-video",
-        "buttonText": "Watch Interview"
+        "description": "We discuss the difficult decision to suspend curbside pickup and what metrics the city is looking at to bring it back."
       },
       {
         "label": "Logistics & Waste",
         "title": "Inside the Material Recovery Facility",
-        "description": "Ever wonder what happens to your cardboard after you drop it off? We tour the local facility to see the sorting process in action.",
-        "videoUrl": "",
-        "buttonText": "Read Summary"
+        "description": "Ever wonder what happens to your cardboard after you drop it off? We tour the local facility to see the sorting process in action."
       }
     ]
   }
