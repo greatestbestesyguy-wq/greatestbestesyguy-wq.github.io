@@ -1,4 +1,25 @@
 {
+  "ABOUT_PAGE_DATA": "--- Settings for about.html ---",
+  "aboutPage": {
+    "pageTitle": "Recycle St. Louis | About",
+    "metaTitle": "About the Project | Metro High School Advocacy",
+    "metaDescription": "A student-led advocacy initiative at Metro Academic & Classical High School addressing the STL recycling crisis.",
+    "title": "About the Project",
+    "tagline": "A student-led advocacy initiative at Metro Academic & Classical High School.",
+    "missionTitle": "The Mission",
+    "missionBody": "<p>This website is the culmination of our <strong>Advocacy Project</strong> for Mr. Boyle’s class. Our goal is to address the critical breakdown of the recycling infrastructure in St. Louis. By synthesizing academic research, city policy, and direct interviews, we aim to provide a clear roadmap for residents to navigate the current 'Drop-Off' model.</p><p>As per the project requirements, we have curated 15 high-quality academic sources and conducted a primary interview with a city authority to ensure our information is both accurate and actionable.</p>",
+    "team": [
+      { "name": "Cy", "role": "Research & Development" },
+      { "name": "Josh", "role": "Design & Policy" },
+      { "name": "Xabi", "role": "Content & Media" }
+    ],
+    "contextTitle": "Assignment Context",
+    "contextCourse": "Mr. Boyle - Advocacy Project",
+    "contextDate": "April 26, 2026",
+    "contextFocus": "City Community Sustainability",
+    "contextQuote": "\"Explore and research a cause you care deeply about, find an authority figure to interview, and raise awareness for the issue by publishing research in a meaningful way.\""
+  },
+
   "HOME_PAGE_DATA": "--- Settings for index.html ---",
   "metadata": {
     "pageTitle": "Recycle St. Louis | Home",
@@ -16,24 +37,15 @@
     "tagline": "A student advocacy project bringing awareness to the state of recycling in our city."
   },
   "stats": [
-    {
-      "value": "0",
-      "label": "Curbside Pickups Active"
-    },
-    {
-      "value": "14",
-      "label": "Drop-Off Locations"
-    },
-    {
-      "value": "100%",
-      "label": "User Responsibility"
-    }
+    { "value": "0", "label": "Curbside Pickups Active" },
+    { "value": "14", "label": "Drop-Off Locations" },
+    { "value": "100%", "label": "User Responsibility" }
   ],
   "interview": {
     "visible": true,
     "label": "Exclusive Interview",
     "title": "Talking Policy with Mayor Cara Spencer",
-    "description": "We sit down with St. Louis Mayor Cara Spencer to discuss the suspension of curbside recycling and what the city's long-term plan is for sustainable waste management.",
+    "description": "We sat down with St. Louis Mayor Cara Spencer to discuss the suspension of curbside recycling and what the city's long-term plan is for sustainable waste management.",
     "buttonText": "Watch the Interview",
     "link": "interviews.html",
     "imageUrl": "https://www.stlmag.com/wp-content/uploads/2025/10/recycling-drop-sites.webp"
@@ -52,28 +64,20 @@
     "tagline": "Official St. Louis City recycling drop-off locations. Use this map to find the station nearest to your neighborhood.",
     "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10000!2d-90.1994!3d38.6270!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDM3JzM3LjIiTiA5MMKwMTEnNTcuOCJX!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus",
     "instructionsTitle": "Using the Map",
-    "instructionsBody": "Click on the icons above to view the specific address and accepted materials for each location. Most sites are open 24/7, but please ensure your items are clean and sorted according to the posted signs to prevent contamination."
+    "instructionsBody": "Click on the icons above to view the specific address and accepted materials for each location."
   },
 
   "INTERVIEWS_PAGE_DATA": "--- Settings for interviews.html ---",
   "interviewsPage": {
     "pageTitle": "Recycle St. Louis | Interviews",
     "metaTitle": "Exclusive Interviews | The Recycling Crisis",
-    "metaDescription": "Watch our exclusive sit-downs with city leaders and experts regarding the future of waste management in St. Louis.",
+    "metaDescription": "Watch our exclusive sit-downs with city leaders and experts.",
     "title": "Interviews",
-    "tagline": "Voices of the city: exploring the policy, the problems, and the potential solutions for our environment.",
+    "tagline": "Voices of the city: exploring the policy, the problems, and the potential solutions.",
     "featuredVideoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
     "entries": [
-      {
-        "label": "Government Policy",
-        "title": "A Sit-down with Mayor Cara Spencer",
-        "description": "We discuss the difficult decision to suspend curbside pickup and what metrics the city is looking at to bring it back."
-      },
-      {
-        "label": "Logistics & Waste",
-        "title": "Inside the Material Recovery Facility",
-        "description": "Ever wonder what happens to your cardboard after you drop it off? We tour the local facility to see the sorting process in action."
-      }
+      { "label": "Government Policy", "title": "A Sit-down with Mayor Cara Spencer", "description": "We discuss the difficult decision to suspend curbside pickup." },
+      { "label": "Logistics & Waste", "title": "Inside the Material Recovery Facility", "description": "We tour the local facility to see the sorting process in action." }
     ]
   },
 
@@ -87,7 +91,7 @@
       { "q": "Should you leave the caps on plastic bottles?", "a": "Yes", "info": "Keep them on! Modern machines capture them better that way." },
       { "q": "Is shredded paper okay for the blue bin?", "a": "No", "info": "Small bits fall through equipment. Compost it instead." },
       { "q": "Can you recycle mirrors or lightbulbs in the bin?", "a": "No", "info": "This glass has different melting points and ruins the batch." },
-      { "q": "Are aluminum cans infinitely recyclable?", "a": "Yes", "info": "Aluminum never loses quality no matter how many times it's reused!" },
+      { "q": "Are aluminum cans infinitely recyclable?", "a": "Yes", "info": "Aluminum never loses quality!" },
       { "q": "Does STL currently have curbside pickup city-wide?", "a": "No", "info": "Most residents must use drop-off stations." }
     ]
   }
