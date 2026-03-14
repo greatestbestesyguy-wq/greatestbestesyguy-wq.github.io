@@ -1,24 +1,20 @@
 {
-  "================ HOME PAGE DATA ================": "",
-
+  "HOME_PAGE_DATA": "--- Settings for index.html ---",
   "metadata": {
     "pageTitle": "Recycle St. Louis | Home",
     "metaTitle": "Recycle St. Louis | Metro High School Advocacy",
     "metaDescription": "0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL."
   },
-
   "popup": {
     "enabled": true,
     "message": "<strong>🚨 Important Update:</strong> Residential recycling is no longer being picked up in many STL neighborhoods. To ensure your items are recycled, they <strong>must</strong> be taken to an official drop-off station.",
     "linkText": "Find a Station Near You",
     "linkUrl": "map.html"
   },
-
   "hero": {
     "title": "Recycle St. Louis",
     "tagline": "A student advocacy project bringing awareness to the state of recycling in our city."
   },
-
   "stats": [
     {
       "value": "0",
@@ -33,7 +29,6 @@
       "label": "User Responsibility"
     }
   ],
-
   "interview": {
     "visible": true,
     "label": "Exclusive Interview",
@@ -43,27 +38,22 @@
     "link": "interviews.html",
     "imageUrl": "https://www.stlmag.com/wp-content/uploads/2025/10/recycling-drop-sites.webp"
   },
-
   "article": {
     "title": "The Curbside Crisis",
     "body": "Due to labor shortages and high contamination rates, St. Louis has officially pivoted to a 'Drop-Off' model. Placing recyclables in your alley bin now almost guarantees they end up in a landfill."
   },
-
-  "================ MAP PAGE DATA ================": "",
-
+  "MAP_PAGE_DATA": "--- Settings for map.html ---",
   "mapPage": {
     "pageTitle": "Recycle St. Louis | Map",
     "metaTitle": "Recycle St. Louis | Map & Locations",
     "metaDescription": "Find the 14 official recycling drop-off stations in St. Louis city.",
     "title": "Find a Station",
     "tagline": "Official St. Louis City recycling drop-off locations. Use this map to find the station nearest to your neighborhood.",
-    "mapUrl": "https://www.google.com/maps/d/embed?mid=YOUR_MAP_ID_HERE",
+    "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10000!2d-90.1994!3d38.6270!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDM3JzM3LjIiTiA5MMKwMTEnNTcuOCJX!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus",
     "instructionsTitle": "Using the Map",
     "instructionsBody": "Click on the icons above to view the specific address and accepted materials for each location. Most sites are open 24/7, but please ensure your items are clean and sorted according to the posted signs to prevent contamination."
   },
-
-  "================ INTERVIEWS PAGE DATA ================": "",
-
+  "INTERVIEWS_PAGE_DATA": "--- Settings for interviews.html ---",
   "interviewsPage": {
     "pageTitle": "Recycle St. Louis | Interviews",
     "metaTitle": "Exclusive Interviews | The Recycling Crisis",
@@ -71,6 +61,21 @@
     "title": "Interviews",
     "tagline": "Voices of the city: exploring the policy, the problems, and the potential solutions for our environment.",
     "featuredVideoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "entries": [
+      {
+        "label": "Government Policy",
+        "title": "A Sit-down with Mayor Cara Spencer",
+        "description": "We discuss the difficult decision to suspend curbside pickup and what metrics the city is looking at to bring it back.",
+        "videoUrl": "https://youtube.com/link-to-video",
+        "buttonText": "Watch Interview"
+      },
+      {
+        "label": "Logistics & Waste",
+        "title": "Inside the Material Recovery Facility",
+        "description": "Ever wonder what happens to your cardboard after you drop it off? We tour the local facility to see the sorting process in action.",
+        "videoUrl": "",
+        "buttonText": "Read Summary"
+      }
     ]
   }
 }
