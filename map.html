@@ -92,34 +92,52 @@
 
     <script src="script.js"></script>
     <script>
+        // MODULAR RENDER FUNCTION
+        function renderMap(data) {
+            const m = data.mapPage;
+
+            // Meta & Social
+            document.title = m.pageTitle;
+            if(document.getElementById('meta-title')) document.getElementById('meta-title').content = m.metaTitle;
+            if(document.getElementById('meta-desc')) document.getElementById('meta-desc').content = m.metaDescription;
+            if(document.getElementById('og-title')) document.getElementById('og-title').content = m.metaTitle;
+            if(document.getElementById('og-desc')) document.getElementById('og-desc').content = m.metaDescription;
+            if(document.getElementById('tw-title')) document.getElementById('tw-title').content = m.metaTitle;
+            if(document.getElementById('tw-desc')) document.getElementById('tw-desc').content = m.metaDescription;
+
+            // Page Content
+            document.getElementById('map-page-title').innerText = m.title;
+            document.getElementById('map-tagline').innerText = m.tagline;
+            
+            // Map Iframe Logic (Prevents reload if URL hasn't changed)
+            const mapIframe = document.getElementById('map-iframe');
+            if(mapIframe.src !== m.mapUrl) {
+                mapIframe.src = m.mapUrl;
+            }
+            
+            document.getElementById('instruction-title').innerText = m.instructionsTitle;
+            document.getElementById('instruction-text').innerText = m.instructionsBody;
+        }
+
+        // INITIAL LOAD
         async function loadMapData() {
             try {
                 const response = await fetch('./content.json');
                 const data = await response.json();
-                const m = data.mapPage;
-
-                // Meta & Social
-                document.title = m.pageTitle;
-                document.getElementById('meta-title').content = m.metaTitle;
-                document.getElementById('meta-desc').content = m.metaDescription;
-                document.getElementById('og-title').content = m.metaTitle;
-                document.getElementById('og-desc').content = m.metaDescription;
-                document.getElementById('tw-title').content = m.metaTitle;
-                document.getElementById('tw-desc').content = m.metaDescription;
-
-                // Page Content
-                document.getElementById('map-page-title').innerText = m.title;
-                document.getElementById('map-tagline').innerText = m.tagline;
-                document.getElementById('map-iframe').src = m.mapUrl;
-                document.getElementById('instruction-title').innerText = m.instructionsTitle;
-                document.getElementById('instruction-text').innerText = m.instructionsBody;
-
+                renderMap(data);
             } catch (error) {
                 console.error("Error loading Map JSON content:", error);
             }
         }
 
         loadMapData();
+
+        // --- CMS LISTENER ---
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'UPDATE_CONTENT') {
+                renderMap(event.data.data);
+            }
+        });
     </script>
 </body>
 </html>
