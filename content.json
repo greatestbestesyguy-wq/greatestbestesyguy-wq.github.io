@@ -71,21 +71,6 @@
     "title": "Interviews",
     "tagline": "Voices of the city: exploring the policy, the problems, and the potential solutions for our environment.",
     "featuredVideoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    "entries": [
-      {
-        "label": "Government Policy",
-        "title": "A Sit-down with Mayor Cara Spencer",
-        "description": "We discuss the difficult decision to suspend curbside pickup and what metrics the city is looking at to bring it back.",
-        "videoUrl": "https://youtube.com/link-to-video",
-        "buttonText": "Watch Interview"
-      },
-      {
-        "label": "Logistics & Waste",
-        "title": "Inside the Material Recovery Facility",
-        "description": "Ever wonder what happens to your cardboard after you drop it off? We tour the local facility to see the sorting process in action.",
-        "videoUrl": "",
-        "buttonText": "Read Summary"
-      }
     ]
   }
 }
