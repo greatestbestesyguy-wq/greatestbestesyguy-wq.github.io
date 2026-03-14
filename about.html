@@ -1,89 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Primary Meta Tags -->
-<!-- Primary Meta Tags -->
-<title>Recycle St. Louis | Metro High School Advocacy</title>
-<meta name="title" content="Recycle St. Louis | Metro High School Advocacy">
-<meta name="description" content="0 curbside pickups. 14 drop-off sites. 100% our responsibility. Help Metro High students educate STL.">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R1Y5DRSP21"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-R1Y5DRSP21');
+    </script>
 
-<!-- Open Graph / Facebook / WhatsApp -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://stl.planet-recycling.pl/">
-<meta property="og:title" content="Recycle St. Louis | Metro High School Advocacy">
-<meta property="og:description" content="A student advocacy project bringing awareness to the state of recycling in St. Louis. Explore the data and view the map.">
-<meta property="og:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
-
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://stl.planet-recycling.pl/">
-<meta property="twitter:title" content="Recycle St. Louis | Metro High School Advocacy">
-<meta property="twitter:description" content="Explore the reality of the St. Louis recycling crisis through our interactive map and student-led interviews.">
-<meta property="twitter:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-R1Y5DRSP21"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-R1Y5DRSP21');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle St. Louis | About</title>
+    
+    <title id="page-title">Recycle St. Louis | About</title>
+    <meta name="title" id="meta-title" content="">
+    <meta name="description" id="meta-desc" content="">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" id="og-title" content="">
+    <meta property="og:description" id="og-desc" content="">
+    <meta property="og:image" content="https://stl.planet-recycling.pl/images/screenshot.png">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <!-- Placeholder for Shared Header -->
         <div id="header-placeholder"></div>
 
         <main>
-            <h1>About the Project</h1>
-            <p class="tagline">A student-led advocacy initiative at Metro Academic & Classical High School.</p>
+            <h1 id="about-title">About the Project</h1>
+            <p id="about-tagline" class="tagline"></p>
 
             <section style="text-align: left; max-width: 800px; margin: 0 auto 60px;">
-                <h2 style="color: var(--accent); font-size: 24px;">The Mission</h2>
-                <p>This website is the culmination of our <strong>Advocacy Project</strong> for Mr. Boyle’s class. Our goal is to address the critical breakdown of the recycling infrastructure in St. Louis. By synthesizing academic research, city policy, and direct interviews, we aim to provide a clear roadmap for residents to navigate the current "Drop-Off" model.</p>
-                
-                <p>As per the project requirements, we have curated 15 high-quality academic sources and conducted a primary interview with a city authority to ensure our information is both accurate and actionable.</p>
+                <h2 id="mission-title" style="color: var(--accent); font-size: 24px;"></h2>
+                <div id="mission-body"></div>
             </section>
 
-            <div class="stats-grid" style="margin-bottom: 60px;">
-                <div class="stat-card">
-                    <h2 style="font-size: 2rem; color: var(--accent);">Cy</h2>
-                    <p>Research & Development</p>
+            <div id="team-grid" class="stats-grid" style="margin-bottom: 60px;">
                 </div>
-                <div class="stat-card">
-                    <h2 style="font-size: 2rem; color: var(--accent);">Josh</h2>
-                    <p>Design & Policy</p>
-                </div>
-                <div class="stat-card">
-                    <h2 style="font-size: 2rem; color: var(--accent);">Xabi</h2>
-                    <p>Content & Media</p>
-                </div>
-            </div>
 
             <section style="text-align: left; max-width: 800px; margin: 0 auto 80px; background: var(--card-bg); padding: 40px; border-radius: 24px; border: 1px solid #222;">
-                <h3 style="margin-top: 0;">Assignment Context</h3>
-                <p style="color: var(--text-dim); font-size: 14px; line-height: 1.6;">
-                    <strong>Course:</strong> Mr. Boyle - Advocacy Project<br>
-                    <strong>Due Date:</strong> April 26, 2026<br>
-                    <strong>Focus:</strong> City Community Sustainability
-                </p>
+                <h3 id="context-title">Assignment Context</h3>
+                <p id="context-details" style="color: var(--text-dim); font-size: 14px; line-height: 1.6;"></p>
                 <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
-                <p style="font-style: italic; color: var(--text-dim);">
-                    "Explore and research a cause you care deeply about, find an authority figure to interview, and raise awareness for the issue by publishing research in a meaningful way."
-                </p>
+                <p id="context-quote" style="font-style: italic; color: var(--text-dim);"></p>
             </section>
         </main>
 
-        <!-- Placeholder for Shared Footer -->
         <div id="footer-placeholder"></div>
     </div>
 
     <script src="script.js"></script>
+    <script>
+        async function loadAboutData() {
+            try {
+                const response = await fetch('./content.json');
+                const data = await response.json();
+                const page = data.aboutPage;
+
+                // Meta & Titles
+                document.title = page.pageTitle;
+                document.getElementById('meta-title').content = page.metaTitle;
+                document.getElementById('meta-desc').content = page.metaDescription;
+                document.getElementById('og-title').content = page.metaTitle;
+                document.getElementById('og-desc').content = page.metaDescription;
+
+                document.getElementById('about-title').innerText = page.title;
+                document.getElementById('about-tagline').innerText = page.tagline;
+
+                // Mission
+                document.getElementById('mission-title').innerText = page.missionTitle;
+                document.getElementById('mission-body').innerHTML = page.missionBody;
+
+                // Team Grid
+                const teamGrid = document.getElementById('team-grid');
+                teamGrid.innerHTML = '';
+                page.team.forEach(member => {
+                    const card = document.createElement('div');
+                    card.className = 'stat-card';
+                    card.innerHTML = `<h2 style="font-size: 2rem; color: var(--accent);">${member.name}</h2><p>${member.role}</p>`;
+                    teamGrid.appendChild(card);
+                });
+
+                // Assignment Context
+                document.getElementById('context-title').innerText = page.contextTitle;
+                document.getElementById('context-details').innerHTML = `
+                    <strong>Course:</strong> ${page.contextCourse}<br>
+                    <strong>Due Date:</strong> ${page.contextDate}<br>
+                    <strong>Focus:</strong> ${page.contextFocus}
+                `;
+                document.getElementById('context-quote').innerText = page.contextQuote;
+
+            } catch (error) {
+                console.error("Error loading About JSON:", error);
+            }
+        }
+        loadAboutData();
+    </script>
 </body>
 </html>
