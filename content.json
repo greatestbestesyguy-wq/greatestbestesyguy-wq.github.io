@@ -62,7 +62,7 @@
     "metaDescription": "Find the 14 official recycling drop-off stations in St. Louis city.",
     "title": "Find a Station",
     "tagline": "Official St. Louis City recycling drop-off locations. Use this map to find the station nearest to your neighborhood.",
-    "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10000!2d-90.1994!3d38.6270!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDM3JzM3LjIiTiA5MMKwMTEnNTcuOCJX!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus",
+    "mapUrl": "https://www.google.com/maps/d/embed?mid=1_QOYr3zEEEjU-LcSlkkSFCpf5gCIkU8&ehbc=2E312F&noprof=1",
     "instructionsTitle": "Using the Map",
     "instructionsBody": "Click on the icons above to view the specific address and accepted materials for each location."
   },
