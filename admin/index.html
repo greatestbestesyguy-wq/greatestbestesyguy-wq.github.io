@@ -9,86 +9,67 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
         /* Setup Screen */
-        #setup-screen { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; text-align: center; }
+        #setup-screen { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; text-align: center; }
         .setup-box { max-width: 600px; width: 100%; }
-        .setup-box h1 { margin-bottom: 10px; font-size: 2rem; color: var(--accent); }
-        .setup-box p { color: var(--text-dim); margin-bottom: 20px; }
-        textarea.json-loader { width: 100%; height: 250px; background: var(--surface); border: 2px dashed var(--border); border-radius: 12px; color: var(--accent); font-family: monospace; padding: 20px; resize: none; transition: border-color 0.3s; }
-        textarea.json-loader:focus { outline: none; border-color: var(--accent); }
+        .setup-box h1 { margin-bottom: 10px; font-size: 2.5rem; color: var(--accent); }
+        .setup-box p { color: var(--text-dim); margin-bottom: 25px; font-size: 1.1rem; }
+        textarea.json-loader { width: 100%; height: 300px; background: var(--surface); border: 2px dashed var(--border); border-radius: 16px; color: var(--accent); font-family: 'Courier New', monospace; padding: 25px; resize: none; transition: all 0.3s; font-size: 14px; }
+        textarea.json-loader:focus { outline: none; border-color: var(--accent); background: #1c1c21; }
         
         /* Main Layout */
         #editor-screen { display: none; flex: 1; flex-direction: column; height: 100vh; }
         header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
         .header-left { display: flex; align-items: center; gap: 20px; }
-        .logo { font-weight: 800; letter-spacing: 1px; }
+        .logo { font-weight: 800; letter-spacing: 1px; font-size: 1.2rem; }
         .logo span { color: var(--accent); }
-        select { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; outline: none; cursor: pointer; }
+        select { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; outline: none; cursor: pointer; font-size: 14px; }
         
-        .header-right { display: flex; gap: 10px; }
-        .btn { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn:hover { background: var(--border); }
-        .btn-primary { background: var(--accent); color: #000; border: none; font-weight: bold; }
-        .btn-primary:hover { background: var(--accent-hover); }
-        .btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); padding: 4px 8px; font-size: 12px; border-radius: 6px; border: 1px solid; cursor: pointer; transition: 0.2s; }
+        .header-right { display: flex; gap: 12px; }
+        .btn { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+        .btn:hover { background: var(--border); transform: translateY(-1px); }
+        .btn-primary { background: var(--accent); color: #000; border: none; font-weight: 700; }
+        .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px 10px; font-size: 12px; }
         .btn-danger:hover { background: var(--danger); color: white; }
 
         .workspace { display: flex; flex: 1; overflow: hidden; }
         
         /* Sidebar */
-        .sidebar { width: 450px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: transform 0.3s ease; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
+        .sidebar { width: 480px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: 10px 0 30px rgba(0,0,0,0.2); z-index: 10; }
+        .sidebar-header { padding: 25px; border-bottom: 1px solid var(--border); }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 25px; }
         
         /* Form Controls */
-        .field-group { margin-bottom: 20px; }
-        .field-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
-        input[type="text"], input[type="url"], textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 12px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .field-group { margin-bottom: 24px; }
+        .field-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+        input[type="text"], input[type="url"], textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); padding: 14px; font-size: 14px; outline: none; transition: border-color 0.2s; }
         input:focus, textarea:focus { border-color: var(--accent); }
-        textarea { height: 100px; resize: vertical; }
+        textarea { height: 120px; resize: vertical; line-height: 1.5; }
         
         /* Array/Section Blocks */
-        .array-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
-        .array-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .array-item-title { font-size: 14px; font-weight: bold; color: var(--accent); }
+        .array-item { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative; }
+        .array-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+        .array-item-title { font-size: 13px; font-weight: bold; color: var(--accent); letter-spacing: 0.5px; }
 
         /* Preview Area */
-        .preview-area { flex: 1; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 20px; transition: all 0.3s ease; }
-        .preview-controls { position: absolute; top: 20px; display: flex; gap: 10px; z-index: 10; }
-        .device-toggle { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; overflow: hidden; }
-        .device-toggle button { background: transparent; color: var(--text-dim); border: none; padding: 8px 15px; cursor: pointer; font-size: 12px; }
+        .preview-area { flex: 1; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 40px; }
+        .device-toggle { position: absolute; top: 25px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; display: flex; overflow: hidden; z-index: 20; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .device-toggle button { background: transparent; color: var(--text-dim); border: none; padding: 10px 20px; cursor: pointer; font-size: 12px; font-weight: 600; }
         .device-toggle button.active { background: var(--border); color: var(--text); }
         
-        .iframe-container { width: 100%; height: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: white; transition: width 0.3s ease, border-radius 0.3s ease; }
+        .iframe-container { width: 100%; height: 100%; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: white; transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         iframe { width: 100%; height: 100%; border: none; }
         
-        /* Fullscreen Mode */
-        body.is-fullscreen header, body.is-fullscreen .sidebar { display: none !important; }
-        body.is-fullscreen .preview-area { padding: 0; position: fixed; inset: 0; z-index: 1000; background: var(--bg); }
-        body.is-fullscreen .iframe-container { border-radius: 0; border: none; width: 100% !important; }
-        body.is-fullscreen .device-toggle { display: none; }
-        .exit-fs-btn { display: none; position: absolute; bottom: 30px; right: 30px; z-index: 1010; padding: 12px 24px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 50px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-weight: bold; align-items: center; gap: 8px; }
-        .exit-fs-btn:hover { background: var(--border); }
-        body.is-fullscreen .exit-fs-btn { display: flex; }
+        /* Export Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 650px; max-width: 90%; padding: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+        .modal h2 { margin-bottom: 15px; color: var(--accent); font-size: 1.8rem; }
+        .modal p { color: var(--text-dim); margin-bottom: 25px; line-height: 1.6; }
+        .modal textarea { height: 350px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; color: var(--accent); font-family: monospace; font-size: 12px; padding: 20px; margin-bottom: 25px; width: 100%; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
 
-        /* Custom Modals */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.2s; }
-        .modal-overlay.show { display: flex; opacity: 1; }
-        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 600px; max-width: 90%; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 0.2s; }
-        .modal-overlay.show .modal { transform: translateY(0); }
-        .modal h2 { margin-bottom: 15px; color: var(--accent); }
-        .modal p { color: var(--text-dim); margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
-        .modal textarea { width: 100%; height: 300px; font-family: monospace; font-size: 12px; margin-bottom: 20px; background: var(--bg); border: 1px solid var(--border); color: var(--accent); padding: 15px; border-radius: 8px; outline: none; resize: none; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
-
-        /* Smaller Confirm Modal */
-        #confirm-modal .modal { width: 400px; }
-
-        /* Toast Notifications */
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 14px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .toast.show { transform: translateX(0); }
-        .toast-icon { color: var(--accent); font-size: 18px; }
-        .toast.error .toast-icon { color: var(--danger); border-color: var(--danger); }
+        h3 { font-size: 14px; color: var(--text); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        h3::before { content: ''; width: 4px; height: 14px; background: var(--accent); border-radius: 2px; }
     </style>
 </head>
 <body>
@@ -96,7 +77,7 @@
     <div id="setup-screen">
         <div class="setup-box">
             <h1>Studio <span>Setup</span></h1>
-            <p id="setup-msg">Paste your <strong>content.json</strong> file below to begin.</p>
+            <p>Paste your <strong>content.json</strong> to enter the editor.</p>
             <textarea id="json-loader" class="json-loader" placeholder='{ "metadata": { ... } }' autofocus></textarea>
         </div>
     </div>
@@ -106,41 +87,37 @@
             <div class="header-left">
                 <div class="logo">RECYCLE<span>STL</span></div>
                 <select id="page-selector" onchange="switchPage(this.value)">
-                    <option value="home">Home Page (index.html)</option>
-                    <option value="map">Map Page (map.html)</option>
-                    <option value="interviews">Interviews Page (interviews.html)</option>
-                    <option value="about">About Page (about.html)</option>
-                    <option value="quiz">Quiz Page (quiz.html)</option>
+                    <option value="home">Home Settings</option>
+                    <option value="map">Map Settings</option>
+                    <option value="interviews">Interview Settings</option>
+                    <option value="about">About Settings</option>
+                    <option value="quiz">Quiz Settings</option>
                 </select>
             </div>
             <div class="header-right">
-                <button class="btn" onclick="reloadPreview()">↻ Reload Preview</button>
-                <button class="btn btn-primary" onclick="openGitHubModal()">⚡ Export JSON</button>
+                <button class="btn" onclick="reloadPreview()">↻ Reload Live Site</button>
+                <button class="btn btn-primary" onclick="openGitHubModal()">⚡ Export & GitHub</button>
             </div>
         </header>
 
         <div class="workspace">
             <aside class="sidebar">
                 <div class="sidebar-header">
-                    <h2 id="sidebar-title" style="font-size: 18px;">Editing Home</h2>
-                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 5px;">Changes sync instantly.</p>
+                    <h2 id="sidebar-title" style="font-size: 1.2rem;">Editing Home</h2>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Fields below update the site instantly.</p>
                 </div>
                 <div class="sidebar-content" id="form-container">
                     </div>
             </aside>
 
             <section class="preview-area">
-                <div class="preview-controls">
-                    <div class="device-toggle">
-                        <button id="btn-desktop" class="active" onclick="setDevice('desktop')">Desktop</button>
-                        <button id="btn-mobile" onclick="setDevice('mobile')">Mobile</button>
-                    </div>
-                    <button class="btn" style="background: var(--surface);" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+                <div class="device-toggle">
+                    <button id="btn-desktop" class="active" onclick="setDevice('desktop')">Desktop</button>
+                    <button id="btn-mobile" onclick="setDevice('mobile')">Mobile</button>
                 </div>
                 <div class="iframe-container" id="iframe-wrap">
-                    <iframe id="preview-frame" src=""></iframe>
+                    <iframe id="preview-frame" src="https://stl.planet-recycling.pl/"></iframe>
                 </div>
-                <button class="exit-fs-btn" onclick="toggleFullscreen()">↙ Exit Fullscreen</button>
             </section>
         </div>
     </div>
@@ -148,103 +125,48 @@
     <div id="github-modal" class="modal-overlay">
         <div class="modal">
             <h2>Ready to Publish!</h2>
-            <p>Your changes are compiled below. Click "Copy JSON", then paste it into your GitHub repository to update your live website.</p>
+            <p>Your updated configuration is ready. Copy the code below, then click the button to open GitHub and update your file.</p>
             <textarea id="export-json" readonly></textarea>
             <div class="modal-actions">
-                <button class="btn" onclick="closeModal('github-modal')">Cancel</button>
+                <button class="btn" onclick="closeGitHubModal()">Cancel</button>
                 <button class="btn" onclick="copyJSON()">📋 Copy JSON</button>
-                <a href="https://github.com/greatestbestesyguy-wq/greatestbestesyguy-wq.github.io/blob/main/content.json" target="_blank" class="btn btn-primary" onclick="closeModal('github-modal')">↗ Open GitHub</a>
+                <a href="https://github.com/greatestbestesyguy-wq/greatestbestesyguy-wq.github.io/blob/main/content.json" target="_blank" class="btn btn-primary" onclick="closeGitHubModal()">↗ Open GitHub Repo</a>
             </div>
         </div>
     </div>
-
-    <div id="confirm-modal" class="modal-overlay">
-        <div class="modal">
-            <h2>Delete Item?</h2>
-            <p>Are you sure you want to permanently remove this item from your site? This cannot be undone.</p>
-            <div class="modal-actions">
-                <button class="btn" onclick="closeModal('confirm-modal')">Cancel</button>
-                <button class="btn btn-danger" style="background: var(--danger); color: white;" onclick="executeDelete()">Yes, Delete</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast-container"></div>
 
     <script>
         let db = null;
         let currentPage = 'home';
-        let pendingDeleteInfo = null;
 
-        // Ensure the editor itself isn't named index.html causing an infinite loop
-        if (window.location.pathname.endsWith('index.html')) {
-            document.getElementById('setup-msg').innerHTML = "<span style='color:var(--danger);'>Warning: You named this file <b>index.html</b>. Please rename it to <b>editor.html</b> so it doesn't try to load itself inside the preview box!</span>";
-        }
-
-        // --- 1. TOAST SYSTEM ---
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<span class="toast-icon">${type === 'success' ? '✓' : '⚠'}</span> <span>${message}</span>`;
-            container.appendChild(toast);
-            
-            // Trigger animation
-            requestAnimationFrame(() => toast.classList.add('show'));
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // --- 2. MODAL SYSTEM ---
-        function openModal(id) {
-            document.getElementById(id).classList.add('show');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
-
-        // --- 3. AUTO-LOADER LOGIC ---
+        // --- AUTO-LOADER ---
         document.getElementById('json-loader').addEventListener('input', function(e) {
             try {
                 db = JSON.parse(e.target.value);
                 document.getElementById('setup-screen').style.display = 'none';
                 document.getElementById('editor-screen').style.display = 'flex';
-                showToast("JSON successfully loaded!");
                 switchPage('home');
-            } catch(err) {
-                // Invalid JSON, wait silently
-            }
+            } catch(err) { /* Waiting for valid JSON */ }
         });
 
-        // --- 4. NAVIGATION & PREVIEW LOGIC ---
         const pageConfigs = {
-            home: { url: './index.html', title: 'Home Page' },
-            map: { url: './map.html', title: 'Map Page' },
-            interviews: { url: './interviews.html', title: 'Interviews' },
-            about: { url: './about.html', title: 'About Page' },
-            quiz: { url: './quiz.html', title: 'Quiz Application' }
+            home: { title: 'Home Page' },
+            map: { title: 'Map Page' },
+            interviews: { title: 'Interviews' },
+            about: { title: 'About Page' },
+            quiz: { title: 'Quiz Application' }
         };
 
         function switchPage(pageKey) {
             currentPage = pageKey;
             document.getElementById('sidebar-title').innerText = `Editing ${pageConfigs[pageKey].title}`;
-            
-            // Check if the file exists by setting the src. If it fails, the iframe will show the browser's 404.
-            document.getElementById('preview-frame').src = pageConfigs[pageKey].url;
             document.getElementById('page-selector').value = pageKey;
             renderForm();
-            
-            // Sync data to the newly loaded iframe after a brief delay
-            setTimeout(syncIframe, 500); 
         }
 
         function reloadPreview() {
-            document.getElementById('preview-frame').src = document.getElementById('preview-frame').src;
-            setTimeout(syncIframe, 500);
-            showToast("Preview reloaded.");
+            document.getElementById('preview-frame').src = "https://stl.planet-recycling.pl/";
+            setTimeout(syncIframe, 800);
         }
 
         function setDevice(type) {
@@ -253,11 +175,7 @@
             document.getElementById('iframe-wrap').style.width = type === 'mobile' ? '375px' : '100%';
         }
 
-        function toggleFullscreen() {
-            document.body.classList.toggle('is-fullscreen');
-        }
-
-        // --- 5. DYNAMIC FORM GENERATION ---
+        // --- FORM ENGINE ---
         function renderForm() {
             const container = document.getElementById('form-container');
             let html = '';
@@ -276,59 +194,55 @@
             };
 
             if (currentPage === 'home') {
-                html += `<h3>Metadata</h3>${input('Page Title', 'metadata.pageTitle')}${input('Meta Description', 'metadata.metaDescription')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
-                html += `<h3>Hero Section</h3>${input('Hero Title', 'hero.title')}${input('Hero Tagline', 'hero.tagline')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
-                html += `<h3>Article</h3>${input('Article Title', 'article.title')}${input('Article Body', 'article.body', 'area')}`;
-                html += renderArray('stats', 'Statistics Cards', ['value', 'label']);
+                html += `<h3>Metadata</h3>${input('Page Title', 'metadata.pageTitle')}${input('Description', 'metadata.metaDescription')}`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
+                html += `<h3>Hero Section</h3>${input('Headline', 'hero.title')}${input('Tagline', 'hero.tagline')}`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
+                html += `<h3>Article</h3>${input('Article Header', 'article.title')}${input('Body Text', 'article.body', 'area')}`;
+                html += renderArray('stats', 'Stats & Cards', ['value', 'label']);
             } 
             else if (currentPage === 'map') {
-                html += `<h3>Metadata</h3>${input('Page Title', 'mapPage.pageTitle')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
-                html += `<h3>Map Settings</h3>${input('Title', 'mapPage.title')}${input('Tagline', 'mapPage.tagline')}${input('Map Embed URL', 'mapPage.mapUrl')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
-                html += `<h3>Instructions</h3>${input('Instruction Title', 'mapPage.instructionsTitle')}${input('Instruction Body', 'mapPage.instructionsBody', 'area')}`;
+                html += `<h3>Map Settings</h3>${input('Main Title', 'mapPage.title')}${input('Map URL (Embed)', 'mapPage.mapUrl')}`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
+                html += `<h3>Instructions</h3>${input('Title', 'mapPage.instructionsTitle')}${input('Body', 'mapPage.instructionsBody', 'area')}`;
             }
             else if (currentPage === 'interviews') {
-                html += `<h3>Metadata & Header</h3>${input('Title', 'interviewsPage.title')}${input('Tagline', 'interviewsPage.tagline')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
-                html += `<h3>Featured Video</h3>${input('YouTube Embed URL', 'interviewsPage.featuredVideoUrl')}`;
+                html += `<h3>Header</h3>${input('Page Headline', 'interviewsPage.title')}${input('YouTube Embed', 'interviewsPage.featuredVideoUrl')}`;
                 html += renderArray('interviewsPage.entries', 'Interview Entries', ['label', 'title', 'description']);
             }
             else if (currentPage === 'about') {
-                html += `<h3>Header & Mission</h3>${input('Title', 'aboutPage.title')}${input('Mission Title', 'aboutPage.missionTitle')}${input('Mission Body (HTML allowed)', 'aboutPage.missionBody', 'area')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">`;
-                html += `<h3>Assignment Context</h3>${input('Course', 'aboutPage.contextCourse')}${input('Due Date', 'aboutPage.contextDate')}${input('Focus', 'aboutPage.contextFocus')}`;
+                html += `<h3>Mission Statement</h3>${input('Title', 'aboutPage.title')}${input('Mission Text', 'aboutPage.missionBody', 'area')}`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
+                html += `<h3>Project Details</h3>${input('Course', 'aboutPage.contextCourse')}${input('Date', 'aboutPage.contextDate')}`;
                 html += renderArray('aboutPage.team', 'Team Members', ['name', 'role']);
             }
             else if (currentPage === 'quiz') {
-                html += `<h3>Quiz Settings</h3>${input('Page Title', 'quizPage.pageTitle')}`;
+                html += `<h3>Header</h3>${input('Header Text', 'quizPage.pageTitle')}`;
                 html += renderArray('quizPage.questions', 'Quiz Questions', ['q', 'a', 'info']);
             }
 
             container.innerHTML = html;
         }
 
-        // --- 6. ARRAY MANAGEMENT LOGIC ---
+        // --- ARRAY ENGINE ---
         function renderArray(path, title, fields) {
             const arr = getPath(db, path) || [];
-            let html = `<hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+            let html = `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                             <h3>${title}</h3>
-                            <button class="btn" style="background:var(--bg);" onclick="addArrayItem('${path}', '${fields.join(',')}')">+ Add Item</button>
+                            <button class="btn btn-primary" style="padding: 5px 12px; font-size: 11px;" onclick="addArrayItem('${path}', '${fields.join(',')}')">+ Add</button>
                         </div>`;
             
             arr.forEach((item, index) => {
                 html += `<div class="array-item">
                             <div class="array-item-header">
-                                <span class="array-item-title">Item ${index + 1}</span>
-                                <button class="btn-danger" onclick="promptDelete('${path}', ${index})">Delete</button>
+                                <span class="array-item-title">#${index + 1} ${fields[0].toUpperCase()}</span>
+                                <button class="btn-danger" onclick="removeArrayItem('${path}', ${index})">×</button>
                             </div>`;
                 fields.forEach(field => {
-                    const isArea = field === 'description' || field === 'info';
+                    const isArea = field === 'description' || field === 'info' || field === 'body';
                     html += `<div class="field-group">
-                                <label>${field.toUpperCase()}</label>
+                                <label>${field}</label>
                                 ${isArea 
                                     ? `<textarea oninput="updateData('${path}.${index}.${field}', this.value)">${item[field] || ''}</textarea>`
                                     : `<input type="text" value="${item[field] || ''}" oninput="updateData('${path}.${index}.${field}', this.value)">`
@@ -348,27 +262,18 @@
             arr.push(newObj);
             renderForm();
             syncIframe();
-            showToast("New item added.");
         }
 
-        function promptDelete(path, index) {
-            pendingDeleteInfo = { path, index };
-            openModal('confirm-modal');
-        }
-
-        function executeDelete() {
-            if (pendingDeleteInfo) {
-                const arr = getPath(db, pendingDeleteInfo.path);
-                arr.splice(pendingDeleteInfo.index, 1);
+        function removeArrayItem(path, index) {
+            if(confirm('Delete this entry?')) {
+                const arr = getPath(db, path);
+                arr.splice(index, 1);
                 renderForm();
                 syncIframe();
-                closeModal('confirm-modal');
-                pendingDeleteInfo = null;
-                showToast("Item deleted.");
             }
         }
 
-        // --- 7. DATA SYNCING LOGIC ---
+        // --- DATA SYNC ---
         function getPath(obj, path) {
             return path.split('.').reduce((o, i) => (o ? o[i] : null), obj);
         }
@@ -376,28 +281,28 @@
         function updateData(path, val) {
             const keys = path.split('.');
             let obj = db;
-            for (let i = 0; i < keys.length - 1; i++) {
-                obj = obj[keys[i]];
-            }
+            for (let i = 0; i < keys.length - 1; i++) { obj = obj[keys[i]]; }
             obj[keys[keys.length - 1]] = val;
             syncIframe();
         }
 
         function syncIframe() {
             const frame = document.getElementById('preview-frame').contentWindow;
-            frame.postMessage({ type: 'UPDATE_CONTENT', data: db }, '*');
+            frame.postMessage({ type: 'UPDATE_CONTENT', data: db }, 'https://stl.planet-recycling.pl');
         }
 
-        // --- 8. EXPORT LOGIC ---
+        // --- MODALS ---
         function openGitHubModal() {
             document.getElementById('export-json').value = JSON.stringify(db, null, 2);
-            openModal('github-modal');
+            document.getElementById('github-modal').style.display = 'flex';
         }
+
+        function closeGitHubModal() { document.getElementById('github-modal').style.display = 'none'; }
 
         function copyJSON() {
             const text = document.getElementById('export-json').value;
             navigator.clipboard.writeText(text);
-            showToast("JSON copied to clipboard!");
+            alert("Code Copied! Now paste it on GitHub.");
         }
     </script>
 </body>
