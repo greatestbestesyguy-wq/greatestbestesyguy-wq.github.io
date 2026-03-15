@@ -1,14 +1,351 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Redirecting...</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>404 - Lost in the Landfill | Recycle STL</title>
+    <style>
+        :root {
+            --bg: #09090b;
+            --surface: #18181b;
+            --border: #27272a;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --text: #f4f4f5;
+            --text-dim: #a1a1aa;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .header { margin-bottom: 20px; }
+        .header h1 { font-size: 3rem; color: var(--accent); margin-bottom: 10px; }
+        .header p { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 20px; }
+
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .game-container {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--text);
+            font-size: 1.2rem;
+        }
+
+        canvas {
+            background: #111;
+            border-radius: 8px;
+            display: block;
+            max-width: 100%;
+            touch-action: none; /* Prevents zooming/scrolling on mobile */
+        }
+
+        .mobile-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+            max-width: 250px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .ctrl-btn {
+            background: var(--border);
+            color: var(--text);
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .ctrl-btn:active { background: var(--accent); color: #000; }
+        .ctrl-up { grid-column: 2; }
+        .ctrl-left { grid-column: 1; }
+        .ctrl-down { grid-column: 2; }
+        .ctrl-right { grid-column: 3; }
+
+        @media (max-width: 600px) {
+            .mobile-controls { display: grid; }
+            .header h1 { font-size: 2.2rem; }
+            canvas { width: 300px; height: 300px; }
+        }
+    </style>
 </head>
-<body style="background: #0a0a0a;">
+<body>
+
+    <div class="header">
+        <h1>404</h1>
+        <p>This page is non-recyclable. It doesn't exist.</p>
+        <a href="https://stl.planet-recycling.pl/" class="btn">Return to Home</a>
+    </div>
+
+    <div class="game-container">
+        <div class="score-board">
+            <span>Items Recycled: <span id="score">0</span></span>
+            <span style="color: var(--accent);">High Score: <span id="highScore">0</span></span>
+        </div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <div class="mobile-controls">
+        <button class="ctrl-btn ctrl-up" id="btn-up">⬆️</button>
+        <button class="ctrl-btn ctrl-left" id="btn-left">⬅️</button>
+        <button class="ctrl-btn ctrl-down" id="btn-down">⬇️</button>
+        <button class="ctrl-btn ctrl-right" id="btn-right">➡️</button>
+    </div>
+
     <script>
-        // Set the flag for the custom popup
-        sessionStorage.setItem('showRedirectPopup', 'true');
-        // Redirect to the ROOT domain to avoid the /index.html/index.html loop
-        window.location.href = '/'; 
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+
+        // Game settings
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+        let speed = 8;
+        let score = 0;
+        let highScore = localStorage.getItem('recycleSnakeHighScore') || 0;
+        highScoreElement.innerText = highScore;
+
+        // Snake setup
+        let snake = [{ x: 10, y: 10 }];
+        let velocity = { x: 0, y: 0 };
+        let nextVelocity = { x: 0, y: 0 }; // Prevents rapid reverse suicide
+
+        // Recyclables (Food)
+        const recyclables = ['📰', '🥫', '📦', '🍾', '♻️'];
+        let food = {
+            x: Math.floor(Math.random() * tileCount),
+            y: Math.floor(Math.random() * tileCount),
+            emoji: recyclables[0]
+        };
+
+        // Touch handling variables
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        function drawGame() {
+            velocity = { ...nextVelocity };
+            moveSnake();
+
+            if (isGameOver()) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white';
+                ctx.font = '24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Landfill Full! (Game Over)', canvas.width / 2, canvas.height / 2);
+                ctx.font = '16px Arial';
+                ctx.fillText('Tap or press a key to restart', canvas.width / 2, canvas.height / 2 + 30);
+                return;
+            }
+
+            clearScreen();
+            checkCollision();
+            drawFood();
+            drawSnake();
+
+            setTimeout(drawGame, 1000 / speed);
+        }
+
+        function clearScreen() {
+            ctx.fillStyle = '#18181b';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawSnake() {
+            snake.forEach((part, index) => {
+                // Head is darker, body is accent color
+                ctx.fillStyle = index === 0 ? '#059669' : '#10b981';
+                ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
+            });
+        }
+
+        function moveSnake() {
+            if (velocity.x === 0 && velocity.y === 0) return;
+
+            const newHead = {
+                x: snake[0].x + velocity.x,
+                y: snake[0].y + velocity.y
+            };
+            snake.unshift(newHead); // Add new head
+            snake.pop(); // Remove tail
+        }
+
+        function drawFood() {
+            ctx.font = `${gridSize - 2}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(
+                food.emoji, 
+                food.x * gridSize + (gridSize / 2), 
+                food.y * gridSize + (gridSize / 2)
+            );
+        }
+
+        function checkCollision() {
+            if (snake[0].x === food.x && snake[0].y === food.y) {
+                // Grow snake
+                snake.push({ ...snake[snake.length - 1] });
+                score++;
+                scoreElement.innerText = score;
+                
+                // Increase speed slightly
+                if (score % 5 === 0) speed++;
+
+                // Spawn new food
+                food.x = Math.floor(Math.random() * tileCount);
+                food.y = Math.floor(Math.random() * tileCount);
+                food.emoji = recyclables[Math.floor(Math.random() * recyclables.length)];
+            }
+        }
+
+        function isGameOver() {
+            let gameOver = false;
+
+            if (velocity.x === 0 && velocity.y === 0) return false;
+
+            // Wall collision
+            if (snake[0].x < 0 || snake[0].x >= tileCount || snake[0].y < 0 || snake[0].y >= tileCount) {
+                gameOver = true;
+            }
+
+            // Self collision
+            for (let i = 1; i < snake.length; i++) {
+                if (snake[0].x === snake[i].x && snake[0].y === snake[i].y) {
+                    gameOver = true;
+                }
+            }
+
+            if (gameOver) {
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('recycleSnakeHighScore', highScore);
+                    highScoreElement.innerText = highScore;
+                }
+            }
+            return gameOver;
+        }
+
+        function resetGame() {
+            score = 0;
+            speed = 8;
+            scoreElement.innerText = score;
+            snake = [{ x: 10, y: 10 }];
+            velocity = { x: 0, y: 0 };
+            nextVelocity = { x: 0, y: 0 };
+            drawGame();
+        }
+
+        // --- CONTROLS ---
+        function changeDirection(x, y) {
+            if (isGameOver()) {
+                resetGame();
+                return;
+            }
+            // Prevent 180 degree turns
+            if (x !== 0 && velocity.x !== 0) return;
+            if (y !== 0 && velocity.y !== 0) return;
+            nextVelocity = { x, y };
+        }
+
+        // Keyboard
+        document.body.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'w') changeDirection(0, -1);
+            if (e.key === 'ArrowDown' || e.key === 's') changeDirection(0, 1);
+            if (e.key === 'ArrowLeft' || e.key === 'a') changeDirection(-1, 0);
+            if (e.key === 'ArrowRight' || e.key === 'd') changeDirection(1, 0);
+        });
+
+        // Mobile On-Screen Buttons
+        document.getElementById('btn-up').addEventListener('pointerdown', () => changeDirection(0, -1));
+        document.getElementById('btn-down').addEventListener('pointerdown', () => changeDirection(0, 1));
+        document.getElementById('btn-left').addEventListener('pointerdown', () => changeDirection(-1, 0));
+        document.getElementById('btn-right').addEventListener('pointerdown', () => changeDirection(1, 0));
+
+        // Mobile Swipe Controls on Canvas
+        canvas.addEventListener('touchstart', (e) => {
+            if (isGameOver()) {
+                resetGame();
+                return;
+            }
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Stop screen from scrolling while swiping on the canvas
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+        });
+
+        function handleSwipe(startX, startY, endX, endY) {
+            const dx = endX - startX;
+            const dy = endY - startY;
+            
+            // Require a minimum swipe distance to prevent accidental taps registering as swipes
+            if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // Horizontal swipe
+                if (dx > 0) changeDirection(1, 0); // Right
+                else changeDirection(-1, 0); // Left
+            } else {
+                // Vertical swipe
+                if (dy > 0) changeDirection(0, 1); // Down
+                else changeDirection(0, -1); // Up
+            }
+        }
+
+        // Start game loop
+        drawGame();
     </script>
 </body>
 </html>
