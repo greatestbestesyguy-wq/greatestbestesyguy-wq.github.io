@@ -67,7 +67,7 @@
         <div class="scanline"></div>
         <div class="terminal-header">
             <span>[ SYSTEM OVERRIDE: AUTHORIZED ACCESS ]</span>
-            <button class="close-terminal" onclick="toggleTerminal(false)">&times;</button>
+            <button class="close-terminal" onclick="toggleTerminal(false)">×</button>
         </div>
 
         <div id="terminal-content">
@@ -86,7 +86,7 @@
     </div>
 
     <div id="popup-notif" style="display:none;">
-        <button class="close-notif" onclick="closePopup()">&times;</button>
+        <button class="close-notif" onclick="closePopup()">×</button>
         <div id="popup-content"></div>
     </div>
 
@@ -96,6 +96,7 @@
         <main id="main-content">
             <h1 id="hero-title"></h1>
             <p id="hero-tagline" class="tagline"></p>
+            <div id="hero-buttons" style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;"></div>
 
             <div id="stats-grid" class="stats-grid"></div>
 
@@ -109,10 +110,12 @@
                 </div>
             </section>
 
-            <section id="article-section" style="max-width:700px; margin: 0 auto 80px;">
+            <section id="article-section" style="max-width:700px; margin: 0 auto 40px;">
                 <h3 id="article-title"></h3>
                 <p id="article-body"></p>
             </section>
+            
+            <div id="additional-articles-container"></div>
         </main>
 
         <div id="footer-placeholder"></div>
@@ -180,6 +183,21 @@
 
             document.getElementById('hero-title').innerText = data.hero.title;
             document.getElementById('hero-tagline').innerText = data.hero.tagline;
+            
+            const btnContainer = document.getElementById('hero-buttons');
+            if (btnContainer) {
+                btnContainer.innerHTML = '';
+                if (data.hero.buttons) {
+                    data.hero.buttons.forEach(btn => {
+                        const a = document.createElement('a');
+                        a.href = btn.url || '#';
+                        a.innerText = btn.text || 'Click Here';
+                        a.className = 'btn-primary'; 
+                        a.style = "padding: 10px 20px; background: var(--accent, #10b981); color: #000; text-decoration: none; border-radius: 8px; font-weight: bold;";
+                        btnContainer.appendChild(a);
+                    });
+                }
+            }
 
             const statsGrid = document.getElementById('stats-grid');
             if(statsGrid) {
@@ -209,6 +227,19 @@
 
             document.getElementById('article-title').innerText = data.article.title;
             document.getElementById('article-body').innerText = data.article.body;
+            
+            const artContainer = document.getElementById('additional-articles-container');
+            if (artContainer) {
+                artContainer.innerHTML = '';
+                if (data.additionalArticles) {
+                    data.additionalArticles.forEach(art => {
+                        const sec = document.createElement('section');
+                        sec.style = "max-width:700px; margin: 0 auto 80px;";
+                        sec.innerHTML = `<h3 style="margin-bottom: 15px;">${art.title || ''}</h3><p>${art.body || ''}</p>`;
+                        artContainer.appendChild(sec);
+                    });
+                }
+            }
         }
 
         async function loadPageData() {
