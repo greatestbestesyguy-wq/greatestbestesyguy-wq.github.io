@@ -150,7 +150,6 @@
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
                 
-                // Set the DB and trigger screen transition
                 db = data;
                 document.getElementById('setup-screen').style.display = 'none';
                 document.getElementById('editor-screen').style.display = 'flex';
@@ -198,7 +197,108 @@
             document.getElementById('iframe-wrap').style.width = type === 'mobile' ? '375px' : '100%';
         }
 
-        // --- FORM ENGINE ---
+        // --- DATA BINDING HELPERS ---
+        function getPath(obj, path) {
+            return path.split('.').reduce((o, i) => (o ? o[i] : ''), obj);
+        }
+
+        function setPath(obj, path, value) {
+            const keys = path.split('.');
+            let current = obj;
+            for (let i = 0; i < keys.length - 1; i++) {
+                if (!current[keys[i]]) current[keys[i]] = {};
+                current = current[keys[i]];
+            }
+            current[keys[keys.length - 1]] = value;
+        }
+
+        function updateData(path, value) {
+            setPath(db, path, value);
+            syncIframe();
+        }
+
+        function updateArrayItem(path, index, key, value) {
+            const arr = getPath(db, path);
+            arr[index][key] = value;
+            syncIframe();
+        }
+
+        function addArrayItem(path, keysStr) {
+            const keys = JSON.parse(keysStr);
+            let arr = getPath(db, path);
+            if (!arr) { 
+                setPath(db, path, []); 
+                arr = getPath(db, path); 
+            }
+            const newItem = {};
+            keys.forEach(k => newItem[k.key] = '');
+            arr.push(newItem);
+            renderForm();
+            syncIframe();
+        }
+
+        function removeArrayItem(path, index) {
+            const arr = getPath(db, path);
+            arr.splice(index, 1);
+            renderForm();
+            syncIframe();
+        }
+
+        function syncIframe() {
+            const iframe = document.getElementById('preview-frame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'UPDATE_CONTENT', data: db }, '*');
+            }
+        }
+
+        function openGitHubModal() {
+            document.getElementById('export-json').value = JSON.stringify(db, null, 2);
+            document.getElementById('github-modal').style.display = 'flex';
+        }
+
+        function closeGitHubModal() {
+            document.getElementById('github-modal').style.display = 'none';
+        }
+
+        function copyJSON() {
+            const text = document.getElementById('export-json');
+            text.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
+        }
+
+        // --- DYNAMIC FORM RENDERERS ---
+        function renderArray(path, title, fields) {
+            const arr = getPath(db, path) || [];
+            let html = `<h3>${title}</h3><div style="margin-bottom: 25px;">`;
+            
+            arr.forEach((item, index) => {
+                html += `
+                    <div class="array-item">
+                        <div class="array-item-header">
+                            <span class="array-item-title">Item ${index + 1}</span>
+                            <button class="btn btn-danger" onclick="removeArrayItem('${path}', ${index})">Remove</button>
+                        </div>`;
+                
+                fields.forEach(f => {
+                    html += `
+                        <div class="field-group">
+                            <label>${f.label}</label>
+                            ${f.type === 'area' 
+                                ? `<textarea oninput="updateArrayItem('${path}', ${index}, '${f.key}', this.value)">${item[f.key] || ''}</textarea>`
+                                : `<input type="text" value="${item[f.key] || ''}" oninput="updateArrayItem('${path}', ${index}, '${f.key}', this.value)">`
+                            }
+                        </div>`;
+                });
+                
+                html += `</div>`;
+            });
+
+            const keysJson = JSON.stringify(fields).replace(/"/g, '&quot;');
+            html += `<button class="btn" onclick="addArrayItem('${path}', '${keysJson}')">+ Add New ${title}</button></div>`;
+            return html;
+        }
+
         function renderForm() {
             const container = document.getElementById('form-container');
             let html = '';
@@ -216,13 +316,44 @@
                     </div>`;
             };
 
+            const toggle = (label, path) => {
+                const val = getPath(db, path);
+                return `
+                    <div class="field-group">
+                        <label>${label}</label>
+                        <select onchange="updateData('${path}', this.value === 'true')">
+                            <option value="true" ${val ? 'selected' : ''}>Visible</option>
+                            <option value="false" ${!val ? 'selected' : ''}>Hidden</option>
+                        </select>
+                    </div>`;
+            };
+
             if (currentPage === 'home') {
                 html += `<h3>Metadata</h3>${input('Page Title', 'metadata.pageTitle')}${input('Description', 'metadata.metaDescription')}`;
                 html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
                 html += `<h3>Hero Section</h3>${input('Headline', 'hero.title')}${input('Tagline', 'hero.tagline')}`;
+                html += renderArray('hero.buttons', 'Hero Buttons', [
+                    {label: 'Button Text', key: 'text'}, {label: 'Link URL', key: 'url'}
+                ]);
                 html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
-                html += `<h3>Article</h3>${input('Article Header', 'article.title')}${input('Body Text', 'article.body', 'area')}`;
-                html += renderArray('stats', 'Stats & Cards', ['value', 'label']);
+                html += renderArray('stats', 'Stats & Cards', [
+                    {label: 'Value', key: 'value'}, {label: 'Label', key: 'label'}
+                ]);
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
+                html += `<h3>Interview Banner</h3>`;
+                html += toggle('Banner Visibility', 'interview.visible');
+                html += input('Small Label', 'interview.label');
+                html += input('Headline', 'interview.title');
+                html += input('Description', 'interview.description', 'area');
+                html += input('Button Text', 'interview.buttonText');
+                html += input('Button Link URL', 'interview.link');
+                html += input('Background Image URL', 'interview.imageUrl');
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
+                html += `<h3>Primary Article</h3>${input('Article Header', 'article.title')}${input('Body Text', 'article.body', 'area')}`;
+                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
+                html += renderArray('additionalArticles', 'Additional Articles', [
+                    {label: 'Title', key: 'title'}, {label: 'Body Content', key: 'body', type: 'area'}
+                ]);
             } 
             else if (currentPage === 'map') {
                 html += `<h3>Map Settings</h3>${input('Main Title', 'mapPage.title')}${input('Map URL (Embed)', 'mapPage.mapUrl')}`;
@@ -231,101 +362,26 @@
             }
             else if (currentPage === 'interviews') {
                 html += `<h3>Header</h3>${input('Page Headline', 'interviewsPage.title')}${input('YouTube Embed', 'interviewsPage.featuredVideoUrl')}`;
-                html += renderArray('interviewsPage.entries', 'Interview Entries', ['label', 'title', 'description']);
+                html += renderArray('interviewsPage.entries', 'Interview Entries', [
+                    {label: 'Label', key: 'label'}, {label: 'Title', key: 'title'}, {label: 'Description', key: 'description'}
+                ]);
             }
             else if (currentPage === 'about') {
-                html += `<h3>Mission Statement</h3>${input('Title', 'aboutPage.title')}${input('Mission Text', 'aboutPage.missionBody', 'area')}`;
+                html += `<h3>Mission Statement</h3>${input('Title', 'aboutPage.missionTitle')}${input('Mission Text', 'aboutPage.missionBody', 'area')}`;
                 html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
-                html += `<h3>Project Details</h3>${input('Course', 'aboutPage.contextCourse')}${input('Date', 'aboutPage.contextDate')}`;
-                html += renderArray('aboutPage.team', 'Team Members', ['name', 'role']);
+                html += `<h3>Project Details</h3>${input('Course', 'aboutPage.contextCourse')}${input('Date', 'aboutPage.contextDate')}${input('Focus', 'aboutPage.contextFocus')}${input('Quote', 'aboutPage.contextQuote', 'area')}`;
+                html += renderArray('aboutPage.team', 'Team Roster', [
+                    {label: 'Name', key: 'name'}, {label: 'Role', key: 'role'}
+                ]);
             }
             else if (currentPage === 'quiz') {
-                html += `<h3>Header</h3>${input('Header Text', 'quizPage.pageTitle')}`;
-                html += renderArray('quizPage.questions', 'Quiz Questions', ['q', 'a', 'info']);
+                html += `<h3>Quiz Settings</h3>${input('Page Title', 'quizPage.pageTitle')}`;
+                html += renderArray('quizPage.questions', 'Questions', [
+                    {label: 'Question', key: 'q'}, {label: 'Answer (Yes/No)', key: 'a'}, {label: 'Explanation', key: 'info'}
+                ]);
             }
-
-            container.innerHTML = html;
-        }
-
-        // --- ARRAY ENGINE ---
-        function renderArray(path, title, fields) {
-            const arr = getPath(db, path) || [];
-            let html = `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                            <h3>${title}</h3>
-                            <button class="btn btn-primary" style="padding: 5px 12px; font-size: 11px;" onclick="addArrayItem('${path}', '${fields.join(',')}')">+ Add</button>
-                        </div>`;
             
-            arr.forEach((item, index) => {
-                html += `<div class="array-item">
-                            <div class="array-item-header">
-                                <span class="array-item-title">#${index + 1} ${fields[0].toUpperCase()}</span>
-                                <button class="btn-danger" onclick="removeArrayItem('${path}', ${index})">×</button>
-                            </div>`;
-                fields.forEach(field => {
-                    const isArea = field === 'description' || field === 'info' || field === 'body';
-                    html += `<div class="field-group">
-                                <label>${field}</label>
-                                ${isArea 
-                                    ? `<textarea oninput="updateData('${path}.${index}.${field}', this.value)">${item[field] || ''}</textarea>`
-                                    : `<input type="text" value="${item[field] || ''}" oninput="updateData('${path}.${index}.${field}', this.value)">`
-                                }
-                             </div>`;
-                });
-                html += `</div>`;
-            });
-            return html;
-        }
-
-        function addArrayItem(path, fieldsStr) {
-            const fields = fieldsStr.split(',');
-            const newObj = {};
-            fields.forEach(f => newObj[f] = f === 'a' ? 'Yes' : '');
-            const arr = getPath(db, path);
-            arr.push(newObj);
-            renderForm();
-            syncIframe();
-        }
-
-        function removeArrayItem(path, index) {
-            if(confirm('Delete this entry?')) {
-                const arr = getPath(db, path);
-                arr.splice(index, 1);
-                renderForm();
-                syncIframe();
-            }
-        }
-
-        // --- DATA SYNC ---
-        function getPath(obj, path) {
-            return path.split('.').reduce((o, i) => (o ? o[i] : null), obj);
-        }
-
-        function updateData(path, val) {
-            const keys = path.split('.');
-            let obj = db;
-            for (let i = 0; i < keys.length - 1; i++) { obj = obj[keys[i]]; }
-            obj[keys[keys.length - 1]] = val;
-            syncIframe();
-        }
-
-        function syncIframe() {
-            const frame = document.getElementById('preview-frame').contentWindow;
-            frame.postMessage({ type: 'UPDATE_CONTENT', data: db }, 'https://stl.planet-recycling.pl');
-        }
-
-        // --- MODALS ---
-        function openGitHubModal() {
-            document.getElementById('export-json').value = JSON.stringify(db, null, 2);
-            document.getElementById('github-modal').style.display = 'flex';
-        }
-
-        function closeGitHubModal() { document.getElementById('github-modal').style.display = 'none'; }
-
-        function copyJSON() {
-            const text = document.getElementById('export-json').value;
-            navigator.clipboard.writeText(text);
-            alert("Code Copied! Now paste it on GitHub.");
+            container.innerHTML = html;
         }
     </script>
 </body>
