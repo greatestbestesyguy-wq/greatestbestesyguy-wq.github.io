@@ -29,7 +29,6 @@
             touch-action: none;
         }
 
-        /* High Visibility Home Button */
         .btn-home {
             position: fixed;
             top: 20px;
@@ -62,7 +61,7 @@
             display: block;
             border: 3px solid var(--accent);
             box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
-            border-radius: 8px;
+            border-radius: 12px;
         }
 
         .overlay {
@@ -77,8 +76,8 @@
             backdrop-filter: blur(8px);
         }
 
-        .overlay h1 { font-size: 4rem; color: var(--accent); margin-bottom: 10px; }
-        .overlay p { font-size: 1.2rem; margin-bottom: 30px; color: var(--text-dim); }
+        .overlay h1 { font-size: clamp(3rem, 10vw, 5rem); color: var(--accent); margin-bottom: 10px; }
+        .overlay p { font-size: 1.2rem; margin-bottom: 30px; color: var(--text-dim); text-align: center; padding: 0 20px;}
 
         .btn-play {
             background: var(--accent);
@@ -120,13 +119,13 @@
 
         <div id="startScreen" class="overlay">
             <h1>404</h1>
-            <p>Page lost. Start cleaning the landfill?</p>
+            <p>Page missing. Help clean the landfill!<br><b>Move your finger or mouse to steer.</b></p>
             <button class="btn-play" onclick="initGame()">START CLEANING</button>
         </div>
 
         <div id="gameOverScreen" class="overlay" style="display:none;">
-            <h1 style="color: var(--danger)">CRASHED!</h1>
-            <p>You recycled <span id="finalScore">0</span> items.</p>
+            <h1 style="color: #ef4444">CRASHED!</h1>
+            <p>You recycled <span id="finalScore" style="color:white">0</span> items.</p>
             <button class="btn-play" onclick="initGame()">TRY AGAIN</button>
         </div>
     </div>
@@ -143,26 +142,36 @@
 
         let snake = [];
         let food = { x: 0, y: 0, emoji: '♻️' };
-        let angle = 0; // In radians
-        let speed = 3;
-        let turnSpeed = 0.08;
+        let angle = 0; 
+        let speed = 3.5;
         let gameActive = false;
-        let canvasSize = { w: 0, h: 0 };
+        let pointer = { x: 0, y: 0, active: false };
 
         const recyclables = ['📰', '🥫', '📦', '🍾', '♻️'];
 
         function resize() {
-            canvasSize.w = window.innerWidth * 0.9;
-            canvasSize.h = window.innerHeight * 0.8;
-            canvas.width = canvasSize.w;
-            canvas.height = canvasSize.h;
+            canvas.width = window.innerWidth * 0.95;
+            canvas.height = window.innerHeight * 0.85;
         }
 
         window.addEventListener('resize', resize);
         resize();
 
+        // Input Handling (Mouse & Touch)
+        const updatePointer = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            pointer.x = clientX - rect.left;
+            pointer.y = clientY - rect.top;
+            pointer.active = true;
+        };
+
+        window.addEventListener('mousemove', updatePointer);
+        window.addEventListener('touchstart', updatePointer, {passive: false});
+        window.addEventListener('touchmove', updatePointer, {passive: false});
+
         function initGame() {
-            // Fullscreen attempt
             const container = document.getElementById('game-container');
             if (container.requestFullscreen) container.requestFullscreen().catch(() => {});
             
@@ -171,15 +180,17 @@
             
             score = 0;
             scoreEl.innerText = score;
-            speed = 3;
-            angle = -Math.PI / 2;
+            speed = 3.5;
             
-            // Start snake in center
             snake = [];
             const startX = canvas.width / 2;
             const startY = canvas.height / 2;
-            for (let i = 0; i < 20; i++) {
-                snake.push({ x: startX, y: startY + (i * 5) });
+            pointer.x = startX;
+            pointer.y = startY - 50;
+            pointer.active = false;
+
+            for (let i = 0; i < 25; i++) {
+                snake.push({ x: startX, y: startY + (i * 4) });
             }
             
             spawnFood();
@@ -188,62 +199,53 @@
         }
 
         function spawnFood() {
-            food.x = 50 + Math.random() * (canvas.width - 100);
-            food.y = 50 + Math.random() * (canvas.height - 100);
+            food.x = 40 + Math.random() * (canvas.width - 80);
+            food.y = 40 + Math.random() * (canvas.height - 80);
             food.emoji = recyclables[Math.floor(Math.random() * recyclables.length)];
         }
-
-        // Input handling
-        let keys = {};
-        window.addEventListener('keydown', e => keys[e.key] = true);
-        window.addEventListener('keyup', e => keys[e.key] = false);
-
-        // Mobile touch steering
-        let touchX = null;
-        window.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
-        window.addEventListener('touchmove', e => {
-            const currentX = e.touches[0].clientX;
-            if (currentX < touchX) angle -= turnSpeed;
-            else if (currentX > touchX) angle += turnSpeed;
-            touchX = currentX;
-        });
 
         function update() {
             if (!gameActive) return;
 
-            // Handle Turning
-            if (keys['ArrowLeft'] || keys['a']) angle -= turnSpeed;
-            if (keys['ArrowRight'] || keys['d']) angle += turnSpeed;
-
-            // Move Head
             const head = { ...snake[0] };
+
+            // Logic: Point toward the mouse/finger
+            if (pointer.active) {
+                const targetAngle = Math.atan2(pointer.y - head.y, pointer.x - head.x);
+                let diff = targetAngle - angle;
+                
+                // Wrap angle difference to stay within -PI to PI
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+
+                // Smooth turn toward pointer (lerp)
+                angle += diff * 0.15;
+            }
+
             head.x += Math.cos(angle) * speed;
             head.y += Math.sin(angle) * speed;
 
-            // Wall Collision
+            // Boundary collision
             if (head.x < 0 || head.x > canvas.width || head.y < 0 || head.y > canvas.height) {
                 endGame(); return;
             }
 
-            // Self Collision (skip first 15 segments to allow tight turns)
-            for (let i = 15; i < snake.length; i++) {
+            // Self Collision (lenient)
+            for (let i = 20; i < snake.length; i++) {
                 const dx = head.x - snake[i].x;
                 const dy = head.y - snake[i].y;
-                if (Math.sqrt(dx*dx + dy*dy) < 10) {
-                    endGame(); return;
-                }
+                if (dx*dx + dy*dy < 100) { endGame(); return; }
             }
 
             // Food Collision
             const fdx = head.x - food.x;
             const fdy = head.y - food.y;
-            if (Math.sqrt(fdx*fdx + fdy*fdy) < 25) {
+            if (fdx*fdx + fdy*fdy < 900) {
                 score++;
                 scoreEl.innerText = score;
-                speed += 0.1;
+                speed += 0.05;
                 spawnFood();
-                // Add length
-                for(let i=0; i<5; i++) snake.push({ ...snake[snake.length-1] });
+                for(let i=0; i<6; i++) snake.push({ ...snake[snake.length-1] });
             }
 
             snake.unshift(head);
@@ -257,16 +259,22 @@
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // Subtle Grid
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+            for(let i=0; i<canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+
             // Draw Food
-            ctx.font = '30px Arial';
+            ctx.font = '32px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(food.emoji, food.x, food.y);
 
-            // Draw Snake Trail/Body
+            // Draw Snake
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            ctx.lineWidth = 15;
+            ctx.lineWidth = 18;
             ctx.strokeStyle = '#10b981';
             
             ctx.beginPath();
@@ -276,12 +284,12 @@
             }
             ctx.stroke();
 
-            // Head glow
-            ctx.shadowBlur = 15;
+            // Head Glow
+            ctx.shadowBlur = 20;
             ctx.shadowColor = '#34d399';
             ctx.fillStyle = '#34d399';
             ctx.beginPath();
-            ctx.arc(snake[0].x, snake[0].y, 10, 0, Math.PI*2);
+            ctx.arc(snake[0].x, snake[0].y, 11, 0, Math.PI*2);
             ctx.fill();
             ctx.shadowBlur = 0;
         }
