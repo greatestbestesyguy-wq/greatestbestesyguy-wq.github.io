@@ -217,38 +217,73 @@
             syncIframe();
         }
 
-        function updateArrayItem(path, index, key, value) {
-            const arr = getPath(db, path);
-            arr[index][key] = value;
-            syncIframe();
-        }
-
-        function addArrayItem(path, keysStr) {
-            const keys = JSON.parse(keysStr);
-            let arr = getPath(db, path);
-            if (!arr) { 
-                setPath(db, path, []); 
-                arr = getPath(db, path); 
-            }
-            const newItem = {};
-            keys.forEach(k => newItem[k.key] = '');
-            arr.push(newItem);
-            renderForm();
-            syncIframe();
-        }
-
-        function removeArrayItem(path, index) {
-            const arr = getPath(db, path);
-            arr.splice(index, 1);
-            renderForm();
-            syncIframe();
-        }
-
         function syncIframe() {
             const iframe = document.getElementById('preview-frame');
             if (iframe && iframe.contentWindow) {
                 iframe.contentWindow.postMessage({ type: 'UPDATE_CONTENT', data: db }, '*');
             }
+        }
+
+        function renderForm() {
+            const container = document.getElementById('form-container');
+            container.innerHTML = '';
+            
+            if (currentPage === 'home') {
+                container.innerHTML += `
+                    <div class="field-group">
+                        <label>Popup Enabled</label>
+                        <select onchange="updateData('popup.enabled', this.value === 'true')">
+                            <option value="true" ${db.popup?.enabled ? 'selected' : ''}>Yes</option>
+                            <option value="false" ${!db.popup?.enabled ? 'selected' : ''}>No</option>
+                        </select>
+                    </div>
+                    <div class="field-group"><label>Popup Message</label><textarea onchange="updateData('popup.message', this.value)">${db.popup?.message || ''}</textarea></div>
+                    <div class="field-group"><label>Popup Link Text</label><input type="text" value="${db.popup?.linkText || ''}" onchange="updateData('popup.linkText', this.value)"></div>
+                    <div class="field-group"><label>Popup Link URL</label><input type="text" value="${db.popup?.linkUrl || ''}" onchange="updateData('popup.linkUrl', this.value)"></div>
+                    
+                    <div style="margin: 30px 0 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                        <h3 style="color:var(--accent);">Content Blocks (Articles & Interviews)</h3>
+                        <p style="font-size:11px; color:var(--text-dim);">Leave any field blank to disable it on the live site.</p>
+                    </div>
+                `;
+                
+                if(!db.contentBlocks) { db.contentBlocks = []; }
+
+                db.contentBlocks.forEach((block, index) => {
+                    container.innerHTML += `
+                        <div class="array-item">
+                            <div class="array-item-header">
+                                <span class="array-item-title">Block ${index + 1}</span>
+                                <button class="btn-danger" onclick="removeBlock(${index})">Remove</button>
+                            </div>
+                            <div class="field-group"><label>Small Label</label><input type="text" value="${block.label || ''}" onchange="updateData('contentBlocks.${index}.label', this.value)"></div>
+                            <div class="field-group"><label>Image URL</label><input type="text" value="${block.imageUrl || ''}" onchange="updateData('contentBlocks.${index}.imageUrl', this.value)"></div>
+                            <div class="field-group"><label>Title (Big Text)</label><input type="text" value="${block.title || ''}" onchange="updateData('contentBlocks.${index}.title', this.value)"></div>
+                            <div class="field-group"><label>Body Text</label><textarea onchange="updateData('contentBlocks.${index}.body', this.value)">${block.body || ''}</textarea></div>
+                            <div class="field-group"><label>Expandable Part (Hidden until clicked)</label><textarea onchange="updateData('contentBlocks.${index}.expandableBody', this.value)">${block.expandableBody || ''}</textarea></div>
+                            <div class="field-group"><label>Button Text</label><input type="text" value="${block.buttonText || ''}" onchange="updateData('contentBlocks.${index}.buttonText', this.value)"></div>
+                            <div class="field-group"><label>Button URL</label><input type="text" value="${block.buttonUrl || ''}" onchange="updateData('contentBlocks.${index}.buttonUrl', this.value)"></div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML += `<button class="btn" onclick="addBlock()" style="width:100%; justify-content:center; margin-top:10px; background: rgba(16, 185, 129, 0.1); border-color: var(--accent); color: var(--accent);">+ Add Content Block</button>`;
+            } else {
+                container.innerHTML = '<p style="color:var(--text-dim); text-align:center; padding: 20px;">Settings for this page are under construction.</p>';
+            }
+        }
+
+        function addBlock() {
+            if(!db.contentBlocks) db.contentBlocks = [];
+            db.contentBlocks.push({ label: "", title: "New Content Block", body: "", imageUrl: "", buttonText: "", buttonUrl: "", expandableBody: "" });
+            renderForm();
+            syncIframe();
+        }
+
+        function removeBlock(index) {
+            db.contentBlocks.splice(index, 1);
+            renderForm();
+            syncIframe();
         }
 
         function openGitHubModal() {
@@ -261,127 +296,10 @@
         }
 
         function copyJSON() {
-            const text = document.getElementById('export-json');
-            text.select();
-            document.execCommand('copy');
-            alert('Copied to clipboard!');
-        }
-
-        // --- DYNAMIC FORM RENDERERS ---
-        function renderArray(path, title, fields) {
-            const arr = getPath(db, path) || [];
-            let html = `<h3>${title}</h3><div style="margin-bottom: 25px;">`;
-            
-            arr.forEach((item, index) => {
-                html += `
-                    <div class="array-item">
-                        <div class="array-item-header">
-                            <span class="array-item-title">Item ${index + 1}</span>
-                            <button class="btn btn-danger" onclick="removeArrayItem('${path}', ${index})">Remove</button>
-                        </div>`;
-                
-                fields.forEach(f => {
-                    html += `
-                        <div class="field-group">
-                            <label>${f.label}</label>
-                            ${f.type === 'area' 
-                                ? `<textarea oninput="updateArrayItem('${path}', ${index}, '${f.key}', this.value)">${item[f.key] || ''}</textarea>`
-                                : `<input type="text" value="${item[f.key] || ''}" oninput="updateArrayItem('${path}', ${index}, '${f.key}', this.value)">`
-                            }
-                        </div>`;
-                });
-                
-                html += `</div>`;
-            });
-
-            const keysJson = JSON.stringify(fields).replace(/"/g, '&quot;');
-            html += `<button class="btn" onclick="addArrayItem('${path}', '${keysJson}')">+ Add New ${title}</button></div>`;
-            return html;
-        }
-
-        function renderForm() {
-            const container = document.getElementById('form-container');
-            let html = '';
-
-            const input = (label, path, type = 'text') => {
-                const val = getPath(db, path);
-                const isArea = type === 'area';
-                return `
-                    <div class="field-group">
-                        <label>${label}</label>
-                        ${isArea 
-                            ? `<textarea oninput="updateData('${path}', this.value)">${val}</textarea>`
-                            : `<input type="text" value="${val}" oninput="updateData('${path}', this.value)">`
-                        }
-                    </div>`;
-            };
-
-            const toggle = (label, path) => {
-                const val = getPath(db, path);
-                return `
-                    <div class="field-group">
-                        <label>${label}</label>
-                        <select onchange="updateData('${path}', this.value === 'true')">
-                            <option value="true" ${val ? 'selected' : ''}>Visible</option>
-                            <option value="false" ${!val ? 'selected' : ''}>Hidden</option>
-                        </select>
-                    </div>`;
-            };
-
-            if (currentPage === 'home') {
-                html += `<h3>Metadata</h3>${input('Page Title', 'metadata.pageTitle')}${input('Description', 'metadata.metaDescription')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
-                html += `<h3>Hero Section</h3>${input('Headline', 'hero.title')}${input('Tagline', 'hero.tagline')}`;
-                html += renderArray('hero.buttons', 'Hero Buttons', [
-                    {label: 'Button Text', key: 'text'}, {label: 'Link URL', key: 'url'}
-                ]);
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
-                html += renderArray('stats', 'Stats & Cards', [
-                    {label: 'Value', key: 'value'}, {label: 'Label', key: 'label'}
-                ]);
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
-                html += `<h3>Interview Banner</h3>`;
-                html += toggle('Banner Visibility', 'interview.visible');
-                html += input('Small Label', 'interview.label');
-                html += input('Headline', 'interview.title');
-                html += input('Description', 'interview.description', 'area');
-                html += input('Button Text', 'interview.buttonText');
-                html += input('Button Link URL', 'interview.link');
-                html += input('Background Image URL', 'interview.imageUrl');
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
-                html += `<h3>Primary Article</h3>${input('Article Header', 'article.title')}${input('Body Text', 'article.body', 'area')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
-                html += renderArray('additionalArticles', 'Additional Articles', [
-                    {label: 'Title', key: 'title'}, {label: 'Body Content', key: 'body', type: 'area'}
-                ]);
-            } 
-            else if (currentPage === 'map') {
-                html += `<h3>Map Settings</h3>${input('Main Title', 'mapPage.title')}${input('Map URL (Embed)', 'mapPage.mapUrl')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
-                html += `<h3>Instructions</h3>${input('Title', 'mapPage.instructionsTitle')}${input('Body', 'mapPage.instructionsBody', 'area')}`;
-            }
-            else if (currentPage === 'interviews') {
-                html += `<h3>Header</h3>${input('Page Headline', 'interviewsPage.title')}${input('YouTube Embed', 'interviewsPage.featuredVideoUrl')}`;
-                html += renderArray('interviewsPage.entries', 'Interview Entries', [
-                    {label: 'Label', key: 'label'}, {label: 'Title', key: 'title'}, {label: 'Description', key: 'description'}
-                ]);
-            }
-            else if (currentPage === 'about') {
-                html += `<h3>Mission Statement</h3>${input('Title', 'aboutPage.missionTitle')}${input('Mission Text', 'aboutPage.missionBody', 'area')}`;
-                html += `<hr style="border:0; border-top:1px solid var(--border); margin:25px 0;">`;
-                html += `<h3>Project Details</h3>${input('Course', 'aboutPage.contextCourse')}${input('Date', 'aboutPage.contextDate')}${input('Focus', 'aboutPage.contextFocus')}${input('Quote', 'aboutPage.contextQuote', 'area')}`;
-                html += renderArray('aboutPage.team', 'Team Roster', [
-                    {label: 'Name', key: 'name'}, {label: 'Role', key: 'role'}
-                ]);
-            }
-            else if (currentPage === 'quiz') {
-                html += `<h3>Quiz Settings</h3>${input('Page Title', 'quizPage.pageTitle')}`;
-                html += renderArray('quizPage.questions', 'Questions', [
-                    {label: 'Question', key: 'q'}, {label: 'Answer (Yes/No)', key: 'a'}, {label: 'Explanation', key: 'info'}
-                ]);
-            }
-            
-            container.innerHTML = html;
+            const copyText = document.getElementById('export-json');
+            copyText.select();
+            document.execCommand("copy");
+            alert("Copied to clipboard!");
         }
     </script>
 </body>
