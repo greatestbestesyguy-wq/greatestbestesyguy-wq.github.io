@@ -21,12 +21,11 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            margin: 0;
             overflow: hidden;
             touch-action: none;
+            width: 100vw;
+            height: 100vh;
         }
 
         .btn-home {
@@ -35,14 +34,14 @@
             left: 20px;
             background: var(--text);
             color: #000;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 50px;
             font-weight: 800;
             text-decoration: none;
             z-index: 100;
-            box-shadow: 0 4px 20px rgba(255,255,255,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: all 0.2s;
-            border: 2px solid transparent;
+            font-size: 0.8rem;
         }
         .btn-home:hover { transform: scale(1.05); background: var(--accent); }
 
@@ -50,18 +49,13 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle, #111 0%, #000 100%);
+            background: #000;
         }
 
         canvas {
-            background: #000;
             display: block;
-            border: 3px solid var(--accent);
-            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
-            border-radius: 12px;
+            width: 100%;
+            height: 100%;
         }
 
         .overlay {
@@ -76,19 +70,19 @@
             backdrop-filter: blur(8px);
         }
 
-        .overlay h1 { font-size: clamp(3rem, 10vw, 5rem); color: var(--accent); margin-bottom: 10px; }
-        .overlay p { font-size: 1.2rem; margin-bottom: 30px; color: var(--text-dim); text-align: center; padding: 0 20px;}
+        .overlay h1 { font-size: clamp(3rem, 15vw, 6rem); color: var(--accent); margin-bottom: 5px; }
+        .overlay p { font-size: 1.1rem; margin-bottom: 25px; color: var(--text-dim); text-align: center; max-width: 300px;}
 
         .btn-play {
             background: var(--accent);
             color: #000;
             border: none;
-            padding: 20px 50px;
+            padding: 18px 45px;
             border-radius: 50px;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
             transition: all 0.2s;
         }
         .btn-play:hover { transform: scale(1.1); background: var(--accent-hover); }
@@ -101,8 +95,9 @@
             font-family: monospace;
             z-index: 100;
             pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
-        .stats div { font-size: 1.5rem; font-weight: bold; }
+        .stats div { font-size: 1.4rem; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -111,7 +106,7 @@
 
     <div class="stats">
         <div style="color: var(--accent)">SCORE: <span id="score">0</span></div>
-        <div style="font-size: 1rem; color: var(--text-dim)">BEST: <span id="highScore">0</span></div>
+        <div style="font-size: 0.9rem; color: var(--text-dim)">BEST: <span id="highScore">0</span></div>
     </div>
 
     <div id="game-container">
@@ -119,13 +114,13 @@
 
         <div id="startScreen" class="overlay">
             <h1>404</h1>
-            <p>Page missing. Help clean the landfill!<br><b>Move your finger or mouse to steer.</b></p>
+            <p>Page not found. Use your finger or mouse to clear the landfill!</p>
             <button class="btn-play" onclick="initGame()">START CLEANING</button>
         </div>
 
         <div id="gameOverScreen" class="overlay" style="display:none;">
-            <h1 style="color: #ef4444">CRASHED!</h1>
-            <p>You recycled <span id="finalScore" style="color:white">0</span> items.</p>
+            <h1 style="color: #ef4444">CRASH!</h1>
+            <p>You recycled <span id="finalScore" style="color:white; font-weight:bold;">0</span> items.</p>
             <button class="btn-play" onclick="initGame()">TRY AGAIN</button>
         </div>
     </div>
@@ -143,27 +138,27 @@
         let snake = [];
         let food = { x: 0, y: 0, emoji: '♻️' };
         let angle = 0; 
-        let speed = 3.5;
+        let speed = 4;
         let gameActive = false;
         let pointer = { x: 0, y: 0, active: false };
+        let effects = []; // For the +1 animations
 
         const recyclables = ['📰', '🥫', '📦', '🍾', '♻️'];
 
         function resize() {
-            canvas.width = window.innerWidth * 0.95;
-            canvas.height = window.innerHeight * 0.85;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
 
         window.addEventListener('resize', resize);
         resize();
 
-        // Input Handling (Mouse & Touch)
+        // Input Handling
         const updatePointer = (e) => {
-            const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            pointer.x = clientX - rect.left;
-            pointer.y = clientY - rect.top;
+            pointer.x = clientX;
+            pointer.y = clientY;
             pointer.active = true;
         };
 
@@ -172,23 +167,20 @@
         window.addEventListener('touchmove', updatePointer, {passive: false});
 
         function initGame() {
-            const container = document.getElementById('game-container');
-            if (container.requestFullscreen) container.requestFullscreen().catch(() => {});
-            
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('gameOverScreen').style.display = 'none';
             
             score = 0;
             scoreEl.innerText = score;
-            speed = 3.5;
+            speed = 4;
+            effects = [];
             
-            snake = [];
             const startX = canvas.width / 2;
             const startY = canvas.height / 2;
             pointer.x = startX;
-            pointer.y = startY - 50;
-            pointer.active = false;
+            pointer.y = startY - 100;
 
+            snake = [];
             for (let i = 0; i < 25; i++) {
                 snake.push({ x: startX, y: startY + (i * 4) });
             }
@@ -199,9 +191,18 @@
         }
 
         function spawnFood() {
-            food.x = 40 + Math.random() * (canvas.width - 80);
-            food.y = 40 + Math.random() * (canvas.height - 80);
+            food.x = 50 + Math.random() * (canvas.width - 100);
+            food.y = 50 + Math.random() * (canvas.height - 100);
             food.emoji = recyclables[Math.floor(Math.random() * recyclables.length)];
+        }
+
+        function createEffect(x, y) {
+            effects.push({
+                x: x,
+                y: y,
+                opacity: 1,
+                velocity: 1.5
+            });
         }
 
         function update() {
@@ -209,47 +210,50 @@
 
             const head = { ...snake[0] };
 
-            // Logic: Point toward the mouse/finger
             if (pointer.active) {
                 const targetAngle = Math.atan2(pointer.y - head.y, pointer.x - head.x);
                 let diff = targetAngle - angle;
-                
-                // Wrap angle difference to stay within -PI to PI
                 while (diff < -Math.PI) diff += Math.PI * 2;
                 while (diff > Math.PI) diff -= Math.PI * 2;
-
-                // Smooth turn toward pointer (lerp)
-                angle += diff * 0.15;
+                angle += diff * 0.12; 
             }
 
             head.x += Math.cos(angle) * speed;
             head.y += Math.sin(angle) * speed;
 
-            // Boundary collision
+            // Boundary Check
             if (head.x < 0 || head.x > canvas.width || head.y < 0 || head.y > canvas.height) {
                 endGame(); return;
             }
 
-            // Self Collision (lenient)
-            for (let i = 20; i < snake.length; i++) {
+            // Self Collision
+            for (let i = 25; i < snake.length; i++) {
                 const dx = head.x - snake[i].x;
                 const dy = head.y - snake[i].y;
-                if (dx*dx + dy*dy < 100) { endGame(); return; }
+                if (dx*dx + dy*dy < 144) { endGame(); return; }
             }
 
             // Food Collision
             const fdx = head.x - food.x;
             const fdy = head.y - food.y;
-            if (fdx*fdx + fdy*fdy < 900) {
+            if (fdx*fdx + fdy*fdy < 1200) {
                 score++;
                 scoreEl.innerText = score;
-                speed += 0.05;
+                speed += 0.04;
+                createEffect(food.x, food.y);
                 spawnFood();
-                for(let i=0; i<6; i++) snake.push({ ...snake[snake.length-1] });
+                for(let i=0; i<8; i++) snake.push({ ...snake[snake.length-1] });
             }
 
             snake.unshift(head);
             snake.pop();
+
+            // Update Effects
+            for (let i = effects.length - 1; i >= 0; i--) {
+                effects[i].y -= effects[i].velocity;
+                effects[i].opacity -= 0.02;
+                if (effects[i].opacity <= 0) effects.splice(i, 1);
+            }
 
             draw();
             requestAnimationFrame(update);
@@ -259,24 +263,22 @@
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Subtle Grid
-            ctx.strokeStyle = '#111';
-            ctx.lineWidth = 1;
-            for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
-            for(let i=0; i<canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+            // Arena Glow Border
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Food
-            ctx.font = '32px Arial';
+            // Food
+            ctx.font = '34px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(food.emoji, food.x, food.y);
 
-            // Draw Snake
+            // Snake
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            ctx.lineWidth = 18;
+            ctx.lineWidth = 20;
             ctx.strokeStyle = '#10b981';
-            
             ctx.beginPath();
             ctx.moveTo(snake[0].x, snake[0].y);
             for (let i = 1; i < snake.length; i++) {
@@ -284,12 +286,19 @@
             }
             ctx.stroke();
 
+            // Floating +1 Effects
+            ctx.font = 'bold 24px Arial';
+            effects.forEach(eff => {
+                ctx.fillStyle = `rgba(16, 185, 129, ${eff.opacity})`;
+                ctx.fillText('+1', eff.x, eff.y);
+            });
+
             // Head Glow
             ctx.shadowBlur = 20;
             ctx.shadowColor = '#34d399';
             ctx.fillStyle = '#34d399';
             ctx.beginPath();
-            ctx.arc(snake[0].x, snake[0].y, 11, 0, Math.PI*2);
+            ctx.arc(snake[0].x, snake[0].y, 12, 0, Math.PI*2);
             ctx.fill();
             ctx.shadowBlur = 0;
         }
@@ -303,7 +312,6 @@
             }
             document.getElementById('finalScore').innerText = score;
             document.getElementById('gameOverScreen').style.display = 'flex';
-            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
         }
     </script>
 </body>
