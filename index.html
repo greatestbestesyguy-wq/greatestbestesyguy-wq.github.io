@@ -59,6 +59,34 @@
         }
 
         .close-terminal { color: #0f0; background: none; border: none; font-size: 24px; cursor: pointer; }
+        
+        /* POPUP & CONTENT STYLES */
+        #popup-notif { position: fixed; bottom: 20px; right: 20px; background: var(--surface, #18181b); color: var(--text, #fff); padding: 25px; border-radius: 12px; z-index: 10000; border: 2px solid var(--accent, #10b981); box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 320px; }
+        .close-notif { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-dim, #a1a1aa); transition: 0.2s; }
+        .close-notif:hover { color: var(--danger, #ef4444); }
+        .dynamic-block { max-width: 800px; margin: 0 auto 50px; padding: 30px; background: rgba(255,255,255,0.03); border: 1px solid var(--border, #27272a); border-radius: 16px; transition: transform 0.2s; }
+        .dynamic-block:hover { border-color: var(--accent, #10b981); }
+
+        /* SMOOTH EXPANDABLE STYLES */
+        .expand-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-bottom 0.4s ease-in-out;
+            opacity: 0;
+            padding: 0 20px;
+            background: rgba(0,0,0,0.2);
+            border-left: 4px solid var(--accent, #10b981);
+            border-radius: 6px;
+            color: var(--text, #fff);
+            white-space: pre-wrap;
+            margin-bottom: 0;
+        }
+        .expand-content.expanded {
+            max-height: 800px; /* arbitrary large height to accommodate content smoothly */
+            opacity: 1;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -87,7 +115,7 @@
 
     <div id="popup-notif" style="display:none;">
         <button class="close-notif" onclick="closePopup()">×</button>
-        <div id="popup-content"></div>
+        <div id="popup-content" style="margin-top: 5px; font-size: 14.5px; line-height: 1.5;"></div>
     </div>
 
     <div class="container">
@@ -100,22 +128,9 @@
 
             <div id="stats-grid" class="stats-grid"></div>
 
-            <section id="interview-container" class="interview-section" style="display:none;">
-                <div id="interview-img" class="interview-img"></div>
-                <div class="interview-content">
-                    <span id="interview-label" style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;"></span>
-                    <h3 id="interview-title"></h3>
-                    <p id="interview-text"></p>
-                    <a id="interview-link" href="" class="btn-play"></a>
-                </div>
-            </section>
-
-            <section id="article-section" style="max-width:700px; margin: 0 auto 40px;">
-                <h3 id="article-title"></h3>
-                <p id="article-body"></p>
-            </section>
-            
-            <div id="additional-articles-container"></div>
+            <section id="interview-container" class="interview-section" style="display:none;"></section>
+            <section id="article-section" style="display:none;"></section>
+            <div id="additional-articles-container" style="display:none;"></div>
         </main>
 
         <div id="footer-placeholder"></div>
@@ -159,6 +174,11 @@
             }, 80);
         }
 
+        function closePopup() {
+            const popup = document.getElementById('popup-notif');
+            if(popup) popup.style.display = 'none';
+        }
+
         // --- EXISTING CONTENT LOGIC ---
         function renderContent(data) {
             document.title = data.metadata.pageTitle;
@@ -171,10 +191,8 @@
             if (data.popup && data.popup.enabled) {
                 const popupContent = document.getElementById('popup-content');
                 if(popupContent) {
-                    popupContent.innerHTML = `
-                        <p>${data.popup.message}</p>
-                        <a href="${data.popup.linkUrl}" class="popup-btn">${data.popup.linkText}</a>
-                    `;
+                    let pLink = (data.popup.linkText && data.popup.linkUrl) ? `<br><br><a href="${data.popup.linkUrl}" style="color: var(--accent, #10b981); font-weight: bold; text-decoration: none; display: inline-block;">${data.popup.linkText} →</a>` : '';
+                    popupContent.innerHTML = `<p style="margin-bottom:0;">${data.popup.message || ''}</p>${pLink}`;
                 }
                 if(popup) popup.style.display = 'block';
             } else {
@@ -193,14 +211,14 @@
                         a.href = btn.url || '#';
                         a.innerText = btn.text || 'Click Here';
                         a.className = 'btn-primary'; 
-                        a.style = "padding: 10px 20px; background: var(--accent, #10b981); color: #000; text-decoration: none; border-radius: 8px; font-weight: bold;";
+                        a.style = "padding: 12px 24px; background: var(--accent, #10b981); color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.2s;";
                         btnContainer.appendChild(a);
                     });
                 }
             }
 
             const statsGrid = document.getElementById('stats-grid');
-            if(statsGrid) {
+            if(statsGrid && data.stats) {
                 statsGrid.innerHTML = ''; 
                 data.stats.forEach(stat => {
                     const card = document.createElement('div');
@@ -210,35 +228,34 @@
                 });
             }
 
-            const interviewContainer = document.getElementById('interview-container');
-            if (data.interview && data.interview.visible) {
-                if(interviewContainer) interviewContainer.style.display = 'grid';
-                document.getElementById('interview-label').innerText = data.interview.label;
-                document.getElementById('interview-title').innerText = data.interview.title;
-                document.getElementById('interview-text').innerText = data.interview.description;
-                const link = document.getElementById('interview-link');
-                link.innerText = data.interview.buttonText;
-                link.href = data.interview.link;
-                const img = document.getElementById('interview-img');
-                img.style.backgroundImage = `url('${data.interview.imageUrl}')`;
-            } else {
-                if(interviewContainer) interviewContainer.style.display = 'none';
-            }
+            const mainContent = document.getElementById('main-content');
+            document.querySelectorAll('.dynamic-block').forEach(e => e.remove());
 
-            document.getElementById('article-title').innerText = data.article.title;
-            document.getElementById('article-body').innerText = data.article.body;
-            
-            const artContainer = document.getElementById('additional-articles-container');
-            if (artContainer) {
-                artContainer.innerHTML = '';
-                if (data.additionalArticles) {
-                    data.additionalArticles.forEach(art => {
-                        const sec = document.createElement('section');
-                        sec.style = "max-width:700px; margin: 0 auto 80px;";
-                        sec.innerHTML = `<h3 style="margin-bottom: 15px;">${art.title || ''}</h3><p>${art.body || ''}</p>`;
-                        artContainer.appendChild(sec);
-                    });
-                }
+            if (data.contentBlocks) {
+                data.contentBlocks.forEach((block, index) => {
+                    const sec = document.createElement('section');
+                    sec.className = 'dynamic-block';
+                    
+                    let html = '';
+                    if (block.label) html += `<span style="color:var(--accent, #10b981); font-weight:800; font-size:12px; text-transform:uppercase; display:block; margin-bottom:10px; letter-spacing:1.5px;">${block.label}</span>`;
+                    if (block.imageUrl) html += `<img src="${block.imageUrl}" style="width:100%; max-height: 400px; object-fit: cover; border-radius:12px; margin-bottom:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">`;
+                    if (block.title) html += `<h2 style="margin-bottom:15px; font-size: 1.8rem;">${block.title}</h2>`;
+                    if (block.body) html += `<p style="margin-bottom:20px; line-height: 1.6; color: var(--text-dim, #ccc); font-size: 1.1rem;">${block.body}</p>`;
+                    
+                    if (block.expandableBody) {
+                        const expId = 'exp-' + index;
+                        // Added new dynamic smooth transition classes here
+                        html += `<div id="${expId}" class="expand-content">${block.expandableBody}</div>`;
+                        html += `<button onclick="const el = document.getElementById('${expId}'); el.classList.toggle('expanded'); this.innerText = el.classList.contains('expanded') ? 'Read Less ↑' : 'Read More ↓';" style="background:transparent; border: 1px solid var(--accent, #10b981); color:var(--accent, #10b981); cursor:pointer; font-weight:bold; padding:10px 20px; margin-right: 15px; margin-bottom: 20px; border-radius: 8px; transition: 0.2s;">Read More ↓</button>`;
+                    }
+
+                    if (block.buttonText && block.buttonUrl) {
+                        html += `<a href="${block.buttonUrl}" style="display:inline-block; padding:12px 24px; background:var(--accent, #10b981); color:#000; text-decoration:none; border-radius:8px; font-weight:bold; transition: 0.2s; margin-bottom: 20px;">${block.buttonText}</a>`;
+                    }
+                    
+                    sec.innerHTML = html;
+                    mainContent.appendChild(sec);
+                });
             }
         }
 
@@ -268,11 +285,6 @@
                     });
                 }
             });
-        }
-
-        function closePopup() {
-            const popup = document.getElementById('popup-notif');
-            if(popup) popup.style.display = 'none';
         }
     </script>
 </body>
