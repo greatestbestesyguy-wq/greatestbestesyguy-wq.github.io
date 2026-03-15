@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>404 - Lost in the Landfill | Recycle STL</title>
+    <link rel="icon" href="data:,"> <title>404 - Lost in the Landfill | Recycle STL</title>
     <style>
         :root {
             --bg: #09090b;
@@ -130,246 +130,221 @@
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreEl = document.getElementById('score');
-        const highScoreEl = document.getElementById('highScore');
-        const gameOverTitle = document.getElementById('gameOverTitle');
-        const gameOverMsg = document.getElementById('gameOverMsg');
-        
-        // Game Constants
-        const arenaOffset = 40;
-        const recyclables = ['📰', '🥫', '📦', '🍾', '♻️'];
-        
-        // State Variables
-        let score = 0;
-        let highScore = localStorage.getItem('snake360Score') || 0;
-        highScoreEl.innerText = highScore;
+        // Use a wrapper to ensure everything exists before running
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('score');
+            const highScoreEl = document.getElementById('highScore');
+            const gameOverTitle = document.getElementById('gameOverTitle');
+            const gameOverMsg = document.getElementById('gameOverMsg');
+            const finalScoreEl = document.getElementById('finalScore');
+            
+            const arenaOffset = 40;
+            const recyclables = ['📰', '🥫', '📦', '🍾', '♻️'];
+            
+            let score = 0;
+            let highScore = localStorage.getItem('snake360Score') || 0;
+            if(highScoreEl) highScoreEl.innerText = highScore;
 
-        let snake = [];
-        let food = { x: 0, y: 0, emoji: '♻️' };
-        let angle = 0; 
-        let speed = 4;
-        let gameActive = false;
-        let pointer = { x: 0, y: 0, active: false };
-        let effects = []; 
-        let gameLoopReq = null;
+            let snake = [];
+            let food = { x: 0, y: 0, emoji: '♻️' };
+            let angle = 0; 
+            let speed = 4;
+            let gameActive = false;
+            let pointer = { x: 0, y: 0, active: false };
+            let effects = []; 
+            let gameLoopReq = null;
 
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Input Management
-        const handleInput = (e) => {
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            pointer.x = clientX;
-            pointer.y = clientY;
-            pointer.active = true;
-        };
-
-        window.addEventListener('mousemove', handleInput);
-        window.addEventListener('touchstart', handleInput, {passive: false});
-        window.addEventListener('touchmove', handleInput, {passive: false});
-
-        function spawnFood() {
-            food.x = (arenaOffset + 60) + Math.random() * (canvas.width - (arenaOffset * 2) - 120);
-            food.y = (arenaOffset + 60) + Math.random() * (canvas.height - (arenaOffset * 2) - 120);
-            food.emoji = recyclables[Math.floor(Math.random() * recyclables.length)];
-        }
-
-        function createEffect(x, y) {
-            effects.push({ x, y, opacity: 1, velocity: 1.5 });
-        }
-
-        function initGame() {
-            // STOP EVERYTHING first
-            gameActive = false;
-            if (gameLoopReq) {
-                cancelAnimationFrame(gameLoopReq);
-                gameLoopReq = null;
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
             }
-            
-            // UI Resets
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('gameOverScreen').style.display = 'none';
-            
-            // Variable Resets
-            score = 0;
-            scoreEl.innerText = score;
-            speed = 4;
-            effects = [];
-            angle = -Math.PI / 2; // Face UP initially
-            
-            const startX = canvas.width / 2;
-            const startY = canvas.height / 2;
-            pointer.x = startX;
-            pointer.y = startY - 100;
-            pointer.active = false;
+            window.addEventListener('resize', resize);
+            resize();
 
-            snake = [];
-            for (let i = 0; i < 25; i++) {
-                snake.push({ x: startX, y: startY + (i * 4) });
-            }
-            
-            spawnFood();
-            
-            // Kick off the loop
-            gameActive = true;
-            gameLoop();
-        }
+            const handleInput = (e) => {
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                pointer.x = clientX;
+                pointer.y = clientY;
+                pointer.active = true;
+            };
 
-        function gameLoop() {
-            if (!gameActive) return;
+            window.addEventListener('mousemove', handleInput);
+            window.addEventListener('touchstart', handleInput, {passive: false});
+            window.addEventListener('touchmove', handleInput, {passive: false});
 
-            update();
-            draw();
-            
-            gameLoopReq = requestAnimationFrame(gameLoop);
-        }
-
-        function update() {
-            const head = { ...snake[0] };
-
-            // Steering Logic
-            if (pointer.active) {
-                const targetAngle = Math.atan2(pointer.y - head.y, pointer.x - head.x);
-                let diff = targetAngle - angle;
-                while (diff < -Math.PI) diff += Math.PI * 2;
-                while (diff > Math.PI) diff -= Math.PI * 2;
-                angle += diff * 0.12; 
+            function spawnFood() {
+                food.x = (arenaOffset + 60) + Math.random() * (canvas.width - (arenaOffset * 2) - 120);
+                food.y = (arenaOffset + 60) + Math.random() * (canvas.height - (arenaOffset * 2) - 120);
+                food.emoji = recyclables[Math.floor(Math.random() * recyclables.length)];
             }
 
-            head.x += Math.cos(angle) * speed;
-            head.y += Math.sin(angle) * speed;
-
-            // Border Collision
-            if (head.x < arenaOffset || head.x > canvas.width - arenaOffset || 
-                head.y < arenaOffset || head.y > canvas.height - arenaOffset) {
-                endGame(); return;
+            function createEffect(x, y) {
+                effects.push({ x, y, opacity: 1, velocity: 1.5 });
             }
 
-            // Self Collision (Checking from segment 25 down for better turn radius)
-            for (let i = 25; i < snake.length; i++) {
-                const dx = head.x - snake[i].x;
-                const dy = head.y - snake[i].y;
-                if (dx*dx + dy*dy < 144) {
+            window.initGame = function() {
+                gameActive = false;
+                if (gameLoopReq) cancelAnimationFrame(gameLoopReq);
+                
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('gameOverScreen').style.display = 'none';
+                
+                score = 0;
+                if(scoreEl) scoreEl.innerText = score;
+                speed = 4;
+                effects = [];
+                angle = -Math.PI / 2;
+                
+                const startX = canvas.width / 2;
+                const startY = canvas.height / 2;
+                pointer.x = startX;
+                pointer.y = startY - 100;
+                pointer.active = false;
+
+                snake = [];
+                for (let i = 0; i < 25; i++) {
+                    snake.push({ x: startX, y: startY + (i * 4) });
+                }
+                
+                spawnFood();
+                gameActive = true;
+                gameLoop();
+            }
+
+            function gameLoop() {
+                if (!gameActive) return;
+                update();
+                draw();
+                gameLoopReq = requestAnimationFrame(gameLoop);
+            }
+
+            function update() {
+                const head = { ...snake[0] };
+
+                if (pointer.active) {
+                    const targetAngle = Math.atan2(pointer.y - head.y, pointer.x - head.x);
+                    let diff = targetAngle - angle;
+                    while (diff < -Math.PI) diff += Math.PI * 2;
+                    while (diff > Math.PI) diff -= Math.PI * 2;
+                    angle += diff * 0.12; 
+                }
+
+                head.x += Math.cos(angle) * speed;
+                head.y += Math.sin(angle) * speed;
+
+                if (head.x < arenaOffset || head.x > canvas.width - arenaOffset || 
+                    head.y < arenaOffset || head.y > canvas.height - arenaOffset) {
                     endGame(); return;
+                }
+
+                for (let i = 25; i < snake.length; i++) {
+                    const dx = head.x - snake[i].x;
+                    const dy = head.y - snake[i].y;
+                    if (dx*dx + dy*dy < 144) {
+                        endGame(); return;
+                    }
+                }
+
+                const fdx = head.x - food.x;
+                const fdy = head.y - food.y;
+                if (fdx*fdx + fdy*fdy < 1500) {
+                    score++;
+                    if(scoreEl) scoreEl.innerText = score;
+                    speed += 0.04;
+                    createEffect(food.x, food.y);
+                    spawnFood();
+                    for(let i=0; i<8; i++) snake.push({ ...snake[snake.length-1] });
+                }
+
+                snake.unshift(head);
+                snake.pop();
+
+                for (let i = effects.length - 1; i >= 0; i--) {
+                    effects[i].y -= effects[i].velocity;
+                    effects[i].opacity -= 0.02;
+                    if (effects[i].opacity <= 0) effects.splice(i, 1);
                 }
             }
 
-            // Food Collection
-            const fdx = head.x - food.x;
-            const fdy = head.y - food.y;
-            if (fdx*fdx + fdy*fdy < 1500) {
-                score++;
-                scoreEl.innerText = score;
-                speed += 0.04;
-                createEffect(food.x, food.y);
-                spawnFood();
-                // Grow Snake
-                for(let i=0; i<8; i++) snake.push({ ...snake[snake.length-1] });
-            }
+            function draw() {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            snake.unshift(head);
-            snake.pop();
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(arenaOffset, arenaOffset, canvas.width - (arenaOffset * 2), canvas.height - (arenaOffset * 2));
 
-            // Particle Physics
-            for (let i = effects.length - 1; i >= 0; i--) {
-                effects[i].y -= effects[i].velocity;
-                effects[i].opacity -= 0.02;
-                if (effects[i].opacity <= 0) effects.splice(i, 1);
-            }
-        }
+                if (score === 0) {
+                    const pulse = 30 + Math.sin(Date.now() / 200) * 15;
+                    ctx.beginPath();
+                    ctx.arc(food.x, food.y, pulse, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = '#10b981';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('COLLECT ME', food.x, food.y + 45);
+                }
 
-        function draw() {
-            // Clear Frame
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Playable Arena Border
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(arenaOffset, arenaOffset, canvas.width - (arenaOffset * 2), canvas.height - (arenaOffset * 2));
-
-            // Start Coaching Highlight
-            if (score === 0) {
-                const pulse = 30 + Math.sin(Date.now() / 200) * 15;
-                ctx.beginPath();
-                ctx.arc(food.x, food.y, pulse, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.fillStyle = '#10b981';
-                ctx.font = 'bold 12px Arial';
+                ctx.font = '34px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText('COLLECT ME', food.x, food.y + 45);
+                ctx.textBaseline = 'middle';
+                ctx.fillText(food.emoji, food.x, food.y);
+
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.lineWidth = 20;
+                ctx.strokeStyle = '#10b981';
+                ctx.beginPath();
+                ctx.moveTo(snake[0].x, snake[0].y);
+                for (let i = 1; i < snake.length; i++) {
+                    ctx.lineTo(snake[i].x, snake[i].y);
+                }
+                ctx.stroke();
+
+                ctx.font = 'bold 24px Arial';
+                effects.forEach(eff => {
+                    ctx.fillStyle = `rgba(16, 185, 129, ${eff.opacity})`;
+                    ctx.fillText('+1', eff.x, eff.y);
+                });
+
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#34d399';
+                ctx.fillStyle = '#34d399';
+                ctx.beginPath();
+                ctx.arc(snake[0].x, snake[0].y, 12, 0, Math.PI*2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
             }
 
-            // Render Food
-            ctx.font = '34px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(food.emoji, food.x, food.y);
-
-            // Render Snake Body
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.lineWidth = 20;
-            ctx.strokeStyle = '#10b981';
-            ctx.beginPath();
-            ctx.moveTo(snake[0].x, snake[0].y);
-            for (let i = 1; i < snake.length; i++) {
-                ctx.lineTo(snake[i].x, snake[i].y);
+            function endGame() {
+                gameActive = false;
+                if (gameLoopReq) cancelAnimationFrame(gameLoopReq);
+                
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('snake360Score', highScore);
+                    if(highScoreEl) highScoreEl.innerText = highScore;
+                }
+                
+                // Safety check: only update if elements exist
+                if(finalScoreEl) finalScoreEl.innerText = score;
+                
+                if (score === 0) {
+                    if(gameOverTitle) gameOverTitle.innerText = "Don't Give Up!";
+                    if(gameOverMsg) gameOverMsg.innerHTML = "<b>Tip:</b> Drag your finger toward icons like ♻️. Avoid the green line!";
+                } else {
+                    if(gameOverTitle) gameOverTitle.innerText = "CRASH!";
+                    if(gameOverMsg) gameOverMsg.innerHTML = `You recycled <span style="color:white; font-weight:bold;">${score}</span> items.`;
+                }
+                
+                document.getElementById('gameOverScreen').style.display = 'flex';
             }
-            ctx.stroke();
-
-            // Render +1 Particles
-            ctx.font = 'bold 24px Arial';
-            effects.forEach(eff => {
-                ctx.fillStyle = `rgba(16, 185, 129, ${eff.opacity})`;
-                ctx.fillText('+1', eff.x, eff.y);
-            });
-
-            // Head Glow & Sprite
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#34d399';
-            ctx.fillStyle = '#34d399';
-            ctx.beginPath();
-            ctx.arc(snake[0].x, snake[0].y, 12, 0, Math.PI*2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-
-        function endGame() {
-            gameActive = false;
-            if (gameLoopReq) {
-                cancelAnimationFrame(gameLoopReq);
-                gameLoopReq = null;
-            }
-            
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('snake360Score', highScore);
-                highScoreEl.innerText = highScore;
-            }
-            
-            document.getElementById('finalScore').innerText = score;
-            
-            if (score === 0) {
-                gameOverTitle.innerText = "Don't Give Up!";
-                gameOverMsg.innerHTML = "<b>Tip:</b> Drag your finger or mouse toward the icons like ♻️ or 🥫 to collect them. Avoid hitting the green line!";
-            } else {
-                gameOverTitle.innerText = "CRASH!";
-                gameOverMsg.innerHTML = `You recycled <span style="color:white; font-weight:bold;">${score}</span> items.`;
-            }
-            
-            document.getElementById('gameOverScreen').style.display = 'flex';
-        }
+        });
     </script>
 </body>
 </html>
