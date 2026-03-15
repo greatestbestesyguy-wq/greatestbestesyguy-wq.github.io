@@ -34,7 +34,10 @@
   },
   "hero": {
     "title": "Recycle St. Louis",
-    "tagline": "A student advocacy project bringing awareness to the state of recycling in our city."
+    "tagline": "A student advocacy project bringing awareness to the state of recycling in our city.",
+    "buttons": [
+      { "text": "Find a Station Near You", "url": "map.html" }
+    ]
   },
   "stats": [
     { "value": "0", "label": "Curbside Pickups Active" },
@@ -54,6 +57,12 @@
     "title": "The Curbside Crisis",
     "body": "Due to labor shortages and high contamination rates, St. Louis has officially pivoted to a 'Drop-Off' model. Placing recyclables in your alley bin now almost guarantees they end up in a landfill."
   },
+  "additionalArticles": [
+    {
+      "title": "What Can Actually Be Recycled?",
+      "body": "It's essential to only drop off the 'Core Four': Clean paper/cardboard, plastic bottles/jugs with caps, glass bottles/jars, and metal cans. When in doubt, throw it out."
+    }
+  ],
 
   "MAP_PAGE_DATA": "--- Settings for map.html ---",
   "mapPage": {
