@@ -36,7 +36,7 @@
     "title": "Recycle St. Louis",
     "tagline": "A student advocacy project bringing awareness to the state of recycling in our city.",
     "buttons": [
-      { "text": "Find a Station Near You", "url": "map.html" }
+     
     ]
   },
   "stats": [
