@@ -118,7 +118,7 @@
 
         <div id="startScreen" class="overlay">
             <h1>404</h1>
-            <p>Page not found. Use your finger or mouse to guide the truck and clear the landfill!</p>
+            <p>Page missing. Help clean the landfill!<br><b>Move your finger or mouse to steer.</b></p>
             <button class="btn-play" onclick="initGame()">START CLEANING</button>
         </div>
 
@@ -137,6 +137,11 @@
         const gameOverTitle = document.getElementById('gameOverTitle');
         const gameOverMsg = document.getElementById('gameOverMsg');
         
+        // Game Constants
+        const arenaOffset = 40;
+        const recyclables = ['📰', '🥫', '📦', '🍾', '♻️'];
+        
+        // State Variables
         let score = 0;
         let highScore = localStorage.getItem('snake360Score') || 0;
         highScoreEl.innerText = highScore;
@@ -148,11 +153,7 @@
         let gameActive = false;
         let pointer = { x: 0, y: 0, active: false };
         let effects = []; 
-        let gameLoopReq;
-
-        // BORDER SETTINGS
-        const arenaOffset = 40; // Pixels away from the screen edge
-        const recyclables = ['📰', '🥫', '📦', '🍾', '♻️'];
+        let gameLoopReq = null;
 
         function resize() {
             canvas.width = window.innerWidth;
@@ -162,7 +163,8 @@
         window.addEventListener('resize', resize);
         resize();
 
-        const updatePointer = (e) => {
+        // Input Management
+        const handleInput = (e) => {
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             pointer.x = clientX;
@@ -170,41 +172,13 @@
             pointer.active = true;
         };
 
-        window.addEventListener('mousemove', updatePointer);
-        window.addEventListener('touchstart', updatePointer, {passive: false});
-        window.addEventListener('touchmove', updatePointer, {passive: false});
-
-        function initGame() {
-            gameActive = false;
-            cancelAnimationFrame(gameLoopReq);
-            
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('gameOverScreen').style.display = 'none';
-            
-            score = 0;
-            scoreEl.innerText = score;
-            speed = 4;
-            effects = [];
-            
-            const startX = canvas.width / 2;
-            const startY = canvas.height / 2;
-            pointer.x = startX;
-            pointer.y = startY - 100;
-
-            snake = [];
-            for (let i = 0; i < 25; i++) {
-                snake.push({ x: startX, y: startY + (i * 4) });
-            }
-            
-            spawnFood();
-            gameActive = true;
-            gameLoopReq = requestAnimationFrame(update);
-        }
+        window.addEventListener('mousemove', handleInput);
+        window.addEventListener('touchstart', handleInput, {passive: false});
+        window.addEventListener('touchmove', handleInput, {passive: false});
 
         function spawnFood() {
-            // Spawn only within the green border
-            food.x = (arenaOffset + 40) + Math.random() * (canvas.width - (arenaOffset * 2) - 80);
-            food.y = (arenaOffset + 40) + Math.random() * (canvas.height - (arenaOffset * 2) - 80);
+            food.x = (arenaOffset + 60) + Math.random() * (canvas.width - (arenaOffset * 2) - 120);
+            food.y = (arenaOffset + 60) + Math.random() * (canvas.height - (arenaOffset * 2) - 120);
             food.emoji = recyclables[Math.floor(Math.random() * recyclables.length)];
         }
 
@@ -212,11 +186,56 @@
             effects.push({ x, y, opacity: 1, velocity: 1.5 });
         }
 
-        function update() {
+        function initGame() {
+            // STOP EVERYTHING first
+            gameActive = false;
+            if (gameLoopReq) {
+                cancelAnimationFrame(gameLoopReq);
+                gameLoopReq = null;
+            }
+            
+            // UI Resets
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            
+            // Variable Resets
+            score = 0;
+            scoreEl.innerText = score;
+            speed = 4;
+            effects = [];
+            angle = -Math.PI / 2; // Face UP initially
+            
+            const startX = canvas.width / 2;
+            const startY = canvas.height / 2;
+            pointer.x = startX;
+            pointer.y = startY - 100;
+            pointer.active = false;
+
+            snake = [];
+            for (let i = 0; i < 25; i++) {
+                snake.push({ x: startX, y: startY + (i * 4) });
+            }
+            
+            spawnFood();
+            
+            // Kick off the loop
+            gameActive = true;
+            gameLoop();
+        }
+
+        function gameLoop() {
             if (!gameActive) return;
 
+            update();
+            draw();
+            
+            gameLoopReq = requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
             const head = { ...snake[0] };
 
+            // Steering Logic
             if (pointer.active) {
                 const targetAngle = Math.atan2(pointer.y - head.y, pointer.x - head.x);
                 let diff = targetAngle - angle;
@@ -228,52 +247,56 @@
             head.x += Math.cos(angle) * speed;
             head.y += Math.sin(angle) * speed;
 
-            // UPDATED COLLISION: Check against arenaOffset instead of screen edge
+            // Border Collision
             if (head.x < arenaOffset || head.x > canvas.width - arenaOffset || 
                 head.y < arenaOffset || head.y > canvas.height - arenaOffset) {
                 endGame(); return;
             }
 
+            // Self Collision (Checking from segment 25 down for better turn radius)
             for (let i = 25; i < snake.length; i++) {
                 const dx = head.x - snake[i].x;
                 const dy = head.y - snake[i].y;
-                if (dx*dx + dy*dy < 144) { endGame(); return; }
+                if (dx*dx + dy*dy < 144) {
+                    endGame(); return;
+                }
             }
 
+            // Food Collection
             const fdx = head.x - food.x;
             const fdy = head.y - food.y;
-            if (fdx*fdx + fdy*fdy < 1400) {
+            if (fdx*fdx + fdy*fdy < 1500) {
                 score++;
                 scoreEl.innerText = score;
                 speed += 0.04;
                 createEffect(food.x, food.y);
                 spawnFood();
+                // Grow Snake
                 for(let i=0; i<8; i++) snake.push({ ...snake[snake.length-1] });
             }
 
             snake.unshift(head);
             snake.pop();
 
+            // Particle Physics
             for (let i = effects.length - 1; i >= 0; i--) {
                 effects[i].y -= effects[i].velocity;
                 effects[i].opacity -= 0.02;
                 if (effects[i].opacity <= 0) effects.splice(i, 1);
             }
-
-            draw();
-            gameLoopReq = requestAnimationFrame(update);
         }
 
         function draw() {
+            // Clear Frame
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // UPDATED BORDER: Moved away from edges
+            // Playable Arena Border
             ctx.strokeStyle = '#10b981';
             ctx.lineWidth = 4;
             ctx.strokeRect(arenaOffset, arenaOffset, canvas.width - (arenaOffset * 2), canvas.height - (arenaOffset * 2));
 
-            // Start Highlight
+            // Start Coaching Highlight
             if (score === 0) {
                 const pulse = 30 + Math.sin(Date.now() / 200) * 15;
                 ctx.beginPath();
@@ -287,13 +310,13 @@
                 ctx.fillText('COLLECT ME', food.x, food.y + 45);
             }
 
-            // Food
+            // Render Food
             ctx.font = '34px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(food.emoji, food.x, food.y);
 
-            // Snake Body
+            // Render Snake Body
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.lineWidth = 20;
@@ -305,14 +328,14 @@
             }
             ctx.stroke();
 
-            // +1 Effects
+            // Render +1 Particles
             ctx.font = 'bold 24px Arial';
             effects.forEach(eff => {
                 ctx.fillStyle = `rgba(16, 185, 129, ${eff.opacity})`;
                 ctx.fillText('+1', eff.x, eff.y);
             });
 
-            // Head Glow
+            // Head Glow & Sprite
             ctx.shadowBlur = 20;
             ctx.shadowColor = '#34d399';
             ctx.fillStyle = '#34d399';
@@ -324,7 +347,11 @@
 
         function endGame() {
             gameActive = false;
-            cancelAnimationFrame(gameLoopReq);
+            if (gameLoopReq) {
+                cancelAnimationFrame(gameLoopReq);
+                gameLoopReq = null;
+            }
+            
             if (score > highScore) {
                 highScore = score;
                 localStorage.setItem('snake360Score', highScore);
