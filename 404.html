@@ -26,6 +26,9 @@
             touch-action: none;
             width: 100vw;
             height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-home {
@@ -145,7 +148,10 @@
         let gameActive = false;
         let pointer = { x: 0, y: 0, active: false };
         let effects = []; 
+        let gameLoopReq;
 
+        // BORDER SETTINGS
+        const arenaOffset = 40; // Pixels away from the screen edge
         const recyclables = ['📰', '🥫', '📦', '🍾', '♻️'];
 
         function resize() {
@@ -169,6 +175,9 @@
         window.addEventListener('touchmove', updatePointer, {passive: false});
 
         function initGame() {
+            gameActive = false;
+            cancelAnimationFrame(gameLoopReq);
+            
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('gameOverScreen').style.display = 'none';
             
@@ -189,12 +198,13 @@
             
             spawnFood();
             gameActive = true;
-            requestAnimationFrame(update);
+            gameLoopReq = requestAnimationFrame(update);
         }
 
         function spawnFood() {
-            food.x = 80 + Math.random() * (canvas.width - 160);
-            food.y = 80 + Math.random() * (canvas.height - 160);
+            // Spawn only within the green border
+            food.x = (arenaOffset + 40) + Math.random() * (canvas.width - (arenaOffset * 2) - 80);
+            food.y = (arenaOffset + 40) + Math.random() * (canvas.height - (arenaOffset * 2) - 80);
             food.emoji = recyclables[Math.floor(Math.random() * recyclables.length)];
         }
 
@@ -218,7 +228,9 @@
             head.x += Math.cos(angle) * speed;
             head.y += Math.sin(angle) * speed;
 
-            if (head.x < 0 || head.x > canvas.width || head.y < 0 || head.y > canvas.height) {
+            // UPDATED COLLISION: Check against arenaOffset instead of screen edge
+            if (head.x < arenaOffset || head.x > canvas.width - arenaOffset || 
+                head.y < arenaOffset || head.y > canvas.height - arenaOffset) {
                 endGame(); return;
             }
 
@@ -249,19 +261,19 @@
             }
 
             draw();
-            requestAnimationFrame(update);
+            gameLoopReq = requestAnimationFrame(update);
         }
 
         function draw() {
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Neon Arena Edge
+            // UPDATED BORDER: Moved away from edges
             ctx.strokeStyle = '#10b981';
             ctx.lineWidth = 4;
-            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeRect(arenaOffset, arenaOffset, canvas.width - (arenaOffset * 2), canvas.height - (arenaOffset * 2));
 
-            // START HIGHLIGHT: Pulsing ring around food if score is 0
+            // Start Highlight
             if (score === 0) {
                 const pulse = 30 + Math.sin(Date.now() / 200) * 15;
                 ctx.beginPath();
@@ -269,10 +281,9 @@
                 ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
-                // Label for extra clarity
                 ctx.fillStyle = '#10b981';
                 ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
                 ctx.fillText('COLLECT ME', food.x, food.y + 45);
             }
 
@@ -313,6 +324,7 @@
 
         function endGame() {
             gameActive = false;
+            cancelAnimationFrame(gameLoopReq);
             if (score > highScore) {
                 highScore = score;
                 localStorage.setItem('snake360Score', highScore);
@@ -321,10 +333,9 @@
             
             document.getElementById('finalScore').innerText = score;
             
-            // SPECIAL INSTRUCTIONS IF THEY LOSE AT ZERO
             if (score === 0) {
                 gameOverTitle.innerText = "Don't Give Up!";
-                gameOverMsg.innerHTML = "<b>Tip:</b> Drag your finger or mouse toward the icons like ♻️ or 🥫 to collect them. Avoid hitting the edges!";
+                gameOverMsg.innerHTML = "<b>Tip:</b> Drag your finger or mouse toward the icons like ♻️ or 🥫 to collect them. Avoid hitting the green line!";
             } else {
                 gameOverTitle.innerText = "CRASH!";
                 gameOverMsg.innerHTML = `You recycled <span style="color:white; font-weight:bold;">${score}</span> items.`;
