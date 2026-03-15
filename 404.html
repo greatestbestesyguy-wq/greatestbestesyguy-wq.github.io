@@ -68,10 +68,11 @@
             justify-content: center;
             z-index: 50;
             backdrop-filter: blur(8px);
+            padding: 20px;
         }
 
         .overlay h1 { font-size: clamp(3rem, 15vw, 6rem); color: var(--accent); margin-bottom: 5px; }
-        .overlay p { font-size: 1.1rem; margin-bottom: 25px; color: var(--text-dim); text-align: center; max-width: 300px;}
+        .overlay p { font-size: 1.1rem; margin-bottom: 25px; color: var(--text-dim); text-align: center; max-width: 400px; line-height: 1.4;}
 
         .btn-play {
             background: var(--accent);
@@ -114,13 +115,13 @@
 
         <div id="startScreen" class="overlay">
             <h1>404</h1>
-            <p>Page not found. Use your finger or mouse to clear the landfill!</p>
+            <p>Page not found. Use your finger or mouse to guide the truck and clear the landfill!</p>
             <button class="btn-play" onclick="initGame()">START CLEANING</button>
         </div>
 
         <div id="gameOverScreen" class="overlay" style="display:none;">
-            <h1 style="color: #ef4444">CRASH!</h1>
-            <p>You recycled <span id="finalScore" style="color:white; font-weight:bold;">0</span> items.</p>
+            <h1 id="gameOverTitle" style="color: #ef4444">CRASH!</h1>
+            <p id="gameOverMsg">You recycled <span id="finalScore" style="color:white; font-weight:bold;">0</span> items.</p>
             <button class="btn-play" onclick="initGame()">TRY AGAIN</button>
         </div>
     </div>
@@ -130,6 +131,8 @@
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
         const highScoreEl = document.getElementById('highScore');
+        const gameOverTitle = document.getElementById('gameOverTitle');
+        const gameOverMsg = document.getElementById('gameOverMsg');
         
         let score = 0;
         let highScore = localStorage.getItem('snake360Score') || 0;
@@ -141,7 +144,7 @@
         let speed = 4;
         let gameActive = false;
         let pointer = { x: 0, y: 0, active: false };
-        let effects = []; // For the +1 animations
+        let effects = []; 
 
         const recyclables = ['📰', '🥫', '📦', '🍾', '♻️'];
 
@@ -153,7 +156,6 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Input Handling
         const updatePointer = (e) => {
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -191,18 +193,13 @@
         }
 
         function spawnFood() {
-            food.x = 50 + Math.random() * (canvas.width - 100);
-            food.y = 50 + Math.random() * (canvas.height - 100);
+            food.x = 80 + Math.random() * (canvas.width - 160);
+            food.y = 80 + Math.random() * (canvas.height - 160);
             food.emoji = recyclables[Math.floor(Math.random() * recyclables.length)];
         }
 
         function createEffect(x, y) {
-            effects.push({
-                x: x,
-                y: y,
-                opacity: 1,
-                velocity: 1.5
-            });
+            effects.push({ x, y, opacity: 1, velocity: 1.5 });
         }
 
         function update() {
@@ -221,22 +218,19 @@
             head.x += Math.cos(angle) * speed;
             head.y += Math.sin(angle) * speed;
 
-            // Boundary Check
             if (head.x < 0 || head.x > canvas.width || head.y < 0 || head.y > canvas.height) {
                 endGame(); return;
             }
 
-            // Self Collision
             for (let i = 25; i < snake.length; i++) {
                 const dx = head.x - snake[i].x;
                 const dy = head.y - snake[i].y;
                 if (dx*dx + dy*dy < 144) { endGame(); return; }
             }
 
-            // Food Collision
             const fdx = head.x - food.x;
             const fdy = head.y - food.y;
-            if (fdx*fdx + fdy*fdy < 1200) {
+            if (fdx*fdx + fdy*fdy < 1400) {
                 score++;
                 scoreEl.innerText = score;
                 speed += 0.04;
@@ -248,7 +242,6 @@
             snake.unshift(head);
             snake.pop();
 
-            // Update Effects
             for (let i = effects.length - 1; i >= 0; i--) {
                 effects[i].y -= effects[i].velocity;
                 effects[i].opacity -= 0.02;
@@ -263,10 +256,25 @@
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Arena Glow Border
+            // Neon Arena Edge
             ctx.strokeStyle = '#10b981';
             ctx.lineWidth = 4;
             ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+            // START HIGHLIGHT: Pulsing ring around food if score is 0
+            if (score === 0) {
+                const pulse = 30 + Math.sin(Date.now() / 200) * 15;
+                ctx.beginPath();
+                ctx.arc(food.x, food.y, pulse, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Label for extra clarity
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 12px Arial';
+                ctx.fillText('COLLECT ME', food.x, food.y + 45);
+            }
 
             // Food
             ctx.font = '34px Arial';
@@ -274,7 +282,7 @@
             ctx.textBaseline = 'middle';
             ctx.fillText(food.emoji, food.x, food.y);
 
-            // Snake
+            // Snake Body
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.lineWidth = 20;
@@ -286,7 +294,7 @@
             }
             ctx.stroke();
 
-            // Floating +1 Effects
+            // +1 Effects
             ctx.font = 'bold 24px Arial';
             effects.forEach(eff => {
                 ctx.fillStyle = `rgba(16, 185, 129, ${eff.opacity})`;
@@ -310,7 +318,18 @@
                 localStorage.setItem('snake360Score', highScore);
                 highScoreEl.innerText = highScore;
             }
+            
             document.getElementById('finalScore').innerText = score;
+            
+            // SPECIAL INSTRUCTIONS IF THEY LOSE AT ZERO
+            if (score === 0) {
+                gameOverTitle.innerText = "Don't Give Up!";
+                gameOverMsg.innerHTML = "<b>Tip:</b> Drag your finger or mouse toward the icons like ♻️ or 🥫 to collect them. Avoid hitting the edges!";
+            } else {
+                gameOverTitle.innerText = "CRASH!";
+                gameOverMsg.innerHTML = `You recycled <span style="color:white; font-weight:bold;">${score}</span> items.`;
+            }
+            
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
     </script>
