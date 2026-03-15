@@ -8,11 +8,15 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
+        /* Setup Screen */
         #setup-screen { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; text-align: center; }
         .setup-box { max-width: 600px; width: 100%; }
         .setup-box h1 { margin-bottom: 10px; font-size: 2.5rem; color: var(--accent); }
+        .setup-box p { color: var(--text-dim); margin-bottom: 25px; font-size: 1.1rem; }
         textarea.json-loader { width: 100%; height: 300px; background: var(--surface); border: 2px dashed var(--border); border-radius: 16px; color: var(--accent); font-family: 'Courier New', monospace; padding: 25px; resize: none; transition: all 0.3s; font-size: 14px; }
+        textarea.json-loader:focus { outline: none; border-color: var(--accent); background: #1c1c21; }
         
+        /* Main Layout */
         #editor-screen { display: none; flex: 1; flex-direction: column; height: 100vh; }
         header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
         .header-left { display: flex; align-items: center; gap: 20px; }
@@ -22,30 +26,50 @@
         
         .header-right { display: flex; gap: 12px; }
         .btn { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+        .btn:hover { background: var(--border); transform: translateY(-1px); }
         .btn-primary { background: var(--accent); color: #000; border: none; font-weight: 700; }
+        .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
         .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px 10px; font-size: 12px; }
+        .btn-danger:hover { background: var(--danger); color: white; }
 
         .workspace { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar */
         .sidebar { width: 480px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: 10px 0 30px rgba(0,0,0,0.2); z-index: 10; }
         .sidebar-header { padding: 25px; border-bottom: 1px solid var(--border); }
         .sidebar-content { flex: 1; overflow-y: auto; padding: 25px; }
         
+        /* Form Controls */
         .field-group { margin-bottom: 24px; }
         .field-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
-        input[type="text"], input[type="url"], textarea, select.field-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); padding: 14px; font-size: 14px; outline: none; }
+        input[type="text"], input[type="url"], textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); padding: 14px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        input:focus, textarea:focus { border-color: var(--accent); }
+        textarea { height: 120px; resize: vertical; line-height: 1.5; }
         
-        .array-item { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        /* Array/Section Blocks */
+        .array-item { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; position: relative; }
+        .array-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+        .array-item-title { font-size: 13px; font-weight: bold; color: var(--accent); letter-spacing: 0.5px; }
+
+        /* Preview Area */
         .preview-area { flex: 1; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 40px; }
-        .device-toggle { position: absolute; top: 25px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; display: flex; overflow: hidden; z-index: 20; }
-        .device-toggle button { background: transparent; color: var(--text-dim); border: none; padding: 10px 20px; cursor: pointer; font-size: 12px; }
+        .device-toggle { position: absolute; top: 25px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; display: flex; overflow: hidden; z-index: 20; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .device-toggle button { background: transparent; color: var(--text-dim); border: none; padding: 10px 20px; cursor: pointer; font-size: 12px; font-weight: 600; }
         .device-toggle button.active { background: var(--border); color: var(--text); }
         
-        .iframe-container { width: 100%; height: 100%; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: white; transition: width 0.4s; }
+        .iframe-container { width: 100%; height: 100%; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: white; transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         iframe { width: 100%; height: 100%; border: none; }
         
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; }
-        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 650px; max-width: 90%; padding: 40px; }
-        .modal textarea { height: 350px; background: var(--bg); color: var(--accent); width: 100%; margin-bottom: 20px; padding: 15px; font-family: monospace; }
+        /* Export Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 650px; max-width: 90%; padding: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+        .modal h2 { margin-bottom: 15px; color: var(--accent); font-size: 1.8rem; }
+        .modal p { color: var(--text-dim); margin-bottom: 25px; line-height: 1.6; }
+        .modal textarea { height: 350px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; color: var(--accent); font-family: monospace; font-size: 12px; padding: 20px; margin-bottom: 25px; width: 100%; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+
+        h3 { font-size: 14px; color: var(--text); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        h3::before { content: ''; width: 4px; height: 14px; background: var(--accent); border-radius: 2px; }
     </style>
 </head>
 <body>
@@ -53,7 +77,8 @@
     <div id="setup-screen">
         <div class="setup-box">
             <h1>Studio <span>Setup</span></h1>
-            <p>Paste your <strong>content.json</strong> to begin editing.</p>
+            <p>Paste your <strong>content.json</strong> or fetch it from the server.</p>
+            <button class="btn btn-primary" onclick="fetchJSON()" style="margin-bottom: 15px; width: 100%; justify-content: center;">☁ Fetch JSON from Live Site</button>
             <textarea id="json-loader" class="json-loader" placeholder='{ "metadata": { ... } }' autofocus></textarea>
         </div>
     </div>
@@ -71,6 +96,7 @@
                 </select>
             </div>
             <div class="header-right">
+                <button class="btn" onclick="reloadPreview()">↻ Reload Live Site</button>
                 <button class="btn btn-primary" onclick="openGitHubModal()">⚡ Export & GitHub</button>
             </div>
         </header>
@@ -78,9 +104,11 @@
         <div class="workspace">
             <aside class="sidebar">
                 <div class="sidebar-header">
-                    <h2 id="sidebar-title">Editing Home</h2>
+                    <h2 id="sidebar-title" style="font-size: 1.2rem;">Editing Home</h2>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">Fields below update the site instantly.</p>
                 </div>
-                <div class="sidebar-content" id="form-container"></div>
+                <div class="sidebar-content" id="form-container">
+                    </div>
             </aside>
 
             <section class="preview-area">
@@ -89,7 +117,7 @@
                     <button id="btn-mobile" onclick="setDevice('mobile')">Mobile</button>
                 </div>
                 <div class="iframe-container" id="iframe-wrap">
-                    <iframe id="preview-frame" src="./index.html"></iframe>
+                    <iframe id="preview-frame" src="https://stl.planet-recycling.pl/"></iframe>
                 </div>
             </section>
         </div>
@@ -98,10 +126,12 @@
     <div id="github-modal" class="modal-overlay">
         <div class="modal">
             <h2>Ready to Publish!</h2>
+            <p>Your updated configuration is ready. Copy the code below, then click the button to open GitHub and update your file.</p>
             <textarea id="export-json" readonly></textarea>
-            <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <div class="modal-actions">
                 <button class="btn" onclick="closeGitHubModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="copyJSON()">📋 Copy JSON</button>
+                <button class="btn" onclick="copyJSON()">📋 Copy JSON</button>
+                <a href="https://github.com/greatestbestesyguy-wq/greatestbestesyguy-wq.github.io/blob/main/content.json" target="_blank" class="btn btn-primary" onclick="closeGitHubModal()">↗ Open GitHub Repo</a>
             </div>
         </div>
     </div>
@@ -110,28 +140,66 @@
         let db = null;
         let currentPage = 'home';
 
+        // --- FETCH ENGINE ---
+        async function fetchJSON() {
+            const btn = document.querySelector('#setup-screen .btn-primary');
+            const originalText = btn.innerText;
+            try {
+                btn.innerText = "⌛ Fetching...";
+                const response = await fetch('https://stl.planet-recycling.pl/content.json');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                
+                db = data;
+                document.getElementById('setup-screen').style.display = 'none';
+                document.getElementById('editor-screen').style.display = 'flex';
+                switchPage('home');
+            } catch (err) {
+                alert("Failed to fetch JSON. Check your connection or CORS settings.");
+                console.error(err);
+                btn.innerText = originalText;
+            }
+        }
+
+        // --- AUTO-LOADER ---
         document.getElementById('json-loader').addEventListener('input', function(e) {
             try {
                 db = JSON.parse(e.target.value);
                 document.getElementById('setup-screen').style.display = 'none';
                 document.getElementById('editor-screen').style.display = 'flex';
                 switchPage('home');
-            } catch(err) {}
+            } catch(err) { /* Waiting for valid JSON */ }
         });
+
+        const pageConfigs = {
+            home: { title: 'Home Page' },
+            map: { title: 'Map Page' },
+            interviews: { title: 'Interviews' },
+            about: { title: 'About Page' },
+            quiz: { title: 'Quiz Application' }
+        };
 
         function switchPage(pageKey) {
             currentPage = pageKey;
-            document.getElementById('sidebar-title').innerText = `Editing ${pageKey.charAt(0).toUpperCase() + pageKey.slice(1)}`;
-            const frame = document.getElementById('preview-frame');
-            const routes = { home: 'index.html', map: 'map.html', interviews: 'interviews.html', about: 'about.html', quiz: 'quiz.html' };
-            frame.src = `./${routes[pageKey]}`;
+            document.getElementById('sidebar-title').innerText = `Editing ${pageConfigs[pageKey].title}`;
+            document.getElementById('page-selector').value = pageKey;
             renderForm();
+        }
+
+        function reloadPreview() {
+            document.getElementById('preview-frame').src = "https://stl.planet-recycling.pl/";
+            setTimeout(syncIframe, 800);
         }
 
         function setDevice(type) {
             document.getElementById('btn-desktop').classList.toggle('active', type === 'desktop');
             document.getElementById('btn-mobile').classList.toggle('active', type === 'mobile');
             document.getElementById('iframe-wrap').style.width = type === 'mobile' ? '375px' : '100%';
+        }
+
+        // --- DATA BINDING HELPERS ---
+        function getPath(obj, path) {
+            return path.split('.').reduce((o, i) => (o ? o[i] : ''), obj);
         }
 
         function setPath(obj, path, value) {
@@ -142,12 +210,16 @@
                 current = current[keys[i]];
             }
             current[keys[keys.length - 1]] = value;
+        }
+
+        function updateData(path, value) {
+            setPath(db, path, value);
             syncIframe();
         }
 
         function syncIframe() {
             const iframe = document.getElementById('preview-frame');
-            if (iframe.contentWindow) {
+            if (iframe && iframe.contentWindow) {
                 iframe.contentWindow.postMessage({ type: 'UPDATE_CONTENT', data: db }, '*');
             }
         }
@@ -157,59 +229,77 @@
             container.innerHTML = '';
             
             if (currentPage === 'home') {
-                renderGroup(container, "General", [
-                    { label: "Popup Enabled", path: "popup.enabled", type: "select", options: [{l:"Yes", v:true}, {l:"No", v:false}] },
-                    { label: "Popup Msg", path: "popup.message", type: "text" },
-                    { label: "Hero Title", path: "hero.title", type: "text" }
-                ]);
-            } else if (currentPage === 'map') {
-                renderGroup(container, "Map View", [
-                    { label: "Page Title", path: "mapPage.title", type: "text" },
-                    { label: "Map URL", path: "mapPage.mapUrl", type: "text" },
-                    { label: "Instructions", path: "mapPage.instructionsBody", type: "textarea" }
-                ]);
-            } else if (currentPage === 'about') {
-                renderGroup(container, "Mission", [
-                    { label: "Title", path: "aboutPage.title", type: "text" },
-                    { label: "Mission Text", path: "aboutPage.missionBody", type: "textarea" }
-                ]);
-            } else if (currentPage === 'interviews') {
-                renderGroup(container, "Video", [
-                    { label: "Video URL", path: "interviewsPage.featuredVideoUrl", type: "text" }
-                ]);
-            } else if (currentPage === 'quiz') {
-                container.innerHTML = "<p>Quiz questions are managed in the content.json array.</p>";
+                container.innerHTML += `
+                    <div class="field-group">
+                        <label>Popup Enabled</label>
+                        <select onchange="updateData('popup.enabled', this.value === 'true')">
+                            <option value="true" ${db.popup?.enabled ? 'selected' : ''}>Yes</option>
+                            <option value="false" ${!db.popup?.enabled ? 'selected' : ''}>No</option>
+                        </select>
+                    </div>
+                    <div class="field-group"><label>Popup Message</label><textarea onchange="updateData('popup.message', this.value)">${db.popup?.message || ''}</textarea></div>
+                    <div class="field-group"><label>Popup Link Text</label><input type="text" value="${db.popup?.linkText || ''}" onchange="updateData('popup.linkText', this.value)"></div>
+                    <div class="field-group"><label>Popup Link URL</label><input type="text" value="${db.popup?.linkUrl || ''}" onchange="updateData('popup.linkUrl', this.value)"></div>
+                    
+                    <div style="margin: 30px 0 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                        <h3 style="color:var(--accent);">Content Blocks (Articles & Interviews)</h3>
+                        <p style="font-size:11px; color:var(--text-dim);">Leave any field blank to disable it on the live site.</p>
+                    </div>
+                `;
+                
+                if(!db.contentBlocks) { db.contentBlocks = []; }
+
+                db.contentBlocks.forEach((block, index) => {
+                    container.innerHTML += `
+                        <div class="array-item">
+                            <div class="array-item-header">
+                                <span class="array-item-title">Block ${index + 1}</span>
+                                <button class="btn-danger" onclick="removeBlock(${index})">Remove</button>
+                            </div>
+                            <div class="field-group"><label>Small Label</label><input type="text" value="${block.label || ''}" onchange="updateData('contentBlocks.${index}.label', this.value)"></div>
+                            <div class="field-group"><label>Image URL</label><input type="text" value="${block.imageUrl || ''}" onchange="updateData('contentBlocks.${index}.imageUrl', this.value)"></div>
+                            <div class="field-group"><label>Title (Big Text)</label><input type="text" value="${block.title || ''}" onchange="updateData('contentBlocks.${index}.title', this.value)"></div>
+                            <div class="field-group"><label>Body Text</label><textarea onchange="updateData('contentBlocks.${index}.body', this.value)">${block.body || ''}</textarea></div>
+                            <div class="field-group"><label>Expandable Part (Hidden until clicked)</label><textarea onchange="updateData('contentBlocks.${index}.expandableBody', this.value)">${block.expandableBody || ''}</textarea></div>
+                            <div class="field-group"><label>Button Text</label><input type="text" value="${block.buttonText || ''}" onchange="updateData('contentBlocks.${index}.buttonText', this.value)"></div>
+                            <div class="field-group"><label>Button URL</label><input type="text" value="${block.buttonUrl || ''}" onchange="updateData('contentBlocks.${index}.buttonUrl', this.value)"></div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML += `<button class="btn" onclick="addBlock()" style="width:100%; justify-content:center; margin-top:10px; background: rgba(16, 185, 129, 0.1); border-color: var(--accent); color: var(--accent);">+ Add Content Block</button>`;
+            } else {
+                container.innerHTML = '<p style="color:var(--text-dim); text-align:center; padding: 20px;">Settings for this page are under construction.</p>';
             }
         }
 
-        function renderGroup(container, title, fields) {
-            let html = `<h3>${title}</h3>`;
-            fields.forEach(f => {
-                const val = f.path.split('.').reduce((o, i) => (o ? o[i] : ''), db);
-                html += `<div class="field-group"><label>${f.label}</label>`;
-                if (f.type === "select") {
-                    html += `<select class="field-input" onchange="setPath(db, '${f.path}', this.value === 'true')">`;
-                    f.options.forEach(o => html += `<option value="${o.v}" ${val == o.v ? 'selected' : ''}>${o.l}</option>`);
-                    html += `</select>`;
-                } else if (f.type === "textarea") {
-                    html += `<textarea onchange="setPath(db, '${f.path}', this.value)">${val}</textarea>`;
-                } else {
-                    html += `<input type="text" value="${val}" onchange="setPath(db, '${f.path}', this.value)">`;
-                }
-                html += `</div>`;
-            });
-            container.innerHTML += html;
+        function addBlock() {
+            if(!db.contentBlocks) db.contentBlocks = [];
+            db.contentBlocks.push({ label: "", title: "New Content Block", body: "", imageUrl: "", buttonText: "", buttonUrl: "", expandableBody: "" });
+            renderForm();
+            syncIframe();
+        }
+
+        function removeBlock(index) {
+            db.contentBlocks.splice(index, 1);
+            renderForm();
+            syncIframe();
         }
 
         function openGitHubModal() {
             document.getElementById('export-json').value = JSON.stringify(db, null, 2);
             document.getElementById('github-modal').style.display = 'flex';
         }
-        function closeGitHubModal() { document.getElementById('github-modal').style.display = 'none'; }
+
+        function closeGitHubModal() {
+            document.getElementById('github-modal').style.display = 'none';
+        }
+
         function copyJSON() {
-            document.getElementById('export-json').select();
+            const copyText = document.getElementById('export-json');
+            copyText.select();
             document.execCommand("copy");
-            alert("Copied!");
+            alert("Copied to clipboard!");
         }
     </script>
 </body>
