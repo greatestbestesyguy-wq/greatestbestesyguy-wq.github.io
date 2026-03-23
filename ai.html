@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI Chat</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        #chat-container { width: 100%; max-width: 600px; background: #1e1e1e; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        #output { min-height: 100px; margin-bottom: 20px; white-space: pre-wrap; line-height: 1.5; color: #e0e0e0; }
+        input { width: calc(100% - 22px); padding: 10px; border-radius: 6px; border: none; background: #333; color: white; margin-bottom: 10px; }
+        button { padding: 10px 20px; border-radius: 6px; border: none; background: #007bff; color: white; cursor: pointer; font-weight: bold; }
+        button:disabled { background: #555; }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <h2>Gemini 3 Flash</h2>
+        <div id="output">Type something below to start...</div>
+        <input type="text" id="userInput" placeholder="Ask me anything..." autofocus>
+        <button id="sendBtn">Send Request</button>
+    </div>
+
+    <script type="module">
+        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
+        // 1. Replace the string below with your actual API key
+        const API_KEY = "AIzaSyAlPrKzui913HeUtzwRWPv11cp6rhjssQw";
+        const genAI = new GoogleGenerativeAI(API_KEY);
+
+        const outputDiv = document.getElementById('output');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        async function runChat() {
+            const prompt = userInput.value;
+            if (!prompt) return;
+
+            // UI Feedback
+            outputDiv.innerText = "Thinking...";
+            sendBtn.disabled = true;
+
+            try {
+                // 2. Initialize the model (Gemini 3 Flash is the current fast default)
+                const model = genAI.getGenerativeModel({ model: "gemini-3-flash" });
+
+                // 3. Generate content
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                const text = response.text();
+
+                // 4. Display result
+                outputDiv.innerText = text;
+            } catch (error) {
+                outputDiv.innerText = "Error: " + error.message;
+                console.error(error);
+            } finally {
+                sendBtn.disabled = false;
+                userInput.value = "";
+            }
+        }
+
+        sendBtn.addEventListener('click', runChat);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') runChat();
+        });
+    </script>
+</body>
+</html>
