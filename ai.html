@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f4f4f9;
@@ -18,21 +18,22 @@
             padding: 25px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
-        .container {
+        .container, .edit-container {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        textarea {
+        textarea, input[type="text"] {
             width: 100%;
-            height: 100px;
             padding: 12px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 16px;
             box-sizing: border-box;
         }
+        textarea { height: 100px; }
         .options {
             display: flex;
             gap: 20px;
@@ -42,6 +43,7 @@
         .buttons {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         button {
             padding: 10px 20px;
@@ -55,8 +57,10 @@
             transition: background 0.2s;
         }
         button:hover { background: #1d4ed8; }
-        button.random { background: #10b981; }
-        button.random:hover { background: #059669; }
+        button.secondary { background: #10b981; }
+        button.secondary:hover { background: #059669; }
+        button.action { background: #8b5cf6; }
+        button.action:hover { background: #7c3aed; }
         button:disabled { background: #9ca3af; cursor: not-allowed; }
         
         #loading {
@@ -64,11 +68,18 @@
             color: #2563eb;
             font-weight: bold;
             margin-top: 10px;
+            padding: 10px;
+            background: #eff6ff;
+            border-radius: 4px;
         }
         
-        .output-section {
-            margin-top: 30px;
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
+        
         iframe {
             width: 100%;
             height: 500px;
@@ -78,12 +89,19 @@
         }
         #output-code {
             width: 100%;
-            height: 250px;
+            height: 200px;
             margin-top: 10px;
             font-family: monospace;
             background: #1e1e1e;
             color: #d4d4d4;
             border: none;
+        }
+        
+        #edit-section {
+            display: none; /* Hidden until a page is generated */
+            border-top: 2px dashed #e5e7eb;
+            padding-top: 20px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -97,22 +115,35 @@
             <textarea id="prompt" placeholder="E.g., A colorful landing page for a local bakery with a hero section and a contact form..."></textarea>
 
             <div class="options">
-                <label><input type="checkbox" id="opt-css" checked> Modern CSS Styling</label>
-                <label><input type="checkbox" id="opt-js"> Interactive JavaScript</label>
+                <label><input type="checkbox" id="opt-css" checked> Modern CSS</label>
+                <label><input type="checkbox" id="opt-js"> Interactive JS</label>
                 <label><input type="checkbox" id="opt-responsive" checked> Mobile Responsive</label>
             </div>
 
             <div class="buttons">
-                <button id="btn-generate" onclick="generatePage()">Generate Page</button>
-                <button id="btn-random" class="random" onclick="generateRandom()">Surprise Me (Random)</button>
+                <button id="btn-generate" onclick="generatePage()">Generate New Page</button>
+                <button id="btn-random" class="secondary" onclick="generateRandom()">Surprise Me</button>
             </div>
+            
+            <div id="loading">⏳ Processing... Please wait.</div>
+        </div>
 
-            <div id="loading">⏳ Generating your web page... Please wait a few seconds.</div>
+        <div id="edit-section">
+            <h3>Refine & Edit</h3>
+            <div class="edit-container">
+                <input type="text" id="edit-prompt" placeholder="E.g., Make the background dark mode, change the title to 'Welcome', add a footer...">
+                <div class="buttons">
+                    <button id="btn-edit" class="action" onclick="editPage()">Apply AI Edit</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="output-section">
-        <h3>Live Preview</h3>
+    <div class="card output-section">
+        <div class="output-header">
+            <h3>Live Preview</h3>
+            <button class="secondary" onclick="openFullscreen()">🔍 View Full Page</button>
+        </div>
         <iframe id="preview"></iframe>
 
         <h3>Raw HTML Output</h3>
@@ -120,53 +151,102 @@
     </div>
 
     <script>
-       // UPDATED: Using the current 2026 stable model string
-const API_KEY = "AIzaSyAlPrKzui913HeUtzwRWPv11cp6rhjssQw"; 
-// Change "gemini-1.5-flash" to "gemini-2.5-flash" or "gemini-3-flash-preview"
-const MODEL_NAME = "gemini-2.5-flash"; 
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-
-async function fetchAI(promptText) {
-    const btnGen = document.getElementById('btn-generate');
-    const btnRand = document.getElementById('btn-random');
-    const loading = document.getElementById('loading');
-    
-    btnGen.disabled = true;
-    btnRand.disabled = true;
-    loading.style.display = 'block';
-
-    try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: promptText }] }]
-            })
-        });
-
-        const data = await response.json();
+        const API_KEY = "AIzaSyAlPrKzui913HeUtzwRWPv11cp6rhjssQw"; 
+        const MODEL_NAME = "gemini-2.5-flash"; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
         
-        if (data.error) {
-            // Check if the error is specifically a model not found error
-            if (data.error.code === 404) {
-                throw new Error(`Model "${MODEL_NAME}" not found. You may need to use "gemini-3-flash-preview" instead.`);
+        let currentHtmlCode = ""; // Store the current code for editing
+
+        // Core AI Fetch Function
+        async function fetchAI(promptText, isEdit = false) {
+            const buttons = document.querySelectorAll('button');
+            const loading = document.getElementById('loading');
+            
+            buttons.forEach(btn => btn.disabled = true);
+            loading.style.display = 'block';
+            loading.innerText = isEdit ? "⏳ Applying your edits..." : "⏳ Generating your web page...";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptText }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                let generatedHtml = data.candidates[0].content.parts[0].text;
+
+                // Clean up markdown formatting
+                generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '').trim();
+
+                // Update state and UI
+                currentHtmlCode = generatedHtml;
+                document.getElementById('preview').srcdoc = currentHtmlCode;
+                document.getElementById('output-code').value = currentHtmlCode;
+                document.getElementById('edit-section').style.display = 'block';
+                document.getElementById('edit-prompt').value = '';
+
+            } catch (error) {
+                alert("API Error: " + error.message);
+                console.error(error);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+                loading.style.display = 'none';
             }
-            throw new Error(data.error.message);
         }
 
-        let generatedHtml = data.candidates[0].content.parts[0].text;
-        generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '');
+        // Generate a brand new page
+        function generatePage() {
+            const userText = document.getElementById('prompt').value.trim();
+            if (!userText) return alert("Please enter a description for your web page.");
 
-        document.getElementById('preview').srcdoc = generatedHtml;
-        document.getElementById('output-code').value = generatedHtml;
-    } catch (error) {
-        alert("API Error: " + error.message);
-    } finally {
-        btnGen.disabled = false;
-        btnRand.disabled = false;
-        loading.style.display = 'none';
-    }
-}
+            const css = document.getElementById('opt-css').checked ? "Use modern, beautiful CSS in the <style> tag." : "No CSS.";
+            const js = document.getElementById('opt-js').checked ? "Include functional JS in the <script> tag." : "No JS.";
+            const responsive = document.getElementById('opt-responsive').checked ? "Make it fully mobile-responsive." : "";
+
+            const fullPrompt = `You are an expert web developer. Write a complete, single-file HTML page for: "${userText}".
+            Requirements: Return ONLY raw HTML code. Do not include markdown blocks. ${css} ${js} ${responsive}`;
+
+            fetchAI(fullPrompt, false);
+        }
+
+        // Edit the existing page
+        function editPage() {
+            const editInstruction = document.getElementById('edit-prompt').value.trim();
+            if (!editInstruction) return alert("Please enter an edit instruction.");
+            if (!currentHtmlCode) return alert("Please generate a page first before editing.");
+
+            const editPrompt = `You are an expert web developer. Here is the current HTML code for a webpage:\n\n${currentHtmlCode}\n\nThe user wants you to apply this change: "${editInstruction}".\n\nReturn the ENTIRE updated HTML code. Return ONLY the raw HTML code, no markdown blocks, no explanations. Make sure it remains a complete HTML document.`;
+
+            fetchAI(editPrompt, true);
+        }
+
+        // Open in a new tab for true "fullscreen" viewing
+        function openFullscreen() {
+            if (!currentHtmlCode) return alert("Generate a page first!");
+            const blob = new Blob([currentHtmlCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        }
+
+        // Random ideas
+        function generateRandom() {
+            const topics = [
+                "A futuristic portfolio for a developer", 
+                "A retro 80s synthwave landing page", 
+                "A clean dashboard for tracking daily habits", 
+                "A vibrant online menu for a smoothie shop"
+            ];
+            document.getElementById('prompt').value = topics[Math.floor(Math.random() * topics.length)];
+            generatePage();
+        }
     </script>
 </body>
 </html>
