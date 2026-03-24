@@ -3,246 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STL Recycle Right AI</title>
+    <title>AI Web Page Builder</title>
     <style>
-        :root {
-            --bg-color: #1a1d21;
-            --container-bg: #2b3036;
-            --text-main: #e0e6ed;
-            --text-muted: #9ba6b1;
-            --accent: #38bdf8; /* Blue accent for STL */
-            --border-color: #444c56;
-        }
-
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: var(--bg-color); 
-            color: var(--text-main); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh;
-            margin: 0; 
-            padding: 20px; 
-        }
-
-        #chat-container { 
-            width: 100%; 
-            max-width: 650px; 
-            background: var(--container-bg); 
-            display: flex;
-            flex-direction: column;
-            border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-
-        /* Header */
-        .chat-header {
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
             padding: 20px;
-            background: rgba(0,0,0,0.2);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            background-color: #f4f4f9;
+            color: #333;
         }
-
-        .chat-header h1 { margin: 0; font-size: 1.2rem; color: var(--accent); }
-        .chat-header p { margin: 5px 0 0 0; font-size: 0.85rem; color: var(--text-muted); }
-
-        /* Output Area */
-        #output-window { 
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            min-height: 300px;
-            max-height: 500px;
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .container {
             display: flex;
             flex-direction: column;
             gap: 15px;
-            scroll-behavior: smooth;
         }
-
-        .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            line-height: 1.5;
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
         }
-
-        .user-message {
-            align-self: flex-end;
-            background-color: var(--accent);
-            color: #000;
-            border-bottom-right-radius: 4px;
+        .options {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 10px 0;
         }
-
-        .ai-message {
-            align-self: flex-start;
-            background-color: #3e444d;
-            border-bottom-left-radius: 4px;
-        }
-
-        .ai-message strong { color: var(--accent); }
-
-        /* Input Area */
-        .input-area {
-            padding: 15px 20px;
-            border-top: 1px solid var(--border-color);
-            background: rgba(0,0,0,0.1);
+        .buttons {
             display: flex;
             gap: 10px;
         }
-
-        input { 
-            flex: 1;
-            padding: 12px; 
-            border-radius: 8px; 
-            border: 1px solid var(--border-color); 
-            background: #121417; 
-            color: white; 
-            font-size: 1rem;
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.2s;
         }
-        input:focus { outline: 2px solid var(--accent); border-color: transparent; }
-
-        button { 
-            padding: 0 24px; 
-            border-radius: 8px; 
-            border: none; 
-            background: var(--accent); 
-            color: #000; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
+        button:hover { background: #1d4ed8; }
+        button.random { background: #10b981; }
+        button.random:hover { background: #059669; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        
+        #loading {
+            display: none;
+            color: #2563eb;
+            font-weight: bold;
+            margin-top: 10px;
         }
-        button:hover { opacity: 0.8; }
-        button:disabled { background: var(--text-muted); cursor: not-allowed; opacity: 1;}
-
+        
+        .output-section {
+            margin-top: 30px;
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+        #output-code {
+            width: 100%;
+            height: 250px;
+            margin-top: 10px;
+            font-family: monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+        }
     </style>
 </head>
 <body>
 
-    <div id="chat-container">
-        <div class="chat-header">
-            <div>
-                <h1>STL Recycle Right AI</h1>
-                <p>Gemini 3 Flash • St. Louis City & County Expert</p>
-            </div>
-        </div>
+    <div class="card">
+        <h1>AI Web Page Builder</h1>
+        <p>Describe your ideal web page, choose your settings, and let AI generate it for you.</p>
+        
+        <div class="container">
+            <textarea id="prompt" placeholder="E.g., A colorful landing page for a local bakery with a hero section and a contact form..."></textarea>
 
-        <div id="output-window">
-            <div class="message ai-message">
-                Hello! ♻️ I'm the St. Louis Recycling Assistant. Ask me if any item can go in your **Blue Bin** in STL City or County.
+            <div class="options">
+                <label><input type="checkbox" id="opt-css" checked> Modern CSS Styling</label>
+                <label><input type="checkbox" id="opt-js"> Interactive JavaScript</label>
+                <label><input type="checkbox" id="opt-responsive" checked> Mobile Responsive</label>
             </div>
-        </div>
 
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Can I recycle a pizza box?" autofocus>
-            <button id="sendBtn">Ask</button>
+            <div class="buttons">
+                <button id="btn-generate" onclick="generatePage()">Generate Page</button>
+                <button id="btn-random" class="random" onclick="generateRandom()">Surprise Me (Random)</button>
+            </div>
+
+            <div id="loading">⏳ Generating your web page... Please wait a few seconds.</div>
         </div>
     </div>
 
-    <script type="module">
-        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+    <div class="output-section">
+        <h3>Live Preview</h3>
+        <iframe id="preview"></iframe>
 
-        // SECURITY: Replace this with your newly generated key.
-        const API_KEY = "AIzaSyAlPrKzui913HeUtzwRWPv11cp6rhjssQw";
+        <h3>Raw HTML Output</h3>
+        <textarea id="output-code" readonly placeholder="Your generated code will appear here..."></textarea>
+    </div>
 
-        const genAI = new GoogleGenerativeAI(API_KEY);
+    <script>
+        // Utilizing the provided test API key
+        const API_KEY = "AIzaSyAlPrKzui913HeUtzwRWPv11cp6rhjssQw"; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-        // Define the AI's persona and strict knowledge base (March 2026 guidelines)
-        const systemInstruction = `
-            You are the "STL Recycling Expert." You speak strictly and authoritatively 
-            regarding official recycling guidelines for both St. Louis City and 
-            St. Louis County, Missouri.
-
-            Your goal is to determine if an item belongs in the standard single-stream 
-            **"Blue Bin" (Curbside Recycling)**, **"Trash" (Landfill)**, or 
-            **"Special Handling" (Drop-off only)**.
-
-            ### Core Rules (Always enforce):
-            1. Items must be **Empty, Clean, and Dry**.
-            2. Items must be placed **Loose** (never bagged in plastic).
-
-            ### Blue Bin (Allowed):
-            - **Paper:** Newspapers, magazines, junk mail, office paper, phone books.
-            - **Cardboard:** Flattened boxes (cereal, shipping). NO grease-soaked cardboard.
-            - **Plastic Bottles & Containers:** Items that hold their shape. Lids must be ON. (Generally codes #1, 2, 3, 5, 7. Avoid #6).
-            - **Metal Cans:** Aluminum and steel food/beverage cans (clean).
-            - **Glass:** Glass bottles and jars only (clean).
-            - **Cartons:** Food/beverage cartons (e.g., milk, juice).
-
-            ### Forbidden in Blue Bin (Trash):
-            - **Plastic Bags, Film, & Wrap:** (Attacker: Never allow). Tell users to return these to grocery stores.
-            - **Styrofoam:** Never allow.
-            - **Food Soiled Items:** Used napkins, paper plates, greasy pizza box bottoms.
-            - **Shredded Paper:** Tangles machinery.
-            - **Hoses, Wires, Hangers, Chains:** These are "tanglers."
-            - **Electronics & Batteries:** Refer to specialized drop-off centers.
-            - **Yard Waste:** Must be composted or specialized pickup.
-
-            ### Behavior Guidelines:
-            - If an item is ambiguous (e.g., "pizza box"), specify the conditions: "Recycle the clean top; trash the greasy bottom."
-            - Be polite, concise, and direct.
-            - Do not answer questions outside of recycling in the St. Louis region.
-        `;
-
-        const outputWindow = document.getElementById('output-window');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-
-        function appendMessage(text, sender) {
-            const msgDiv = document.createElement('div');
-            msgDiv.classList.add('message');
-            msgDiv.classList.add(sender === 'user' ? 'user-message' : 'ai-message');
+        async function fetchAI(promptText) {
+            const btnGen = document.getElementById('btn-generate');
+            const btnRand = document.getElementById('btn-random');
+            const loading = document.getElementById('loading');
             
-            // Allow basic bolding if the AI uses **markdown**
-            msgDiv.innerHTML = text.replace(/\*\*(.*?)\*\*/g, 'strong>$1</strong');
-            
-            outputWindow.appendChild(msgDiv);
-            outputWindow.scrollTop = outputWindow.scrollHeight;
-        }
-
-        async function runChat() {
-            const prompt = userInput.value;
-            if (!prompt) return;
-
-            appendMessage(prompt, 'user');
-            userInput.value = "";
-            userInput.focus();
-            
-            sendBtn.disabled = true;
-            sendBtn.innerText = "...";
+            // Disable UI during generation
+            btnGen.disabled = true;
+            btnRand.disabled = true;
+            loading.style.display = 'block';
+            document.getElementById('preview').srcdoc = '';
+            document.getElementById('output-code').value = '';
 
             try {
-                // Initialize the model WITH the system instruction
-                const model = genAI.getGenerativeModel({ 
-                    model: "gemini-3-flash-preview",
-                    systemInstruction: systemInstruction 
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptText }] }]
+                    })
                 });
 
-                // Generate response
-                const result = await model.generateContent(prompt);
-                const response = await result.response;
-                const text = response.text();
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
 
-                appendMessage(text, 'ai');
+                let generatedHtml = data.candidates[0].content.parts[0].text;
+
+                // Clean up markdown formatting if the AI wraps it in code blocks
+                generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '');
+
+                document.getElementById('preview').srcdoc = generatedHtml;
+                document.getElementById('output-code').value = generatedHtml;
             } catch (error) {
-                appendMessage("Sorry, I had trouble checking that. Error: " + error.message, 'ai');
-                console.error(error);
+                alert("Error generating page: " + error.message);
+                console.error("API Error:", error);
             } finally {
-                sendBtn.disabled = false;
-                sendBtn.innerText = "Ask";
+                // Restore UI
+                btnGen.disabled = false;
+                btnRand.disabled = false;
+                loading.style.display = 'none';
             }
         }
 
-        sendBtn.addEventListener('click', runChat);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') runChat();
-        });
+        function generatePage() {
+            const userText = document.getElementById('prompt').value.trim();
+            if (!userText) {
+                alert("Please enter a description for your web page.");
+                return;
+            }
+
+            // Gather options
+            const css = document.getElementById('opt-css').checked ? "Use modern, beautiful, and extensive CSS styling embedded in the <style> tag." : "Do not include any CSS styling.";
+            const js = document.getElementById('opt-js').checked ? "Include relevant and functional JavaScript embedded in the <script> tag for interactivity." : "Do not include any JavaScript.";
+            const responsive = document.getElementById('opt-responsive').checked ? "Ensure the design is fully mobile-responsive using flexbox/grid and media queries." : "";
+
+            // Construct the strict system prompt
+            const fullPrompt = `You are an expert web developer. Write a complete, single-file HTML page for the following request: "${userText}".
+            
+            Strict Requirements:
+            - Return ONLY the raw HTML code. Do not include markdown code blocks, explanations, or introductory text.
+            - ${css}
+            - ${js}
+            - ${responsive}
+            - Ensure all code is contained within a single standard HTML5 document format.`;
+
+            fetchAI(fullPrompt);
+        }
+
+        function generateRandom() {
+            const topics = [
+                "A futuristic portfolio for an AI developer", 
+                "A retro 80s synthwave landing page for a music festival", 
+                "A clean, minimalist dashboard for tracking daily habits", 
+                "A vibrant online menu for a tropical smoothie shop",
+                "A dark-mode landing page for a cybersecurity firm"
+            ];
+            const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+            document.getElementById('prompt').value = randomTopic;
+            generatePage();
+        }
     </script>
 </body>
 </html>
