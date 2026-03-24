@@ -120,92 +120,53 @@
     </div>
 
     <script>
-        // Utilizing the provided test API key
-        const API_KEY = "AIzaSyAlPrKzui913HeUtzwRWPv11cp6rhjssQw"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+       // UPDATED: Using the current 2026 stable model string
+const API_KEY = "AIzaSyAlPrKzui913HeUtzwRWPv11cp6rhjssQw"; 
+// Change "gemini-1.5-flash" to "gemini-2.5-flash" or "gemini-3-flash-preview"
+const MODEL_NAME = "gemini-2.5-flash"; 
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
-        async function fetchAI(promptText) {
-            const btnGen = document.getElementById('btn-generate');
-            const btnRand = document.getElementById('btn-random');
-            const loading = document.getElementById('loading');
-            
-            // Disable UI during generation
-            btnGen.disabled = true;
-            btnRand.disabled = true;
-            loading.style.display = 'block';
-            document.getElementById('preview').srcdoc = '';
-            document.getElementById('output-code').value = '';
+async function fetchAI(promptText) {
+    const btnGen = document.getElementById('btn-generate');
+    const btnRand = document.getElementById('btn-random');
+    const loading = document.getElementById('loading');
+    
+    btnGen.disabled = true;
+    btnRand.disabled = true;
+    loading.style.display = 'block';
 
-            try {
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: promptText }] }]
-                    })
-                });
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: promptText }] }]
+            })
+        });
 
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-
-                let generatedHtml = data.candidates[0].content.parts[0].text;
-
-                // Clean up markdown formatting if the AI wraps it in code blocks
-                generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '');
-
-                document.getElementById('preview').srcdoc = generatedHtml;
-                document.getElementById('output-code').value = generatedHtml;
-            } catch (error) {
-                alert("Error generating page: " + error.message);
-                console.error("API Error:", error);
-            } finally {
-                // Restore UI
-                btnGen.disabled = false;
-                btnRand.disabled = false;
-                loading.style.display = 'none';
+        const data = await response.json();
+        
+        if (data.error) {
+            // Check if the error is specifically a model not found error
+            if (data.error.code === 404) {
+                throw new Error(`Model "${MODEL_NAME}" not found. You may need to use "gemini-3-flash-preview" instead.`);
             }
+            throw new Error(data.error.message);
         }
 
-        function generatePage() {
-            const userText = document.getElementById('prompt').value.trim();
-            if (!userText) {
-                alert("Please enter a description for your web page.");
-                return;
-            }
+        let generatedHtml = data.candidates[0].content.parts[0].text;
+        generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '');
 
-            // Gather options
-            const css = document.getElementById('opt-css').checked ? "Use modern, beautiful, and extensive CSS styling embedded in the <style> tag." : "Do not include any CSS styling.";
-            const js = document.getElementById('opt-js').checked ? "Include relevant and functional JavaScript embedded in the <script> tag for interactivity." : "Do not include any JavaScript.";
-            const responsive = document.getElementById('opt-responsive').checked ? "Ensure the design is fully mobile-responsive using flexbox/grid and media queries." : "";
-
-            // Construct the strict system prompt
-            const fullPrompt = `You are an expert web developer. Write a complete, single-file HTML page for the following request: "${userText}".
-            
-            Strict Requirements:
-            - Return ONLY the raw HTML code. Do not include markdown code blocks, explanations, or introductory text.
-            - ${css}
-            - ${js}
-            - ${responsive}
-            - Ensure all code is contained within a single standard HTML5 document format.`;
-
-            fetchAI(fullPrompt);
-        }
-
-        function generateRandom() {
-            const topics = [
-                "A futuristic portfolio for an AI developer", 
-                "A retro 80s synthwave landing page for a music festival", 
-                "A clean, minimalist dashboard for tracking daily habits", 
-                "A vibrant online menu for a tropical smoothie shop",
-                "A dark-mode landing page for a cybersecurity firm"
-            ];
-            const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-            document.getElementById('prompt').value = randomTopic;
-            generatePage();
-        }
+        document.getElementById('preview').srcdoc = generatedHtml;
+        document.getElementById('output-code').value = generatedHtml;
+    } catch (error) {
+        alert("API Error: " + error.message);
+    } finally {
+        btnGen.disabled = false;
+        btnRand.disabled = false;
+        loading.style.display = 'none';
+    }
+}
     </script>
 </body>
 </html>
