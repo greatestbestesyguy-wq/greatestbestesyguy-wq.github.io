@@ -17,11 +17,6 @@
             --border: #334155;
         }
 
-        * {
-            box-sizing: border-box;
-            transition: all 0.2s ease;
-        }
-
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
@@ -34,59 +29,41 @@
             min-height: 100vh;
         }
 
-        .container {
-            width: 100%;
-            max-width: 1100px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
+        .container { width: 100%; max-width: 1000px; }
+        
         h1 {
             font-size: 2.5rem;
+            text-align: center;
             background: linear-gradient(to right, #818cf8, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-            margin-bottom: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        textarea, input[type="text"] {
+        textarea, input {
             width: 100%;
             background: #0f172a;
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 16px;
+            padding: 14px;
             color: white;
             font-size: 1rem;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             outline: none;
         }
 
-        textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .btn-group { display: flex; gap: 10px; }
-
+        .btn-row { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+        
         button {
-            padding: 12px 24px;
+            padding: 12px 20px;
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
@@ -94,74 +71,42 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.95rem;
+            transition: 0.2s;
         }
 
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-primary:hover { background: var(--primary-hover); }
         .btn-secondary { background: var(--border); color: var(--text); }
-        .btn-secondary:hover { background: #475569; }
 
-        /* Thinking/Status UI */
-        #status-container {
+        #status-area {
             display: none;
-            margin-top: 20px;
-            padding: 15px;
+            margin-top: 15px;
+            padding: 12px;
             background: rgba(99, 102, 241, 0.1);
-            border-left: 4px solid var(--primary);
             border-radius: 8px;
+            border-left: 4px solid var(--primary);
         }
 
-        .thinking-dots {
-            display: inline-block;
-            font-style: italic;
-            color: var(--primary);
-        }
-
-        #timer {
-            font-family: monospace;
-            color: var(--accent);
-            font-weight: bold;
-        }
-
-        /* Preview Area */
-        .preview-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+        #timer { color: var(--accent); font-weight: bold; font-family: monospace; }
 
         iframe {
             width: 100%;
-            height: 600px;
+            height: 500px;
             border: 1px solid var(--border);
             border-radius: 12px;
             background: white;
+            margin-top: 15px;
         }
 
-        /* History Sidebar */
-        .history-section {
-            margin-top: 20px;
-        }
-
-        .history-list {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 10px 0;
-        }
-
-        .history-item {
+        .history-list { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; }
+        .history-chip {
             background: var(--border);
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 20px;
+            font-size: 0.8rem;
             cursor: pointer;
             white-space: nowrap;
-            font-size: 0.85rem;
         }
-
-        .history-item:hover { background: var(--primary); }
 
         .hidden { display: none; }
     </style>
@@ -169,55 +114,39 @@
 <body>
 
 <div class="container">
-    <header>
-        <h1>Nexus AI</h1>
-        <p style="color: var(--text-muted)">Architecting the web through natural language.</p>
-    </header>
+    <h1>Nexus AI</h1>
 
     <div class="card">
-        <textarea id="prompt" rows="3" placeholder="Describe a high-converting landing page for a coffee shop..."></textarea>
+        <textarea id="prompt" rows="3" placeholder="Describe your website (e.g. A sleek dark-mode portfolio)..."></textarea>
         
-        <div class="controls">
-            <div class="btn-group">
-                <button class="btn-primary" id="btn-generate" onclick="generatePage()">
-                    <i data-lucide="sparkles"></i> Build Website
-                </button>
-                <button class="btn-secondary" onclick="generateRandom()">
-                    <i data-lucide="shuffle"></i> Surprise Me
-                </button>
+        <div class="btn-row">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-primary" onclick="generatePage()"><i data-lucide="sparkles"></i> Build</button>
+                <button class="btn-secondary" onclick="generateRandom()">Random</button>
             </div>
-            <div id="timer-display" class="hidden">
-                Time: <span id="timer">0.0s</span>
-            </div>
+            <div id="timer-box" class="hidden">Build Time: <span id="timer">0.0s</span></div>
         </div>
 
-        <div id="status-container">
-            <div id="ai-thought-process" class="thinking-dots">Initializing architect...</div>
+        <div id="status-area">
+            <span id="ai-status">Architecting...</span>
         </div>
     </div>
 
-    <div id="history-container" class="history-section hidden">
-        <h4 style="margin: 0 0 10px 0;">Recent Designs</h4>
-        <div id="history-list" class="history-list"></div>
+    <div id="history-section" class="card hidden">
+        <div class="history-list" id="history-list"></div>
     </div>
 
     <div id="edit-section" class="card hidden">
-        <input type="text" id="edit-prompt" placeholder="Change the theme to dark mode, or add a pricing section...">
-        <button class="btn-primary" onclick="editPage()">
-            <i data-lucide="wand-2"></i> Refine Design
-        </button>
+        <input type="text" id="edit-prompt" placeholder="Ask for a change (e.g. 'Make the buttons green')...">
+        <button class="btn-primary" onclick="editPage()"><i data-lucide="wand-2"></i> Update</button>
     </div>
 
     <div id="output-section" class="card hidden">
-        <div class="preview-header">
-            <h3>Live Environment</h3>
-            <div class="btn-group">
-                <button class="btn-secondary" onclick="copyHtml()">
-                    <i data-lucide="copy"></i> Copy HTML
-                </button>
-                <button class="btn-secondary" onclick="openFullscreen()">
-                    <i data-lucide="external-link"></i> Full View
-                </button>
+        <div class="btn-row" style="margin-bottom: 10px;">
+            <h3>Live Preview</h3>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-secondary" onclick="copyHtml()"><i data-lucide="copy"></i> Copy HTML</button>
+                <button class="btn-secondary" onclick="openFull()"><i data-lucide="maximize"></i> Fullscreen</button>
             </div>
         </div>
         <iframe id="preview"></iframe>
@@ -225,149 +154,107 @@
 </div>
 
 <script>
-    // Initialize Lucide Icons
     lucide.createIcons();
 
-    const API_KEY = "AIzaSyC7BC5viMahX6kpTl2gis7l5GgkoHGkcrU"; 
+    // Replace this with your valid key
+    const API_KEY = "YOUR_GEMINI_API_KEY_HERE"; 
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
     
-    let currentHtmlCode = "";
+    let currentHtml = "";
     let startTime;
-    let timerInterval;
+    let timerInt;
 
-    // Load history from cookies/localStorage on start
     window.onload = loadHistory;
 
     function startTimer() {
         startTime = Date.now();
-        document.getElementById('timer-display').classList.remove('hidden');
-        timerInterval = setInterval(() => {
-            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-            document.getElementById('timer').innerText = `${elapsed}s`;
+        document.getElementById('timer-box').classList.remove('hidden');
+        timerInt = setInterval(() => {
+            document.getElementById('timer').innerText = ((Date.now() - startTime)/1000).toFixed(1) + 's';
         }, 100);
     }
 
-    function stopTimer() {
-        clearInterval(timerInterval);
-    }
-
-    async function fetchAI(promptText, isEdit = false) {
-        const statusBox = document.getElementById('status-container');
-        const thoughtText = document.getElementById('ai-thought-process');
-        const buttons = document.querySelectorAll('button');
+    async function fetchAI(promptText) {
+        const statusArea = document.getElementById('status-area');
+        const statusText = document.getElementById('ai-status');
         
-        buttons.forEach(b => b.disabled = true);
-        statusBox.style.display = 'block';
+        statusArea.style.display = 'block';
         startTimer();
 
-        const stages = [
-            "Analyzing layout requirements...",
-            "Structuring semantic HTML5...",
-            "Injecting modern CSS3 variables...",
-            "Optimizing responsiveness...",
-            "Finalizing assets..."
-        ];
-
-        let stageIdx = 0;
-        const stageInterval = setInterval(() => {
-            thoughtText.innerText = stages[stageIdx % stages.length];
-            stageIdx++;
-        }, 1500);
+        const thoughts = ["Analyzing request...", "Generating structure...", "Styling components...", "Writing scripts...", "Polishing UI..."];
+        let i = 0;
+        const thoughtInt = setInterval(() => {
+            statusText.innerText = thoughts[i % thoughts.length];
+            i++;
+        }, 1200);
 
         try {
             const response = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: promptText }] }]
-                })
+                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
             });
 
             const data = await response.json();
-            let generatedHtml = data.candidates[0].content.parts[0].text;
-            generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '').trim();
+            if (data.error) throw new Error(data.error.message);
 
-            currentHtmlCode = generatedHtml;
-            document.getElementById('preview').srcdoc = currentHtmlCode;
-            
-            // Show UI sections
+            let raw = data.candidates[0].content.parts[0].text;
+            currentHtml = raw.replace(/```html|```/gi, "").trim();
+
+            document.getElementById('preview').srcdoc = currentHtml;
             document.getElementById('output-section').classList.remove('hidden');
             document.getElementById('edit-section').classList.remove('hidden');
             
-            saveToHistory(promptText.substring(0, 30) + "...");
-
-        } catch (error) {
-            alert("Connection Error: Check API Key or Vercel Environment.");
+            saveHistory(promptText.substring(0, 20) + "...");
+        } catch (e) {
+            alert("Error: " + e.message + "\n\nNote: Browsers often block AI keys for security. For Vercel, use a 'Serverless Function' backend.");
         } finally {
-            clearInterval(stageInterval);
-            stopTimer();
-            statusBox.style.display = 'none';
-            buttons.forEach(b => b.disabled = false);
+            clearInterval(timerInt);
+            clearInterval(thoughtInt);
+            statusArea.style.display = 'none';
         }
     }
 
     function generatePage() {
-        const userText = document.getElementById('prompt').value.trim();
-        if (!userText) return;
-
-        const fullPrompt = `You are a world-class frontend dev. Build a complete, modern, single-file HTML/CSS/JS page for: "${userText}". 
-        Make it beautiful with modern colors and responsive. RETURN ONLY RAW HTML CODE. NO MARKDOWN.`;
-
-        fetchAI(fullPrompt);
+        const p = document.getElementById('prompt').value;
+        fetchAI(`Create a complete single-file HTML/CSS website for: ${p}. Return ONLY the code.`);
     }
 
     function editPage() {
-        const instruction = document.getElementById('edit-prompt').value.trim();
-        if (!instruction) return;
-
-        const editPrompt = `Current Code: ${currentHtmlCode} \n\n User Request: ${instruction}. 
-        Apply these changes and return the FULL updated code. RAW HTML ONLY.`;
-        
-        fetchAI(editPrompt, true);
+        const p = document.getElementById('edit-prompt').value;
+        fetchAI(`Update this code: ${currentHtml}\n\nChange: ${p}\n\nReturn ONLY the full updated code.`);
     }
 
-    function copyHtml() {
-        navigator.clipboard.writeText(currentHtmlCode);
-        alert("Code copied to clipboard!");
-    }
-
-    function openFullscreen() {
-        const blob = new Blob([currentHtmlCode], { type: 'text/html' });
-        window.open(URL.createObjectURL(blob), '_blank');
-    }
-
-    function saveToHistory(label) {
-        let history = JSON.parse(localStorage.getItem('webHistory') || '[]');
-        history.unshift({ label, code: currentHtmlCode });
-        history = history.slice(0, 5); // Keep last 5
-        localStorage.setItem('webHistory', JSON.stringify(history));
+    function saveHistory(name) {
+        let h = JSON.parse(localStorage.getItem('nexus_history') || '[]');
+        h.unshift({ name, code: currentHtml });
+        localStorage.setItem('nexus_history', JSON.stringify(h.slice(0, 5)));
         loadHistory();
     }
 
     function loadHistory() {
-        const history = JSON.parse(localStorage.getItem('webHistory') || '[]');
-        if (history.length === 0) return;
-
+        let h = JSON.parse(localStorage.getItem('nexus_history') || '[]');
+        if (h.length === 0) return;
+        document.getElementById('history-section').classList.remove('hidden');
         const list = document.getElementById('history-list');
-        document.getElementById('history-container').classList.remove('hidden');
-        list.innerHTML = '';
-        
-        history.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            div.innerText = item.label;
-            div.onclick = () => {
-                currentHtmlCode = item.code;
-                document.getElementById('preview').srcdoc = currentHtmlCode;
-                document.getElementById('output-section').classList.remove('hidden');
-            };
-            list.appendChild(div);
-        });
+        list.innerHTML = h.map((item, idx) => `<div class="history-chip" onclick="restore(${idx})">${item.name}</div>`).join('');
     }
 
+    window.restore = (idx) => {
+        let h = JSON.parse(localStorage.getItem('nexus_history'));
+        currentHtml = h[idx].code;
+        document.getElementById('preview').srcdoc = currentHtml;
+        document.getElementById('output-section').classList.remove('hidden');
+    };
+
+    function copyHtml() { navigator.clipboard.writeText(currentHtml); alert("Copied!"); }
+    function openFull() {
+        const win = window.open();
+        win.document.write(currentHtml);
+    }
     function generateRandom() {
-        const ideas = ["SaaS Landing Page", "Cyberpunk Dashboard", "Minimalist Portfolio", "Recipe Blog"];
-        document.getElementById('prompt').value = ideas[Math.floor(Math.random() * ideas.length)];
+        const r = ["Space Travel Agency", "Cyberpunk Coffee", "Minimalist Blog", "80s Retro Portfolio"];
+        document.getElementById('prompt').value = r[Math.floor(Math.random()*r.length)];
         generatePage();
     }
 </script>
