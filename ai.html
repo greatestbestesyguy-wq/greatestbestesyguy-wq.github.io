@@ -3,260 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus | AI Web Architect</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>AI Web Page Builder</title>
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg: #0f172a;
+            --bg-color: #0f172a;
             --card-bg: #1e293b;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #10b981;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --success-hover: #059669;
             --border: #334155;
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container { width: 100%; max-width: 1000px; }
-        
-        h1 {
-            font-size: 2.5rem;
-            text-align: center;
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
         }
 
         .card {
             background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        textarea, input {
-            width: 100%;
-            background: #0f172a;
-            border: 1px solid var(--border);
+            padding: 30px;
             border-radius: 12px;
-            padding: 14px;
-            color: white;
-            font-size: 1rem;
-            margin-bottom: 12px;
-            outline: none;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
         }
 
-        .btn-row { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
-        
+        h1, h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+        }
+
+        p { color: var(--text-secondary); }
+
+        .container, .edit-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea { height: 120px; resize: vertical; }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
         button {
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-weight: 600;
+            padding: 12px 24px;
             cursor: pointer;
+            background: var(--accent);
+            color: white;
             border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        button:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        button.secondary { background: var(--border); color: var(--text-primary); }
+        button.secondary:hover { background: #475569; }
+        button.success { background: var(--success); }
+        button.success:hover { background: var(--success-hover); }
+        button:disabled { background: var(--border); color: var(--text-secondary); cursor: not-allowed; transform: none; }
+
+        #status-container {
+            display: none;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid var(--accent);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .loader {
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: 0.2s;
+            gap: 10px;
         }
 
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-secondary { background: var(--border); color: var(--text); }
-
-        #status-area {
-            display: none;
-            margin-top: 15px;
-            padding: 12px;
-            background: rgba(99, 102, 241, 0.1);
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
         }
 
-        #timer { color: var(--accent); font-weight: bold; font-family: monospace; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #timer { font-family: monospace; font-size: 1.2em; font-weight: bold; color: var(--accent); }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
 
         iframe {
             width: 100%;
-            height: 500px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
             background: white;
+        }
+
+        #edit-section {
+            display: none;
+            border-top: 1px solid var(--border);
+            padding-top: 25px;
+            margin-top: 25px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             margin-top: 15px;
         }
 
-        .history-list { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; }
-        .history-chip {
-            background: var(--border);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+        .history-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            padding: 12px 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             cursor: pointer;
-            white-space: nowrap;
+            transition: border-color 0.2s;
         }
 
-        .hidden { display: none; }
+        .history-item:hover { border-color: var(--accent); }
+        .history-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
+        .history-date { font-size: 0.8em; color: var(--text-secondary); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Nexus AI</h1>
-
     <div class="card">
-        <textarea id="prompt" rows="3" placeholder="Describe your website (e.g. A sleek dark-mode portfolio)..."></textarea>
+        <h1>AI Web Page Builder</h1>
+        <p>Describe your ideal web page, and let AI automatically generate a modern, responsive design for you.</p>
         
-        <div class="btn-row">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-primary" onclick="generatePage()"><i data-lucide="sparkles"></i> Build</button>
-                <button class="btn-secondary" onclick="generateRandom()">Random</button>
+        <div class="container">
+            <textarea id="prompt" placeholder="E.g., A sleek landing page for a tech startup featuring a dark theme, a hero section, and a contact form..."></textarea>
+
+            <div class="buttons">
+                <button id="btn-generate" onclick="generatePage()">✨ Generate Website</button>
+                <button id="btn-random" class="secondary" onclick="generateRandom()">Surprise Me</button>
             </div>
-            <div id="timer-box" class="hidden">Build Time: <span id="timer">0.0s</span></div>
+            
+            <div id="status-container" style="display: none;">
+                <div class="loader">
+                    <div class="spinner"></div>
+                    <span id="thinking-text">Initializing AI...</span>
+                </div>
+                <div id="timer">0.0s</div>
+            </div>
         </div>
 
-        <div id="status-area">
-            <span id="ai-status">Architecting...</span>
+        <div id="edit-section">
+            <h3>Refine & Edit</h3>
+            <div class="edit-container">
+                <input type="text" id="edit-prompt" placeholder="E.g., Make the background dark mode, change the title to 'Welcome'...">
+                <div class="buttons">
+                    <button id="btn-edit" onclick="editPage()">Apply AI Edit</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="history-section" class="card hidden">
-        <div class="history-list" id="history-list"></div>
-    </div>
-
-    <div id="edit-section" class="card hidden">
-        <input type="text" id="edit-prompt" placeholder="Ask for a change (e.g. 'Make the buttons green')...">
-        <button class="btn-primary" onclick="editPage()"><i data-lucide="wand-2"></i> Update</button>
-    </div>
-
-    <div id="output-section" class="card hidden">
-        <div class="btn-row" style="margin-bottom: 10px;">
+    <div class="card output-section" id="output-card" style="display: none;">
+        <div class="output-header">
             <h3>Live Preview</h3>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn-secondary" onclick="copyHtml()"><i data-lucide="copy"></i> Copy HTML</button>
-                <button class="btn-secondary" onclick="openFull()"><i data-lucide="maximize"></i> Fullscreen</button>
+            <div class="buttons" style="margin: 0;">
+                <button class="success" onclick="copyHtml()">📋 Copy HTML</button>
+                <button class="secondary" onclick="openFullscreen()">🔍 Fullscreen</button>
             </div>
         </div>
         <iframe id="preview"></iframe>
     </div>
-</div>
 
-<script>
-    lucide.createIcons();
+    <div class="card" id="history-card">
+        <h3>Your Past Designs</h3>
+        <p>Websites you generate are saved locally to your browser.</p>
+        <div class="history-list" id="history-list">
+            </div>
+    </div>
 
-    // Replace this with your valid key
-    const API_KEY = "YOUR_GEMINI_API_KEY_HERE"; 
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-    
-    let currentHtml = "";
-    let startTime;
-    let timerInt;
-
-    window.onload = loadHistory;
-
-    function startTimer() {
-        startTime = Date.now();
-        document.getElementById('timer-box').classList.remove('hidden');
-        timerInt = setInterval(() => {
-            document.getElementById('timer').innerText = ((Date.now() - startTime)/1000).toFixed(1) + 's';
-        }, 100);
-    }
-
-    async function fetchAI(promptText) {
-        const statusArea = document.getElementById('status-area');
-        const statusText = document.getElementById('ai-status');
+    <script>
+        const API_KEY = "AIzaSyC7BC5viMahX6kpTl2gis7l5GgkoHGkcrU"; 
+        const MODEL_NAME = "gemini-2.5-flash"; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
         
-        statusArea.style.display = 'block';
-        startTimer();
+        let currentHtmlCode = "";
+        let timerInterval, thinkingInterval, startTime;
 
-        const thoughts = ["Analyzing request...", "Generating structure...", "Styling components...", "Writing scripts...", "Polishing UI..."];
-        let i = 0;
-        const thoughtInt = setInterval(() => {
-            statusText.innerText = thoughts[i % thoughts.length];
-            i++;
-        }, 1200);
+        const thinkingPhases = [
+            "Analyzing your prompt...",
+            "Structuring HTML layout...",
+            "Writing modern CSS styling...",
+            "Adding JavaScript interactivity...",
+            "Ensuring mobile responsiveness...",
+            "Finalizing code..."
+        ];
 
-        try {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-            });
+        // Load history on startup
+        document.addEventListener("DOMContentLoaded", loadHistory);
 
-            const data = await response.json();
-            if (data.error) throw new Error(data.error.message);
-
-            let raw = data.candidates[0].content.parts[0].text;
-            currentHtml = raw.replace(/```html|```/gi, "").trim();
-
-            document.getElementById('preview').srcdoc = currentHtml;
-            document.getElementById('output-section').classList.remove('hidden');
-            document.getElementById('edit-section').classList.remove('hidden');
+        function startTimers() {
+            document.getElementById('status-container').style.display = 'flex';
+            startTime = Date.now();
             
-            saveHistory(promptText.substring(0, 20) + "...");
-        } catch (e) {
-            alert("Error: " + e.message + "\n\nNote: Browsers often block AI keys for security. For Vercel, use a 'Serverless Function' backend.");
-        } finally {
-            clearInterval(timerInt);
-            clearInterval(thoughtInt);
-            statusArea.style.display = 'none';
+            timerInterval = setInterval(() => {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                document.getElementById('timer').innerText = `${elapsed}s`;
+            }, 100);
+
+            let phaseIdx = 0;
+            document.getElementById('thinking-text').innerText = thinkingPhases[0];
+            thinkingInterval = setInterval(() => {
+                phaseIdx = (phaseIdx + 1) % thinkingPhases.length;
+                document.getElementById('thinking-text').innerText = thinkingPhases[phaseIdx];
+            }, 2500);
         }
-    }
 
-    function generatePage() {
-        const p = document.getElementById('prompt').value;
-        fetchAI(`Create a complete single-file HTML/CSS website for: ${p}. Return ONLY the code.`);
-    }
+        function stopTimers() {
+            clearInterval(timerInterval);
+            clearInterval(thinkingInterval);
+            document.getElementById('status-container').style.display = 'none';
+        }
 
-    function editPage() {
-        const p = document.getElementById('edit-prompt').value;
-        fetchAI(`Update this code: ${currentHtml}\n\nChange: ${p}\n\nReturn ONLY the full updated code.`);
-    }
+        async function fetchAI(promptText, isEdit = false, savePrompt = "") {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
+            startTimers();
 
-    function saveHistory(name) {
-        let h = JSON.parse(localStorage.getItem('nexus_history') || '[]');
-        h.unshift({ name, code: currentHtml });
-        localStorage.setItem('nexus_history', JSON.stringify(h.slice(0, 5)));
-        loadHistory();
-    }
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptText }] }]
+                    })
+                });
 
-    function loadHistory() {
-        let h = JSON.parse(localStorage.getItem('nexus_history') || '[]');
-        if (h.length === 0) return;
-        document.getElementById('history-section').classList.remove('hidden');
-        const list = document.getElementById('history-list');
-        list.innerHTML = h.map((item, idx) => `<div class="history-chip" onclick="restore(${idx})">${item.name}</div>`).join('');
-    }
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
 
-    window.restore = (idx) => {
-        let h = JSON.parse(localStorage.getItem('nexus_history'));
-        currentHtml = h[idx].code;
-        document.getElementById('preview').srcdoc = currentHtml;
-        document.getElementById('output-section').classList.remove('hidden');
-    };
+                let generatedHtml = data.candidates[0].content.parts[0].text;
+                generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '').trim();
 
-    function copyHtml() { navigator.clipboard.writeText(currentHtml); alert("Copied!"); }
-    function openFull() {
-        const win = window.open();
-        win.document.write(currentHtml);
-    }
-    function generateRandom() {
-        const r = ["Space Travel Agency", "Cyberpunk Coffee", "Minimalist Blog", "80s Retro Portfolio"];
-        document.getElementById('prompt').value = r[Math.floor(Math.random()*r.length)];
-        generatePage();
-    }
-</script>
+                currentHtmlCode = generatedHtml;
+                document.getElementById('preview').srcdoc = currentHtmlCode;
+                
+                document.getElementById('output-card').style.display = 'block';
+                document.getElementById('edit-section').style.display = 'block';
+                document.getElementById('edit-prompt').value = '';
+
+                // Save to LocalStorage History
+                saveToHistory(savePrompt || promptText, currentHtmlCode);
+
+            } catch (error) {
+                alert("API Error: " + error.message);
+                console.error(error);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+                stopTimers();
+            }
+        }
+
+        function generatePage() {
+            const userText = document.getElementById('prompt').value.trim();
+            if (!userText) return alert("Please enter a description for your web page.");
+
+            const fullPrompt = `You are an expert web developer. Write a complete, single-file HTML page for: "${userText}". 
+            Requirements: Return ONLY raw HTML code. Do not include markdown blocks. Use modern, beautiful CSS in the <style> tag. Include functional JS in the <script> tag if needed. Make it fully mobile-responsive.`;
+
+            fetchAI(fullPrompt, false, userText);
+        }
+
+        function editPage() {
+            const editInstruction = document.getElementById('edit-prompt').value.trim();
+            if (!editInstruction) return alert("Please enter an edit instruction.");
+            if (!currentHtmlCode) return alert("Please generate a page first.");
+
+            const editPrompt = `You are an expert web developer. Here is the current HTML code for a webpage:\n\n${currentHtmlCode}\n\nThe user wants you to apply this change: "${editInstruction}".\n\nReturn the ENTIRE updated HTML code. Return ONLY the raw HTML code, no markdown blocks, no explanations. Make sure it remains a complete HTML document.`;
+
+            fetchAI(editPrompt, true, `Edit: ${editInstruction}`);
+        }
+
+        function copyHtml() {
+            if (!currentHtmlCode) return alert("Nothing to copy yet!");
+            navigator.clipboard.writeText(currentHtmlCode).then(() => {
+                const btn = document.querySelector('.success');
+                const originalText = btn.innerText;
+                btn.innerText = "✅ Copied!";
+                setTimeout(() => btn.innerText = originalText, 2000);
+            });
+        }
+
+        function openFullscreen() {
+            if (!currentHtmlCode) return alert("Generate a page first!");
+            const blob = new Blob([currentHtmlCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        }
+
+        function generateRandom() {
+            const topics = [
+                "A futuristic portfolio for a developer with neon accents", 
+                "A retro 80s synthwave landing page with a grid background", 
+                "A clean, minimalist dashboard for tracking daily habits", 
+                "A vibrant online menu for a smoothie shop with hover animations"
+            ];
+            document.getElementById('prompt').value = topics[Math.floor(Math.random() * topics.length)];
+            generatePage();
+        }
+
+        // --- History Management (Local Storage) ---
+        function saveToHistory(promptText, htmlCode) {
+            let history = JSON.parse(localStorage.getItem('ai_sites') || '[]');
+            const newItem = {
+                id: Date.now(),
+                prompt: promptText,
+                html: htmlCode,
+                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+            };
+            history.unshift(newItem);
+            if (history.length > 15) history = history.slice(0, 15); // Keep last 15
+            localStorage.setItem('ai_sites', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const historyList = document.getElementById('history-list');
+            const history = JSON.parse(localStorage.getItem('ai_sites') || '[]');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No past designs saved yet.</p>';
+                return;
+            }
+
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item" onclick="loadPastDesign(${item.id})">
+                    <div class="history-text"><strong>${item.prompt}</strong></div>
+                    <div class="history-date">${item.date}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadPastDesign(id) {
+            const history = JSON.parse(localStorage.getItem('ai_sites') || '[]');
+            const item = history.find(i => i.id === id);
+            if (item) {
+                currentHtmlCode = item.html;
+                document.getElementById('preview').srcdoc = currentHtmlCode;
+                document.getElementById('output-card').style.display = 'block';
+                document.getElementById('edit-section').style.display = 'block';
+                document.getElementById('prompt').value = item.prompt;
+                window.scrollTo({ top: document.getElementById('output-card').offsetTop, behavior: 'smooth' });
+            }
+        }
+    </script>
 </body>
 </html>
