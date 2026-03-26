@@ -35,11 +35,7 @@
             border: 1px solid var(--border);
         }
 
-        h1, h3 {
-            margin-top: 0;
-            color: var(--text-primary);
-        }
-
+        h1, h3 { margin-top: 0; color: var(--text-primary); }
         p { color: var(--text-secondary); }
 
         .container, .edit-container {
@@ -100,17 +96,11 @@
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
-            display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .loader {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        .loader { display: flex; align-items: center; gap: 10px; }
         .spinner {
             width: 20px;
             height: 20px;
@@ -121,15 +111,7 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
-
         #timer { font-family: monospace; font-size: 1.2em; font-weight: bold; color: var(--accent); }
-
-        .output-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
 
         iframe {
             width: 100%;
@@ -166,8 +148,6 @@
         }
 
         .history-item:hover { border-color: var(--accent); }
-        .history-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
-        .history-date { font-size: 0.8em; color: var(--text-secondary); }
     </style>
 </head>
 <body>
@@ -177,14 +157,13 @@
         <p>Describe your ideal web page, and let AI automatically generate a modern, responsive design for you.</p>
         
         <div class="container">
-            <textarea id="prompt" placeholder="E.g., A sleek landing page for a tech startup featuring a dark theme, a hero section, and a contact form..."></textarea>
-
+            <textarea id="prompt" placeholder="E.g., A sleek landing page for a tech startup..."></textarea>
             <div class="buttons">
                 <button id="btn-generate" onclick="generatePage()">✨ Generate Website</button>
                 <button id="btn-random" class="secondary" onclick="generateRandom()">Surprise Me</button>
             </div>
             
-            <div id="status-container" style="display: none;">
+            <div id="status-container">
                 <div class="loader">
                     <div class="spinner"></div>
                     <span id="thinking-text">Initializing AI...</span>
@@ -196,7 +175,7 @@
         <div id="edit-section">
             <h3>Refine & Edit</h3>
             <div class="edit-container">
-                <input type="text" id="edit-prompt" placeholder="E.g., Make the background dark mode, change the title to 'Welcome'...">
+                <input type="text" id="edit-prompt" placeholder="E.g., Make the background dark mode...">
                 <div class="buttons">
                     <button id="btn-edit" onclick="editPage()">Apply AI Edit</button>
                 </div>
@@ -204,8 +183,8 @@
         </div>
     </div>
 
-    <div class="card output-section" id="output-card" style="display: none;">
-        <div class="output-header">
+    <div class="card" id="output-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3>Live Preview</h3>
             <div class="buttons" style="margin: 0;">
                 <button class="success" onclick="copyHtml()">📋 Copy HTML</button>
@@ -218,15 +197,11 @@
     <div class="card" id="history-card">
         <h3>Your Past Designs</h3>
         <p>Websites you generate are saved locally to your browser.</p>
-        <div class="history-list" id="history-list">
-            </div>
+        <div class="history-list" id="history-list"></div>
     </div>
 
     <script>
-        const API_KEY = "AIzaSyC7BC5viMahX6kpTl2gis7l5GgkoHGkcrU"; 
-        const MODEL_NAME = "gemini-2.5-flash"; 
         const API_URL = "/api/chat";
-        
         let currentHtmlCode = "";
         let timerInterval, thinkingInterval, startTime;
 
@@ -239,20 +214,17 @@
             "Finalizing code..."
         ];
 
-        // Load history on startup
         document.addEventListener("DOMContentLoaded", loadHistory);
 
         function startTimers() {
             document.getElementById('status-container').style.display = 'flex';
             startTime = Date.now();
-            
             timerInterval = setInterval(() => {
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
                 document.getElementById('timer').innerText = `${elapsed}s`;
             }, 100);
 
             let phaseIdx = 0;
-            document.getElementById('thinking-text').innerText = thinkingPhases[0];
             thinkingInterval = setInterval(() => {
                 phaseIdx = (phaseIdx + 1) % thinkingPhases.length;
                 document.getElementById('thinking-text').innerText = thinkingPhases[phaseIdx];
@@ -274,29 +246,30 @@
                 const response = await fetch(API_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: promptText }] }]
-                    })
+                    body: JSON.stringify({ prompt: promptText }) 
                 });
 
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Server Error");
+                }
 
+                const data = await response.json();
                 let generatedHtml = data.candidates[0].content.parts[0].text;
+                
+                // Clean markdown tags if present
                 generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '').trim();
 
                 currentHtmlCode = generatedHtml;
                 document.getElementById('preview').srcdoc = currentHtmlCode;
-                
                 document.getElementById('output-card').style.display = 'block';
                 document.getElementById('edit-section').style.display = 'block';
                 document.getElementById('edit-prompt').value = '';
 
-                // Save to LocalStorage History
                 saveToHistory(savePrompt || promptText, currentHtmlCode);
 
             } catch (error) {
-                alert("API Error: " + error.message);
+                alert("Generation Error: " + error.message);
                 console.error(error);
             } finally {
                 buttons.forEach(btn => btn.disabled = false);
@@ -306,87 +279,56 @@
 
         function generatePage() {
             const userText = document.getElementById('prompt').value.trim();
-            if (!userText) return alert("Please enter a description for your web page.");
-
-            const fullPrompt = `You are an expert web developer. Write a complete, single-file HTML page for: "${userText}". 
-            Requirements: Return ONLY raw HTML code. Do not include markdown blocks. Use modern, beautiful CSS in the <style> tag. Include functional JS in the <script> tag if needed. Make it fully mobile-responsive.`;
-
+            if (!userText) return alert("Please enter a description.");
+            const fullPrompt = `Expert Web Dev: Write a complete, single-file HTML page for "${userText}". Return ONLY raw HTML code. Modern CSS/JS, mobile-responsive.`;
             fetchAI(fullPrompt, false, userText);
         }
 
         function editPage() {
             const editInstruction = document.getElementById('edit-prompt').value.trim();
-            if (!editInstruction) return alert("Please enter an edit instruction.");
-            if (!currentHtmlCode) return alert("Please generate a page first.");
-
-            const editPrompt = `You are an expert web developer. Here is the current HTML code for a webpage:\n\n${currentHtmlCode}\n\nThe user wants you to apply this change: "${editInstruction}".\n\nReturn the ENTIRE updated HTML code. Return ONLY the raw HTML code, no markdown blocks, no explanations. Make sure it remains a complete HTML document.`;
-
+            if (!editInstruction || !currentHtmlCode) return alert("Describe the change first.");
+            const editPrompt = `Expert Web Dev. Current Code:\n${currentHtmlCode}\nApply: "${editInstruction}". Return entire updated HTML.`;
             fetchAI(editPrompt, true, `Edit: ${editInstruction}`);
         }
 
         function copyHtml() {
-            if (!currentHtmlCode) return alert("Nothing to copy yet!");
             navigator.clipboard.writeText(currentHtmlCode).then(() => {
                 const btn = document.querySelector('.success');
-                const originalText = btn.innerText;
                 btn.innerText = "✅ Copied!";
-                setTimeout(() => btn.innerText = originalText, 2000);
+                setTimeout(() => btn.innerText = "📋 Copy HTML", 2000);
             });
         }
 
         function openFullscreen() {
-            if (!currentHtmlCode) return alert("Generate a page first!");
             const blob = new Blob([currentHtmlCode], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
+            window.open(URL.createObjectURL(blob), '_blank');
         }
 
         function generateRandom() {
-            const topics = [
-                "A futuristic portfolio for a developer with neon accents", 
-                "A retro 80s synthwave landing page with a grid background", 
-                "A clean, minimalist dashboard for tracking daily habits", 
-                "A vibrant online menu for a smoothie shop with hover animations"
-            ];
+            const topics = ["Futuristic dark portfolio", "Neon synthwave landing page", "Minimalist habit tracker"];
             document.getElementById('prompt').value = topics[Math.floor(Math.random() * topics.length)];
             generatePage();
         }
 
-        // --- History Management (Local Storage) ---
         function saveToHistory(promptText, htmlCode) {
             let history = JSON.parse(localStorage.getItem('ai_sites') || '[]');
-            const newItem = {
-                id: Date.now(),
-                prompt: promptText,
-                html: htmlCode,
-                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
-            };
-            history.unshift(newItem);
-            if (history.length > 15) history = history.slice(0, 15); // Keep last 15
-            localStorage.setItem('ai_sites', JSON.stringify(history));
+            history.unshift({ id: Date.now(), prompt: promptText, html: htmlCode, date: new Date().toLocaleString() });
+            localStorage.setItem('ai_sites', JSON.stringify(history.slice(0, 10)));
             loadHistory();
         }
 
         function loadHistory() {
-            const historyList = document.getElementById('history-list');
+            const list = document.getElementById('history-list');
             const history = JSON.parse(localStorage.getItem('ai_sites') || '[]');
-            
-            if (history.length === 0) {
-                historyList.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No past designs saved yet.</p>';
-                return;
-            }
-
-            historyList.innerHTML = history.map(item => `
+            list.innerHTML = history.length ? history.map(item => `
                 <div class="history-item" onclick="loadPastDesign(${item.id})">
                     <div class="history-text"><strong>${item.prompt}</strong></div>
-                    <div class="history-date">${item.date}</div>
-                </div>
-            `).join('');
+                    <div style="font-size: 0.8em; color: var(--text-secondary);">${item.date}</div>
+                </div>`).join('') : '<p>No past designs yet.</p>';
         }
 
         function loadPastDesign(id) {
-            const history = JSON.parse(localStorage.getItem('ai_sites') || '[]');
-            const item = history.find(i => i.id === id);
+            const item = JSON.parse(localStorage.getItem('ai_sites')).find(i => i.id === id);
             if (item) {
                 currentHtmlCode = item.html;
                 document.getElementById('preview').srcdoc = currentHtmlCode;
