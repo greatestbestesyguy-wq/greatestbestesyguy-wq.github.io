@@ -3,250 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Web Page Builder</title>
+    <title>Nexus | AI Web Architect</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
             padding: 20px;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .container, .edit-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            min-height: 100vh;
         }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            margin-bottom: 24px;
+        }
+
         textarea, input[type="text"] {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        textarea { height: 100px; }
-        .options {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            padding: 10px 0;
-        }
-        .buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        button {
-            padding: 10px 20px;
-            cursor: pointer;
-            background: #2563eb;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
             color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.2s;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            outline: none;
         }
-        button:hover { background: #1d4ed8; }
-        button.secondary { background: #10b981; }
-        button.secondary:hover { background: #059669; }
-        button.action { background: #8b5cf6; }
-        button.action:hover { background: #7c3aed; }
-        button:disabled { background: #9ca3af; cursor: not-allowed; }
-        
-        #loading {
-            display: none;
-            color: #2563eb;
-            font-weight: bold;
-            margin-top: 10px;
-            padding: 10px;
-            background: #eff6ff;
-            border-radius: 4px;
-        }
-        
-        .output-header {
+
+        textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+
+        .controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        
+
+        .btn-group { display: flex; gap: 10px; }
+
+        button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-secondary { background: var(--border); color: var(--text); }
+        .btn-secondary:hover { background: #475569; }
+
+        /* Thinking/Status UI */
+        #status-container {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+        }
+
+        .thinking-dots {
+            display: inline-block;
+            font-style: italic;
+            color: var(--primary);
+        }
+
+        #timer {
+            font-family: monospace;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Preview Area */
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
         iframe {
             width: 100%;
-            height: 500px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            height: 600px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
             background: white;
         }
-        #output-code {
-            width: 100%;
-            height: 200px;
-            margin-top: 10px;
-            font-family: monospace;
-            background: #1e1e1e;
-            color: #d4d4d4;
-            border: none;
-        }
-        
-        #edit-section {
-            display: none; /* Hidden until a page is generated */
-            border-top: 2px dashed #e5e7eb;
-            padding-top: 20px;
+
+        /* History Sidebar */
+        .history-section {
             margin-top: 20px;
         }
+
+        .history-list {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .history-item {
+            background: var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 0.85rem;
+        }
+
+        .history-item:hover { background: var(--primary); }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
+<div class="container">
+    <header>
+        <h1>Nexus AI</h1>
+        <p style="color: var(--text-muted)">Architecting the web through natural language.</p>
+    </header>
+
     <div class="card">
-        <h1>AI Web Page Builder</h1>
-        <p>Describe your ideal web page, choose your settings, and let AI generate it for you.</p>
+        <textarea id="prompt" rows="3" placeholder="Describe a high-converting landing page for a coffee shop..."></textarea>
         
-        <div class="container">
-            <textarea id="prompt" placeholder="E.g., A colorful landing page for a local bakery with a hero section and a contact form..."></textarea>
-
-            <div class="options">
-                <label><input type="checkbox" id="opt-css" checked> Modern CSS</label>
-                <label><input type="checkbox" id="opt-js"> Interactive JS</label>
-                <label><input type="checkbox" id="opt-responsive" checked> Mobile Responsive</label>
+        <div class="controls">
+            <div class="btn-group">
+                <button class="btn-primary" id="btn-generate" onclick="generatePage()">
+                    <i data-lucide="sparkles"></i> Build Website
+                </button>
+                <button class="btn-secondary" onclick="generateRandom()">
+                    <i data-lucide="shuffle"></i> Surprise Me
+                </button>
             </div>
-
-            <div class="buttons">
-                <button id="btn-generate" onclick="generatePage()">Generate New Page</button>
-                <button id="btn-random" class="secondary" onclick="generateRandom()">Surprise Me</button>
+            <div id="timer-display" class="hidden">
+                Time: <span id="timer">0.0s</span>
             </div>
-            
-            <div id="loading">⏳ Processing... Please wait.</div>
         </div>
 
-        <div id="edit-section">
-            <h3>Refine & Edit</h3>
-            <div class="edit-container">
-                <input type="text" id="edit-prompt" placeholder="E.g., Make the background dark mode, change the title to 'Welcome', add a footer...">
-                <div class="buttons">
-                    <button id="btn-edit" class="action" onclick="editPage()">Apply AI Edit</button>
-                </div>
-            </div>
+        <div id="status-container">
+            <div id="ai-thought-process" class="thinking-dots">Initializing architect...</div>
         </div>
     </div>
 
-    <div class="card output-section">
-        <div class="output-header">
-            <h3>Live Preview</h3>
-            <button class="secondary" onclick="openFullscreen()">🔍 View Full Page</button>
+    <div id="history-container" class="history-section hidden">
+        <h4 style="margin: 0 0 10px 0;">Recent Designs</h4>
+        <div id="history-list" class="history-list"></div>
+    </div>
+
+    <div id="edit-section" class="card hidden">
+        <input type="text" id="edit-prompt" placeholder="Change the theme to dark mode, or add a pricing section...">
+        <button class="btn-primary" onclick="editPage()">
+            <i data-lucide="wand-2"></i> Refine Design
+        </button>
+    </div>
+
+    <div id="output-section" class="card hidden">
+        <div class="preview-header">
+            <h3>Live Environment</h3>
+            <div class="btn-group">
+                <button class="btn-secondary" onclick="copyHtml()">
+                    <i data-lucide="copy"></i> Copy HTML
+                </button>
+                <button class="btn-secondary" onclick="openFullscreen()">
+                    <i data-lucide="external-link"></i> Full View
+                </button>
+            </div>
         </div>
         <iframe id="preview"></iframe>
-
-        <h3>Raw HTML Output</h3>
-        <textarea id="output-code" readonly placeholder="Your generated code will appear here..."></textarea>
     </div>
+</div>
 
-    <script>
-        const API_KEY = "AIzaSyC7BC5viMahX6kpTl2gis7l5GgkoHGkcrU"; 
-        const MODEL_NAME = "gemini-2.5-flash"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+<script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    const API_KEY = "AIzaSyC7BC5viMahX6kpTl2gis7l5GgkoHGkcrU"; 
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    
+    let currentHtmlCode = "";
+    let startTime;
+    let timerInterval;
+
+    // Load history from cookies/localStorage on start
+    window.onload = loadHistory;
+
+    function startTimer() {
+        startTime = Date.now();
+        document.getElementById('timer-display').classList.remove('hidden');
+        timerInterval = setInterval(() => {
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            document.getElementById('timer').innerText = `${elapsed}s`;
+        }, 100);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    async function fetchAI(promptText, isEdit = false) {
+        const statusBox = document.getElementById('status-container');
+        const thoughtText = document.getElementById('ai-thought-process');
+        const buttons = document.querySelectorAll('button');
         
-        let currentHtmlCode = ""; // Store the current code for editing
+        buttons.forEach(b => b.disabled = true);
+        statusBox.style.display = 'block';
+        startTimer();
 
-        // Core AI Fetch Function
-        async function fetchAI(promptText, isEdit = false) {
-            const buttons = document.querySelectorAll('button');
-            const loading = document.getElementById('loading');
+        const stages = [
+            "Analyzing layout requirements...",
+            "Structuring semantic HTML5...",
+            "Injecting modern CSS3 variables...",
+            "Optimizing responsiveness...",
+            "Finalizing assets..."
+        ];
+
+        let stageIdx = 0;
+        const stageInterval = setInterval(() => {
+            thoughtText.innerText = stages[stageIdx % stages.length];
+            stageIdx++;
+        }, 1500);
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: promptText }] }]
+                })
+            });
+
+            const data = await response.json();
+            let generatedHtml = data.candidates[0].content.parts[0].text;
+            generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '').trim();
+
+            currentHtmlCode = generatedHtml;
+            document.getElementById('preview').srcdoc = currentHtmlCode;
             
-            buttons.forEach(btn => btn.disabled = true);
-            loading.style.display = 'block';
-            loading.innerText = isEdit ? "⏳ Applying your edits..." : "⏳ Generating your web page...";
+            // Show UI sections
+            document.getElementById('output-section').classList.remove('hidden');
+            document.getElementById('edit-section').classList.remove('hidden');
+            
+            saveToHistory(promptText.substring(0, 30) + "...");
 
-            try {
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: promptText }] }]
-                    })
-                });
+        } catch (error) {
+            alert("Connection Error: Check API Key or Vercel Environment.");
+        } finally {
+            clearInterval(stageInterval);
+            stopTimer();
+            statusBox.style.display = 'none';
+            buttons.forEach(b => b.disabled = false);
+        }
+    }
 
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
+    function generatePage() {
+        const userText = document.getElementById('prompt').value.trim();
+        if (!userText) return;
 
-                let generatedHtml = data.candidates[0].content.parts[0].text;
+        const fullPrompt = `You are a world-class frontend dev. Build a complete, modern, single-file HTML/CSS/JS page for: "${userText}". 
+        Make it beautiful with modern colors and responsive. RETURN ONLY RAW HTML CODE. NO MARKDOWN.`;
 
-                // Clean up markdown formatting
-                generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '').trim();
+        fetchAI(fullPrompt);
+    }
 
-                // Update state and UI
-                currentHtmlCode = generatedHtml;
+    function editPage() {
+        const instruction = document.getElementById('edit-prompt').value.trim();
+        if (!instruction) return;
+
+        const editPrompt = `Current Code: ${currentHtmlCode} \n\n User Request: ${instruction}. 
+        Apply these changes and return the FULL updated code. RAW HTML ONLY.`;
+        
+        fetchAI(editPrompt, true);
+    }
+
+    function copyHtml() {
+        navigator.clipboard.writeText(currentHtmlCode);
+        alert("Code copied to clipboard!");
+    }
+
+    function openFullscreen() {
+        const blob = new Blob([currentHtmlCode], { type: 'text/html' });
+        window.open(URL.createObjectURL(blob), '_blank');
+    }
+
+    function saveToHistory(label) {
+        let history = JSON.parse(localStorage.getItem('webHistory') || '[]');
+        history.unshift({ label, code: currentHtmlCode });
+        history = history.slice(0, 5); // Keep last 5
+        localStorage.setItem('webHistory', JSON.stringify(history));
+        loadHistory();
+    }
+
+    function loadHistory() {
+        const history = JSON.parse(localStorage.getItem('webHistory') || '[]');
+        if (history.length === 0) return;
+
+        const list = document.getElementById('history-list');
+        document.getElementById('history-container').classList.remove('hidden');
+        list.innerHTML = '';
+        
+        history.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerText = item.label;
+            div.onclick = () => {
+                currentHtmlCode = item.code;
                 document.getElementById('preview').srcdoc = currentHtmlCode;
-                document.getElementById('output-code').value = currentHtmlCode;
-                document.getElementById('edit-section').style.display = 'block';
-                document.getElementById('edit-prompt').value = '';
+                document.getElementById('output-section').classList.remove('hidden');
+            };
+            list.appendChild(div);
+        });
+    }
 
-            } catch (error) {
-                alert("API Error: " + error.message);
-                console.error(error);
-            } finally {
-                buttons.forEach(btn => btn.disabled = false);
-                loading.style.display = 'none';
-            }
-        }
-
-        // Generate a brand new page
-        function generatePage() {
-            const userText = document.getElementById('prompt').value.trim();
-            if (!userText) return alert("Please enter a description for your web page.");
-
-            const css = document.getElementById('opt-css').checked ? "Use modern, beautiful CSS in the <style> tag." : "No CSS.";
-            const js = document.getElementById('opt-js').checked ? "Include functional JS in the <script> tag." : "No JS.";
-            const responsive = document.getElementById('opt-responsive').checked ? "Make it fully mobile-responsive." : "";
-
-            const fullPrompt = `You are an expert web developer. Write a complete, single-file HTML page for: "${userText}".
-            Requirements: Return ONLY raw HTML code. Do not include markdown blocks. ${css} ${js} ${responsive}`;
-
-            fetchAI(fullPrompt, false);
-        }
-
-        // Edit the existing page
-        function editPage() {
-            const editInstruction = document.getElementById('edit-prompt').value.trim();
-            if (!editInstruction) return alert("Please enter an edit instruction.");
-            if (!currentHtmlCode) return alert("Please generate a page first before editing.");
-
-            const editPrompt = `You are an expert web developer. Here is the current HTML code for a webpage:\n\n${currentHtmlCode}\n\nThe user wants you to apply this change: "${editInstruction}".\n\nReturn the ENTIRE updated HTML code. Return ONLY the raw HTML code, no markdown blocks, no explanations. Make sure it remains a complete HTML document.`;
-
-            fetchAI(editPrompt, true);
-        }
-
-        // Open in a new tab for true "fullscreen" viewing
-        function openFullscreen() {
-            if (!currentHtmlCode) return alert("Generate a page first!");
-            const blob = new Blob([currentHtmlCode], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
-        }
-
-        // Random ideas
-        function generateRandom() {
-            const topics = [
-                "A futuristic portfolio for a developer", 
-                "A retro 80s synthwave landing page", 
-                "A clean dashboard for tracking daily habits", 
-                "A vibrant online menu for a smoothie shop"
-            ];
-            document.getElementById('prompt').value = topics[Math.floor(Math.random() * topics.length)];
-            generatePage();
-        }
-    </script>
+    function generateRandom() {
+        const ideas = ["SaaS Landing Page", "Cyberpunk Dashboard", "Minimalist Portfolio", "Recipe Blog"];
+        document.getElementById('prompt').value = ideas[Math.floor(Math.random() * ideas.length)];
+        generatePage();
+    }
+</script>
 </body>
 </html>
