@@ -3,13 +3,12 @@ export default async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
     const { prompt } = req.body;
 
-    if (!apiKey) return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
+    if (!apiKey) return res.status(500).json({ error: "Missing API Key" });
     if (!prompt) return res.status(400).json({ error: "No prompt provided" });
 
-    // FIX 1: Using the 2026 stable "latest" alias for the free tier
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-latest:generateContent?key=${apiKey}`;
+    // UPDATE: Using the exact string confirmed by your ListModels call
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
-    // FIX 2: Added the missing "fetch(" opening and assigned it to a variable
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
