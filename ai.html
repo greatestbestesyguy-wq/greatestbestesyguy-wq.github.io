@@ -44,6 +44,23 @@
             gap: 15px;
         }
 
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: -10px;
+        }
+
+        #usage-counter {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
         textarea, input[type="text"] {
             width: 100%;
             padding: 15px;
@@ -157,7 +174,13 @@
         <p>Describe your ideal web page, and let AI automatically generate a modern, responsive design for you.</p>
         
         <div class="container">
+            <div class="input-header">
+                <span style="color: var(--text-secondary); font-size: 0.9em;">Page Description</span>
+                <span id="usage-counter">Daily Uses: 0 / 1500</span>
+            </div>
+            
             <textarea id="prompt" placeholder="E.g., A sleek landing page for a tech startup..."></textarea>
+            
             <div class="buttons">
                 <button id="btn-generate" onclick="generatePage()">✨ Generate Website</button>
                 <button id="btn-random" class="secondary" onclick="generateRandom()">Surprise Me</button>
@@ -188,6 +211,7 @@
             <h3>Live Preview</h3>
             <div class="buttons" style="margin: 0;">
                 <button class="success" onclick="copyHtml()">📋 Copy HTML</button>
+                <button class="success" onclick="downloadHtml()">💾 Download .HTML</button>
                 <button class="secondary" onclick="openFullscreen()">🔍 Fullscreen</button>
             </div>
         </div>
@@ -214,8 +238,35 @@
             "Finalizing code..."
         ];
 
-        document.addEventListener("DOMContentLoaded", loadHistory);
+        document.addEventListener("DOMContentLoaded", () => {
+            loadHistory();
+            updateUsageDisplay();
+        });
 
+        // --- Usage Counter Logic ---
+        function updateUsageDisplay() {
+            const today = new Date().toDateString();
+            let usage = JSON.parse(localStorage.getItem('ai_usage_tracker')) || { date: today, count: 0 };
+            
+            // Reset counter if it's a new day
+            if (usage.date !== today) {
+                usage = { date: today, count: 0 };
+                localStorage.setItem('ai_usage_tracker', JSON.stringify(usage));
+            }
+            
+            document.getElementById('usage-counter').innerText = `Daily Uses: ${usage.count} / 1500`;
+        }
+
+        function incrementUsage() {
+            const today = new Date().toDateString();
+            let usage = JSON.parse(localStorage.getItem('ai_usage_tracker')) || { date: today, count: 0 };
+            usage.count += 1;
+            usage.date = today;
+            localStorage.setItem('ai_usage_tracker', JSON.stringify(usage));
+            updateUsageDisplay();
+        }
+
+        // --- Timers ---
         function startTimers() {
             document.getElementById('status-container').style.display = 'flex';
             startTime = Date.now();
@@ -237,6 +288,7 @@
             document.getElementById('status-container').style.display = 'none';
         }
 
+        // --- Core Fetch Logic ---
         async function fetchAI(promptText, isEdit = false, savePrompt = "") {
             const buttons = document.querySelectorAll('button');
             buttons.forEach(btn => btn.disabled = true);
@@ -250,23 +302,31 @@
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    const errorData = await response.json().catch(() => ({ error: "Server returned an invalid response." }));
                     throw new Error(errorData.error || "Server Error");
                 }
 
                 const data = await response.json();
-                let generatedHtml = data.candidates[0].content.parts[0].text;
+                let rawText = data.candidates[0].content.parts[0].text;
                 
-                // Clean markdown tags if present
-                generatedHtml = generatedHtml.replace(/```html\n?/gi, '').replace(/```\n?/gi, '').trim();
+                // NEW: Bulletproof Regex to extract ONLY the HTML
+                // This ignores any conversational text the AI tries to inject before or after the code
+                const htmlMatch = rawText.match(/<!DOCTYPE html>[\s\S]*<\/html>/i);
+                
+                if (htmlMatch) {
+                    currentHtmlCode = htmlMatch[0]; // Strict extraction
+                } else {
+                    // Fallback if the AI forgot the DOCTYPE
+                    currentHtmlCode = rawText.replace(/```html\n?/gi, '').replace(/```\n?/gi, '').trim();
+                }
 
-                currentHtmlCode = generatedHtml;
                 document.getElementById('preview').srcdoc = currentHtmlCode;
                 document.getElementById('output-card').style.display = 'block';
                 document.getElementById('edit-section').style.display = 'block';
                 document.getElementById('edit-prompt').value = '';
 
                 saveToHistory(savePrompt || promptText, currentHtmlCode);
+                incrementUsage(); // Update the counter on success
 
             } catch (error) {
                 alert("Generation Error: " + error.message);
@@ -277,26 +337,47 @@
             }
         }
 
+        // --- Generators ---
         function generatePage() {
             const userText = document.getElementById('prompt').value.trim();
             if (!userText) return alert("Please enter a description.");
-            const fullPrompt = `Expert Web Dev: Write a complete, single-file HTML page for "${userText}". Return ONLY raw HTML code. Modern CSS/JS, mobile-responsive.`;
+            
+            // NEW: Hardened Prompt 
+            const fullPrompt = `Expert Web Dev: Write a complete, single-file HTML page for:\n\n${userText}\n\nCRITICAL SYSTEM INSTRUCTION: Return ONLY valid, raw HTML code starting with <!DOCTYPE html> and ending with </html>. DO NOT write any conversational text, explanations, or markdown formatting before or after the code.`;
+            
             fetchAI(fullPrompt, false, userText);
         }
 
         function editPage() {
             const editInstruction = document.getElementById('edit-prompt').value.trim();
             if (!editInstruction || !currentHtmlCode) return alert("Describe the change first.");
-            const editPrompt = `Expert Web Dev. Current Code:\n${currentHtmlCode}\nApply: "${editInstruction}". Return entire updated HTML.`;
+            
+            // NEW: Hardened Edit Prompt
+            const editPrompt = `Expert Web Dev. Current Code:\n${currentHtmlCode}\nApply this edit: "${editInstruction}".\n\nCRITICAL SYSTEM INSTRUCTION: Return ONLY the newly updated, entire HTML code starting with <!DOCTYPE html> and ending with </html>. DO NOT write any conversational text, explanations, or markdown formatting before or after the code.`;
+            
             fetchAI(editPrompt, true, `Edit: ${editInstruction}`);
         }
 
+        // --- Actions ---
         function copyHtml() {
             navigator.clipboard.writeText(currentHtmlCode).then(() => {
                 const btn = document.querySelector('.success');
                 btn.innerText = "✅ Copied!";
                 setTimeout(() => btn.innerText = "📋 Copy HTML", 2000);
             });
+        }
+
+        // NEW: Download Function
+        function downloadHtml() {
+            if (!currentHtmlCode) return;
+            const blob = new Blob([currentHtmlCode], { type: "text/html" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "ai_generated_design.html";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
         }
 
         function openFullscreen() {
@@ -310,6 +391,7 @@
             generatePage();
         }
 
+        // --- History ---
         function saveToHistory(promptText, htmlCode) {
             let history = JSON.parse(localStorage.getItem('ai_sites') || '[]');
             history.unshift({ id: Date.now(), prompt: promptText, html: htmlCode, date: new Date().toLocaleString() });
