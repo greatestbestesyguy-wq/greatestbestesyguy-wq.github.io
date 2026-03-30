@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Pixel Art Studio</title>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .controls { background: #2a2a2a; padding: 20px; border-radius: 8px; margin-bottom: 20px; width: 100%; max-width: 600px; }
+        .grid-container { background: #000; padding: 10px; border: 2px solid #444; cursor: crosshair; }
+        canvas { image-rendering: pixelated; max-width: 100%; height: auto; }
+        input, select, button { margin: 5px; padding: 8px; border-radius: 4px; border: none; }
+        button { background: #4a90e2; color: white; cursor: pointer; font-weight: bold; }
+        button:hover { background: #357abd; }
+        .editor-tools { margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+    </style>
+</head>
+<body>
+
+    <h2>AI Pixel Generator & Editor</h2>
+
+    <div class="controls">
+        <input type="text" id="prompt" placeholder="e.g. A red sunset over blue mountains" style="width: 70%;">
+        <select id="quality">
+            <option value="8">Low (8x8)</option>
+            <option value="16" selected>Med (16x16)</option>
+            <option value="32">High (32x32)</option>
+        </select>
+        <button onclick="generateImage()">Generate</button>
+        
+        <div class="editor-tools">
+            <label>Draw Color:</label>
+            <input type="color" id="colorPicker" value="#ffffff">
+            <span>Click canvas to edit pixels</span>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <canvas id="pixelCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('pixelCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentSize = 16;
+
+        // Initialize Canvas
+        function initCanvas(size) {
+            currentSize = size;
+            canvas.width = size;
+            canvas.height = size;
+            canvas.style.width = '400px'; // Visual display size
+            canvas.style.height = '400px';
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, size, size);
+        }
+        initCanvas(16);
+
+        async function generateImage() {
+            const prompt = document.getElementById('prompt').value;
+            const size = document.getElementById('quality').value;
+            if (!prompt) return alert("Enter a prompt!");
+
+            initCanvas(parseInt(size));
+            
+            // Constructing a prompt that forces the AI to return a JSON array of colors
+            const technicalPrompt = `Generate a ${size}x${size} grid of hex color codes for an image of: ${prompt}. 
+            Return ONLY a raw JSON array of strings, e.g. ["#000000", "#ffffff", ...]. 
+            The array must contain exactly ${size * size} elements.`;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: technicalPrompt })
+                });
+
+                const data = await response.json();
+                const aiText = data.candidates[0].content.parts[0].text;
+                
+                // Clean up AI response to find the JSON array
+                const jsonMatch = aiText.match(/\[[\s\S]*\]/);
+                if (jsonMatch) {
+                    const colors = JSON.parse(jsonMatch[0]);
+                    renderPixels(colors, size);
+                }
+            } catch (err) {
+                console.error("Failed to generate:", err);
+                alert("Error generating image. Ensure your API returns valid JSON arrays.");
+            }
+        }
+
+        function renderPixels(colors, size) {
+            let index = 0;
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    ctx.fillStyle = colors[index] || '#000';
+                    ctx.fillRect(x, y, 1, 1);
+                    index++;
+                }
+            }
+        }
+
+        // Manual Editing Logic
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = Math.floor((e.clientX - rect.left) * scaleX);
+            const y = Math.floor((e.clientY - rect.top) * scaleY);
+            
+            ctx.fillStyle = document.getElementById('colorPicker').value;
+            ctx.fillRect(x, y, 1, 1);
+        });
+    </script>
+</body>
+</html>
