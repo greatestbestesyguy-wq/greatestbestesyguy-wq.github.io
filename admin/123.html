@@ -3,115 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Pixel Art Studio</title>
+    <title>AI Live Painter</title>
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .controls { background: #2a2a2a; padding: 20px; border-radius: 8px; margin-bottom: 20px; width: 100%; max-width: 600px; }
-        .grid-container { background: #000; padding: 10px; border: 2px solid #444; cursor: crosshair; }
-        canvas { image-rendering: pixelated; max-width: 100%; height: auto; }
-        input, select, button { margin: 5px; padding: 8px; border-radius: 4px; border: none; }
-        button { background: #4a90e2; color: white; cursor: pointer; font-weight: bold; }
-        button:hover { background: #357abd; }
-        .editor-tools { margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .ui-panel { background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 100%; max-width: 500px; margin-bottom: 20px; }
+        .canvas-area { position: relative; background: #000; border: 4px solid #333; line-height: 0; box-shadow: 0 0 20px rgba(0,0,0,1); }
+        canvas { image-rendering: pixelated; width: 512px; height: 512px; cursor: crosshair; }
+        .loading-bar { height: 4px; background: #4a90e2; width: 0%; transition: width 0.3s; margin-top: 10px; border-radius: 2px; }
+        input, select, button { background: #2d2d2d; color: white; border: 1px solid #444; padding: 12px; border-radius: 6px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { background: #0078d4; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
+        button:hover { background: #005a9e; transform: translateY(-1px); }
+        .status { font-size: 0.8em; color: #888; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <h2>AI Pixel Generator & Editor</h2>
-
-    <div class="controls">
-        <input type="text" id="prompt" placeholder="e.g. A red sunset over blue mountains" style="width: 70%;">
-        <select id="quality">
-            <option value="8">Low (8x8)</option>
-            <option value="16" selected>Med (16x16)</option>
-            <option value="32">High (32x32)</option>
-        </select>
-        <button onclick="generateImage()">Generate</button>
+    <div class="ui-panel">
+        <label>Prompt:</label>
+        <input type="text" id="promptInput" placeholder="A cozy cabin in the snow...">
         
-        <div class="editor-tools">
-            <label>Draw Color:</label>
-            <input type="color" id="colorPicker" value="#ffffff">
-            <span>Click canvas to edit pixels</span>
+        <label>Quality:</label>
+        <select id="qualitySelect">
+            <option value="16">Standard (16x16)</option>
+            <option value="32">High (32x32)</option>
+            <option value="64">Ultra (64x64)</option>
+            <option value="128">Full (128x128) - Slow & Detailed</option>
+        </select>
+
+        <button onclick="startGeneration()">Generate Image</button>
+        <div id="loading" class="loading-bar"></div>
+        <div id="statusText" class="status">Ready</div>
+
+        <div style="margin-top: 15px; display: flex; align-items: center; gap: 10px;">
+            <span>Edit Color:</span>
+            <input type="color" id="editColor" value="#ffffff" style="width: 50px; height: 40px; padding: 2px;">
+            <button onclick="downloadImg()" style="width: auto; padding: 10px 20px;">Save PNG</button>
         </div>
     </div>
 
-    <div class="grid-container">
-        <canvas id="pixelCanvas"></canvas>
+    <div class="canvas-area">
+        <canvas id="paintCanvas"></canvas>
     </div>
 
     <script>
-        const canvas = document.getElementById('pixelCanvas');
+        const canvas = document.getElementById('paintCanvas');
         const ctx = canvas.getContext('2d');
+        const loadingBar = document.getElementById('loading');
+        const statusText = document.getElementById('statusText');
         let currentSize = 16;
+        let pixelIndex = 0;
 
-        // Initialize Canvas
         function initCanvas(size) {
             currentSize = size;
             canvas.width = size;
             canvas.height = size;
-            canvas.style.width = '400px'; // Visual display size
-            canvas.style.height = '400px';
+            pixelIndex = 0;
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, size, size);
+            loadingBar.style.width = '0%';
         }
-        initCanvas(16);
 
-        async function generateImage() {
-            const prompt = document.getElementById('prompt').value;
-            const size = document.getElementById('quality').value;
-            if (!prompt) return alert("Enter a prompt!");
+        async function startGeneration() {
+            const prompt = document.getElementById('promptInput').value;
+            const size = parseInt(document.getElementById('qualitySelect').value);
+            if (!prompt) return;
 
-            initCanvas(parseInt(size));
-            
-            // Constructing a prompt that forces the AI to return a JSON array of colors
-            const technicalPrompt = `Generate a ${size}x${size} grid of hex color codes for an image of: ${prompt}. 
-            Return ONLY a raw JSON array of strings, e.g. ["#000000", "#ffffff", ...]. 
-            The array must contain exactly ${size * size} elements.`;
+            initCanvas(size);
+            statusText.innerText = "AI is thinking...";
+
+            // We ask for a raw stream of hex codes to make parsing easy
+            const streamPrompt = `Act as a painter. Generate a ${size}x${size} grid of hex colors for: ${prompt}. 
+            Output ONLY the hex codes separated by commas (e.g. #ffffff,#000000,...). 
+            Do not use JSON, markdown, or text. Just the raw codes. Total pixels: ${size * size}.`;
 
             try {
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: technicalPrompt })
+                    body: JSON.stringify({ prompt: streamPrompt })
                 });
 
-                const data = await response.json();
-                const aiText = data.candidates[0].content.parts[0].text;
-                
-                // Clean up AI response to find the JSON array
-                const jsonMatch = aiText.match(/\[[\s\S]*\]/);
-                if (jsonMatch) {
-                    const colors = JSON.parse(jsonMatch[0]);
-                    renderPixels(colors, size);
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    // Extract text from Gemini's SSE format
+                    const matches = chunk.match(/"text":\s*"(.*?)"/g);
+                    if (matches) {
+                        matches.forEach(m => {
+                            const text = m.replace(/"text":\s*"/, "").replace(/"$/, "");
+                            processTextChunk(text);
+                        });
+                    }
                 }
+                statusText.innerText = "Generation Complete!";
             } catch (err) {
-                console.error("Failed to generate:", err);
-                alert("Error generating image. Ensure your API returns valid JSON arrays.");
+                statusText.innerText = "Error: " + err.message;
             }
         }
 
-        function renderPixels(colors, size) {
-            let index = 0;
-            for (let y = 0; y < size; y++) {
-                for (let x = 0; x < size; x++) {
-                    ctx.fillStyle = colors[index] || '#000';
-                    ctx.fillRect(x, y, 1, 1);
-                    index++;
+        function processTextChunk(text) {
+            // Clean up backslashes and split by commas
+            const colors = text.replace(/\\n/g, "").split(',');
+            
+            colors.forEach(color => {
+                const cleaned = color.trim();
+                if (cleaned.startsWith('#') && cleaned.length >= 4) {
+                    drawPixel(cleaned);
                 }
-            }
+            });
         }
 
-        // Manual Editing Logic
+        function drawPixel(color) {
+            if (pixelIndex >= currentSize * currentSize) return;
+
+            const x = pixelIndex % currentSize;
+            const y = Math.floor(pixelIndex / currentSize);
+            
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, 1, 1);
+            
+            pixelIndex++;
+            const progress = (pixelIndex / (currentSize * currentSize)) * 100;
+            loadingBar.style.width = progress + '%';
+        }
+
+        // Click to Edit
         canvas.addEventListener('mousedown', (e) => {
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const x = Math.floor((e.clientX - rect.left) * scaleX);
-            const y = Math.floor((e.clientY - rect.top) * scaleY);
+            const scale = currentSize / rect.width;
+            const x = Math.floor((e.clientX - rect.left) * scale);
+            const y = Math.floor((e.clientY - rect.top) * scale);
             
-            ctx.fillStyle = document.getElementById('colorPicker').value;
+            ctx.fillStyle = document.getElementById('editColor').value;
             ctx.fillRect(x, y, 1, 1);
         });
+
+        function downloadImg() {
+            const link = document.createElement('a');
+            link.download = 'ai-generation.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        initCanvas(16);
     </script>
 </body>
 </html>
