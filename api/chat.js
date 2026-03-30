@@ -1,13 +1,14 @@
 export default async function handler(req, res) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    const { prompt } = req.body;
+    const { prompt, stream } = req.body; // Added 'stream' toggle
 
     if (!apiKey) return res.status(500).json({ error: "Missing API Key" });
     if (!prompt) return res.status(400).json({ error: "No prompt provided" });
 
-    // UPDATE: Using the exact string confirmed by your ListModels call
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // 1. Determine the mode based on the request body
+    const mode = stream ? 'streamGenerateContent?alt=sse' : 'generateContent';
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:${mode}&key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -17,16 +18,19 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json({ 
-        error: data.error?.message || "Google API Error" 
-      });
+    if (stream) {
+      // 2. Handle Streaming (for the Image Generator)
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      response.body.pipe(res);
+    } else {
+      // 3. Handle Standard JSON (for your other existing pages)
+      const data = await response.json();
+      res.status(response.status).json(data);
     }
 
-    res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ error: "Server Crash: " + error.message });
+    res.status(500).json({ error: "Server Error: " + error.message });
   }
 }
