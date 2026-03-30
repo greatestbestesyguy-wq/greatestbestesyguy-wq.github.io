@@ -3,155 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Live Painter</title>
+    <title>AI Pixel Art Studio</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .ui-panel { background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 100%; max-width: 500px; margin-bottom: 20px; }
-        .canvas-area { position: relative; background: #000; border: 4px solid #333; line-height: 0; box-shadow: 0 0 20px rgba(0,0,0,1); }
-        canvas { image-rendering: pixelated; width: 512px; height: 512px; cursor: crosshair; }
-        .loading-bar { height: 4px; background: #4a90e2; width: 0%; transition: width 0.3s; margin-top: 10px; border-radius: 2px; }
-        input, select, button { background: #2d2d2d; color: white; border: 1px solid #444; padding: 12px; border-radius: 6px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-        button { background: #0078d4; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
-        button:hover { background: #005a9e; transform: translateY(-1px); }
-        .status { font-size: 0.8em; color: #888; margin-top: 10px; text-align: center; }
+        :root {
+            --bg: #0a0a0c;
+            --panel: #16161e;
+            --accent: #7aa2f7;
+            --text: #c0caf5;
+            --border: #292e42;
+        }
+
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .ui-panel { 
+            background: var(--panel); 
+            padding: 24px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+
+        .canvas-container { 
+            position: relative; 
+            background: #000; 
+            border: 2px solid var(--border); 
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1 / 1;
+        }
+
+        canvas { 
+            image-rendering: pixelated; 
+            width: 100%; 
+            height: 100%; 
+            cursor: crosshair; 
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #1a1b26;
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        input, select, button { 
+            background: #1a1b26; 
+            color: var(--text); 
+            border: 1px solid var(--border); 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        button { 
+            background: var(--accent); 
+            color: #1a1b26; 
+            font-weight: 700; 
+            cursor: pointer; 
+            border: none; 
+            transition: all 0.2s; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button:disabled { background: #414868; cursor: not-allowed; }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .editor-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .status { font-size: 12px; color: #565f89; text-align: center; margin-top: 8px; }
     </style>
 </head>
 <body>
 
+
+<div class="container">
     <div class="ui-panel">
-        <label>Prompt:</label>
-        <input type="text" id="promptInput" placeholder="A cozy cabin in the snow...">
+        <h2 style="margin-top: 0; color: var(--accent);">Pixel Generator</h2>
         
-        <label>Quality:</label>
-        <select id="qualitySelect">
-            <option value="16">Standard (16x16)</option>
-            <option value="32">High (32x32)</option>
-            <option value="64">Ultra (64x64)</option>
-            <option value="128">Full (128x128) - Slow & Detailed</option>
-        </select>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 12px; font-weight: bold; color: #565f89;">PROMPT</label>
+            <input type="text" id="promptInput" placeholder="A futuristic cyberpunk city skyline...">
+            
+            <div class="controls-grid">
+                <div>
+                    <label style="font-size: 12px; font-weight: bold; color: #565f89;">QUALITY</label>
+                    <select id="qualitySelect" style="width: 100%;">
+                        <option value="16">16x16 (Fast)</option>
+                        <option value="32" selected>32x32 (Standard)</option>
+                        <option value="64">64x64 (Detailed)</option>
+                        <option value="128">128x128 (Full Quality)</option>
+                    </select>
+                </div>
+                <div style="display: flex; flex-direction: column; justify-content: flex-end;">
+                    <button id="genBtn" onclick="startGeneration()">Generate</button>
+                </div>
+            </div>
+        </div>
 
-        <button onclick="startGeneration()">Generate Image</button>
-        <div id="loading" class="loading-bar"></div>
-        <div id="statusText" class="status">Ready</div>
+        <div class="progress-container">
+            <div id="progressBar"></div>
+        </div>
+        <div id="statusText" class="status">Ready to paint</div>
 
-        <div style="margin-top: 15px; display: flex; align-items: center; gap: 10px;">
-            <span>Edit Color:</span>
-            <input type="color" id="editColor" value="#ffffff" style="width: 50px; height: 40px; padding: 2px;">
-            <button onclick="downloadImg()" style="width: auto; padding: 10px 20px;">Save PNG</button>
+        <div class="editor-bar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="color" id="editColor" value="#bb9af7" style="width: 40px; height: 40px; padding: 2px; border: none;">
+                <span style="font-size: 12px;">Click canvas to edit</span>
+            </div>
+            <button onclick="downloadImg()" style="background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px 16px;">Save PNG</button>
         </div>
     </div>
 
-    <div class="canvas-area">
+    <div class="canvas-container">
         <canvas id="paintCanvas"></canvas>
     </div>
+</div>
 
-    <script>
-        const canvas = document.getElementById('paintCanvas');
-        const ctx = canvas.getContext('2d');
-        const loadingBar = document.getElementById('loading');
-        const statusText = document.getElementById('statusText');
-        let currentSize = 16;
-        let pixelIndex = 0;
+<script>
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+    const progressBar = document.getElementById('progressBar');
+    const statusText = document.getElementById('statusText');
+    const genBtn = document.getElementById('genBtn');
+    
+    let currentSize = 32;
+    let pixelIndex = 0;
 
-        function initCanvas(size) {
-            currentSize = size;
-            canvas.width = size;
-            canvas.height = size;
-            pixelIndex = 0;
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, size, size);
-            loadingBar.style.width = '0%';
-        }
+    function initCanvas(size) {
+        currentSize = size;
+        canvas.width = size;
+        canvas.height = size;
+        pixelIndex = 0;
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, size, size);
+        progressBar.style.width = '0%';
+    }
 
-        async function startGeneration() {
-            const prompt = document.getElementById('promptInput').value;
-            const size = parseInt(document.getElementById('qualitySelect').value);
-            if (!prompt) return;
+    async function startGeneration() {
+        const prompt = document.getElementById('promptInput').value;
+        const size = parseInt(document.getElementById('qualitySelect').value);
+        if (!prompt) return alert("Please enter a prompt");
 
-            initCanvas(size);
-            statusText.innerText = "AI is thinking...";
+        initCanvas(size);
+        genBtn.disabled = true;
+        statusText.innerText = "Consulting the AI...";
 
-            // We ask for a raw stream of hex codes to make parsing easy
-            const streamPrompt = `Act as a painter. Generate a ${size}x${size} grid of hex colors for: ${prompt}. 
-            Output ONLY the hex codes separated by commas (e.g. #ffffff,#000000,...). 
-            Do not use JSON, markdown, or text. Just the raw codes. Total pixels: ${size * size}.`;
+        const streamPrompt = `Task: Act as a 2D pixel artist. 
+        Generate a ${size}x${size} grid of hex color codes for: "${prompt}". 
+        Output format: Provide ONLY the hex codes separated by commas (e.g., #000000,#ffffff). 
+        Rules: No text, no markdown, no descriptions. Just the ${size*size} codes.`;
 
-            try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: streamPrompt })
-                });
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let buffer = "";
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value);
-                    // Extract text from Gemini's SSE format
-                    const matches = chunk.match(/"text":\s*"(.*?)"/g);
-                    if (matches) {
-                        matches.forEach(m => {
-                            const text = m.replace(/"text":\s*"/, "").replace(/"$/, "");
-                            processTextChunk(text);
-                        });
-                    }
-                }
-                statusText.innerText = "Generation Complete!";
-            } catch (err) {
-                statusText.innerText = "Error: " + err.message;
-            }
-        }
-
-        function processTextChunk(text) {
-            // Clean up backslashes and split by commas
-            const colors = text.replace(/\\n/g, "").split(',');
-            
-            colors.forEach(color => {
-                const cleaned = color.trim();
-                if (cleaned.startsWith('#') && cleaned.length >= 4) {
-                    drawPixel(cleaned);
-                }
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    prompt: streamPrompt,
+                    stream: true 
+                })
             });
+
+            if (!response.ok) throw new Error("API Error");
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let partialData = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                // Extract only the text parts from Gemini's SSE format
+                const textMatches = chunk.match(/"text":\s*"(.*?)"/g);
+                
+                if (textMatches) {
+                    textMatches.forEach(match => {
+                        const content = match.replace(/"text":\s*"/, "").replace(/"$/, "");
+                        // Use regex to find all hex codes in the string chunk
+                        const hexCodes = content.match(/#[A-Fa-f0-9]{6}/g);
+                        if (hexCodes) {
+                            hexCodes.forEach(color => drawPixel(color));
+                        }
+                    });
+                }
+            }
+            statusText.innerText = "Masterpiece Finished!";
+        } catch (err) {
+            statusText.innerText = "Error: " + err.message;
+        } finally {
+            genBtn.disabled = false;
         }
+    }
 
-        function drawPixel(color) {
-            if (pixelIndex >= currentSize * currentSize) return;
+    function drawPixel(color) {
+        if (pixelIndex >= currentSize * currentSize) return;
 
-            const x = pixelIndex % currentSize;
-            const y = Math.floor(pixelIndex / currentSize);
-            
-            ctx.fillStyle = color;
-            ctx.fillRect(x, y, 1, 1);
-            
-            pixelIndex++;
-            const progress = (pixelIndex / (currentSize * currentSize)) * 100;
-            loadingBar.style.width = progress + '%';
-        }
+        const x = pixelIndex % currentSize;
+        const y = Math.floor(pixelIndex / currentSize);
+        
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, 1, 1);
+        
+        pixelIndex++;
+        const progress = (pixelIndex / (currentSize * currentSize)) * 100;
+        progressBar.style.width = progress + '%';
+        statusText.innerText = `Painting... ${Math.round(progress)}%`;
+    }
 
-        // Click to Edit
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const scale = currentSize / rect.width;
-            const x = Math.floor((e.clientX - rect.left) * scale);
-            const y = Math.floor((e.clientY - rect.top) * scale);
-            
-            ctx.fillStyle = document.getElementById('editColor').value;
-            ctx.fillRect(x, y, 1, 1);
-        });
+    // Canvas Editing (Paint tool)
+    canvas.addEventListener('mousedown', paint);
+    canvas.addEventListener('mousemove', (e) => {
+        if (e.buttons === 1) paint(e);
+    });
 
-        function downloadImg() {
-            const link = document.createElement('a');
-            link.download = 'ai-generation.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        }
+    function paint(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scale = currentSize / rect.width;
+        const x = Math.floor((e.clientX - rect.left) * scale);
+        const y = Math.floor((e.clientY - rect.top) * scale);
+        
+        ctx.fillStyle = document.getElementById('editColor').value;
+        ctx.fillRect(x, y, 1, 1);
+    }
 
-        initCanvas(16);
-    </script>
+    function downloadImg() {
+        const link = document.createElement('a');
+        link.download = `ai-pixel-art-${Date.now()}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    }
+
+    // Set initial canvas state
+    initCanvas(32);
+</script>
+
 </body>
 </html>
