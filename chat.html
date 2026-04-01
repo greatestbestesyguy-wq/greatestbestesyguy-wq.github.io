@@ -1,0 +1,29 @@
+<div id="chat-container">
+  <div id="chat-window"></div>
+  <div id="input-area">
+    <input type="text" id="user-input" placeholder="Ask about recycling...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+  async function sendMessage() {
+    const input = document.getElementById('user-input');
+    const window = document.getElementById('chat-window');
+    const message = input.value;
+    if (!message) return;
+
+    // Show your message
+    window.innerHTML += `<p><b>You:</b> ${message}</p>`;
+    input.value = '';
+
+    // Ask the AI (This points to your Vercel function)
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: message }),
+    });
+    
+    const data = await response.json();
+    window.innerHTML += `<p><b>Bot:</b> ${data.text}</p>`;
+  }
+</script>
