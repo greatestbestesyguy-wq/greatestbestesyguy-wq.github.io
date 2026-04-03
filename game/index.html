@@ -3,89 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiplayer Platformer - Proxy Edition</title>
+    <title>Multiplayer Platformer - School Network Fix</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
         canvas { display: block; background: #333; }
         #ui { position: absolute; top: 10px; left: 10px; color: white; pointer-events: none; }
-        #login { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; z-index: 10; }
+        #login { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: white; padding: 20px; border-radius: 8px; z-index: 100; 
+        }
+        input, button { padding: 10px; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="login">
-    <input type="text" id="username" placeholder="Enter Name">
-    <button onclick="startGame()">Join Race</button>
+    <h3>Join the Race</h3>
+    <input type="text" id="username" placeholder="Your Name" maxlength="10">
+    <button onclick="startGame()">Start Game</button>
 </div>
 
 <div id="ui">
-    <div id="status">Connecting via Proxy...</div>
+    <div id="status">Waiting for login...</div>
 </div>
 
 <canvas id="gameCanvas"></canvas>
 
 <script>
+    // 1. Setup Canvas (Wait for DOM to be ready)
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    
-    // Set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    let supabaseClient; 
+    // 2. Global Variables
+    let supabaseClient; // Renamed to avoid library conflict
     let channel;
     let myId = Math.random().toString(36).substr(2, 9);
     let players = {};
     let myPlayer = { x: 100, y: 100, vx: 0, vy: 0, name: '' };
 
+    // 3. Initialize Connection
     function initSupabase() {
         const PROXY_URL = window.location.origin + '/supabase';
         const API_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
 
-        supabaseClient = supabase.createClient(PROXY_URL, API_KEY);
+        // FORCE LONG POLLING: This makes traffic look like normal web requests
+        supabaseClient = supabase.createClient(PROXY_URL, API_KEY, {
+            realtime: {
+                params: {
+                    eventsPerSecond: 10
+                }
+            }
+        });
         
         channel = supabaseClient.channel('race-room', {
-            config: { presence: { key: myId } },
+            config: { 
+                presence: { key: myId }
+            }
         });
 
         channel
             .on('presence', { event: 'sync' }, () => {
-                const state = channel.presenceState();
-                console.log('Sync:', state);
+                console.log('Syncing presence...');
             })
             .on('broadcast', { event: 'move' }, ({ payload }) => {
                 players[payload.id] = payload;
             })
             .subscribe(async (status) => {
                 if (status === 'SUBSCRIBED') {
-                    document.getElementById('status').innerText = "Connected!";
+                    document.getElementById('status').innerText = "Status: Connected via Proxy";
                     await channel.track({ id: myId, name: myPlayer.name, x: myPlayer.x, y: myPlayer.y });
+                } else {
+                    document.getElementById('status').innerText = "Status: " + status;
                 }
             });
     }
 
+    // 4. Start Game logic
     function startGame() {
         const name = document.getElementById('username').value;
-        if (!name) return;
+        if (!name) {
+            alert("Please enter a name!");
+            return;
+        }
         myPlayer.name = name;
         document.getElementById('login').style.display = 'none';
+        
         initSupabase();
         requestAnimationFrame(gameLoop);
     }
 
+    // 5. Physics and Drawing
     function gameLoop() {
-        // Simple Physics
-        myPlayer.vy += 0.5; 
+        // Simple platformer gravity
+        myPlayer.vy += 0.8; 
         myPlayer.y += myPlayer.vy;
         myPlayer.x += myPlayer.vx;
 
+        // Ground collision
         if (myPlayer.y > canvas.height - 50) {
             myPlayer.y = canvas.height - 50;
             myPlayer.vy = 0;
         }
 
-        // Send updates
+        // Screen boundaries
+        if (myPlayer.x < 0) myPlayer.x = 0;
+        if (myPlayer.x > canvas.width - 30) myPlayer.x = canvas.width - 30;
+
+        // Send movement to others
         if (channel && channel.state === 'joined') {
             channel.send({
                 type: 'broadcast',
@@ -94,31 +121,39 @@
             });
         }
 
-        // Draw
+        // Render Frame
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        ctx.fillStyle = 'cyan';
+        // Draw Current Player
+        ctx.fillStyle = '#00f2ff';
         ctx.fillRect(myPlayer.x, myPlayer.y, 30, 30);
+        ctx.fillStyle = 'white';
         ctx.fillText(myPlayer.name, myPlayer.x, myPlayer.y - 10);
 
-        ctx.fillStyle = 'red';
+        // Draw Other Players
+        ctx.fillStyle = '#ff4b2b';
         for (let id in players) {
             if (id !== myId) {
                 let p = players[id];
                 ctx.fillRect(p.x, p.y, 30, 30);
+                ctx.fillStyle = 'white';
                 ctx.fillText(p.name, p.x, p.y - 10);
             }
         }
+
         requestAnimationFrame(gameLoop);
     }
 
+    // 6. Controls
     window.addEventListener('keydown', e => {
-        if (e.code === 'ArrowLeft') myPlayer.vx = -5;
-        if (e.code === 'ArrowRight') myPlayer.vx = 5;
-        if (e.code === 'Space' && myPlayer.vy === 0) myPlayer.vy = -10;
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') myPlayer.vx = -7;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') myPlayer.vx = 7;
+        if ((e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') && myPlayer.vy === 0) {
+            myPlayer.vy = -15;
+        }
     });
     window.addEventListener('keyup', e => {
-        if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') myPlayer.vx = 0;
+        if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) myPlayer.vx = 0;
     });
 </script>
 
