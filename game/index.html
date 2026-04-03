@@ -3,55 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Drift - Multiplayer</title>
+    <title>Cyber-Factory Tycoon</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #0a0a12; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; user-select: none; }
+        body { margin: 0; overflow: hidden; background: #0f0f1a; font-family: 'Segoe UI', sans-serif; color: white; }
         canvas { display: block; }
-        #ui { position: absolute; top: 20px; left: 20px; pointer-events: none; text-shadow: 0 0 5px black; }
-        #leaderboard { position: absolute; top: 20px; right: 20px; text-align: right; pointer-events: none; text-shadow: 0 0 5px black; }
         
-        #login-overlay { 
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-            background: rgba(10, 10, 18, 0.9); display: flex; justify-content: center; align-items: center; z-index: 100;
-            backdrop-filter: blur(5px);
+        /* UI Overlay */
+        #gui { position: absolute; top: 20px; left: 20px; pointer-events: none; }
+        .stat-card { background: rgba(20, 20, 35, 0.8); padding: 15px; border-left: 4px solid #00f2ff; border-radius: 4px; margin-bottom: 10px; }
+        
+        /* Shop Menu */
+        #shop { 
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            background: #1a1a2e; padding: 15px; border-radius: 10px; display: flex; gap: 10px;
+            border: 1px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
-        .panel {
-            background: #151522; padding: 40px; border-radius: 12px; border: 1px solid #333;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); text-align: center; width: 300px;
+        .shop-item { 
+            background: #252545; padding: 10px; border-radius: 5px; cursor: pointer; 
+            text-align: center; width: 100px; transition: 0.2s; font-size: 12px;
         }
-        input { 
-            width: 100%; padding: 12px; margin: 15px 0; background: #0a0a12; border: 1px solid #444; 
-            color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; outline: none;
+        .shop-item:hover { background: #353565; transform: translateY(-5px); }
+        .shop-item.locked { opacity: 0.5; cursor: not-allowed; }
+
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f0f1a; display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
-        input:focus { border-color: #00f2ff; box-shadow: 0 0 10px rgba(0,242,255,0.3); }
-        button { 
-            width: 100%; padding: 12px; background: #00f2ff; color: #000; border: none; 
-            border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s;
-        }
-        button:hover { background: #00c2cc; transform: scale(1.02); }
-        h1 { margin-top: 0; color: #00f2ff; text-transform: uppercase; letter-spacing: 2px; }
+        .login-box { background: #1a1a2e; padding: 40px; border-radius: 15px; text-align: center; border: 1px solid #00f2ff; }
+        input { padding: 10px; width: 200px; border-radius: 5px; border: none; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #00f2ff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="login-overlay">
-    <div class="panel">
-        <h1>Neon Drift</h1>
-        <p style="color:#aaa; font-size:14px; margin-bottom: 20px;">Fight for the center. Drift to survive.</p>
-        <input type="text" id="username" placeholder="Enter Pilot Name" maxlength="12">
-        <button onclick="startGame()">ENTER ARENA</button>
+<div id="login-screen">
+    <div class="login-box">
+        <h1 style="color:#00f2ff">CYBER TYCOON</h1>
+        <input type="text" id="username" placeholder="Pilot Name" maxlength="12"><br>
+        <button onclick="enterGame()">INITIALIZE BASE</button>
     </div>
 </div>
 
-<div id="ui">
-    <div id="status" style="color: #00f2ff; font-weight: bold;">Connecting to Proxy...</div>
-    <div style="margin-top:10px; color:#aaa; font-size: 14px;">Controls: W, A, S, D or Arrows to thrust.</div>
+<div id="gui">
+    <div class="stat-card">
+        <div style="font-size: 12px; color: #aaa;">CREDITS</div>
+        <div id="cash-display" style="font-size: 24px; font-weight: bold; color: #00f2ff;">$0</div>
+    </div>
+    <div id="status" style="font-size: 12px; color: #00ffaa;">Connecting...</div>
 </div>
 
-<div id="leaderboard">
-    <h3 style="margin: 0 0 10px 0; color: #ff0055;">LEADERBOARD</h3>
-    <div id="lb-list"></div>
+<div id="shop">
+    <div class="shop-item" onclick="buyItem('dropper_1', 50)">
+        <b>Dropper T1</b><br>$50
+    </div>
+    <div class="shop-item" onclick="buyItem('dropper_2', 250)">
+        <b>Dropper T2</b><br>$250
+    </div>
+    <div class="shop-item" onclick="buyItem('shield_wall', 500)">
+        <b>Shield Wall</b><br>$500
+    </div>
+    <div class="shop-item" onclick="buyItem('neon_tower', 1000)">
+        <b>Neon Tower</b><br>$1000
+    </div>
 </div>
 
 <canvas id="gameCanvas"></canvas>
@@ -62,204 +76,184 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    });
-
     let supabaseClient;
     const myId = Math.random().toString(36).substr(2, 9);
     
-    // Generate a random neon color for this player
-    const colors = ['#00f2ff', '#ff0055', '#00ffaa', '#ffaa00', '#aa00ff'];
-    const myColor = colors[Math.floor(Math.random() * colors.length)];
-
-    let players = {};
-    let myPlayer = { 
-        name: '', x: Math.random() * 800 - 400, y: Math.random() * 800 - 400, 
-        vx: 0, vy: 0, score: 0, history: [] 
+    // Game State
+    let myData = {
+        name: '',
+        cash: 100,
+        unlocked: [],
+        x: 0, y: 0,
+        color: '#00f2ff'
     };
 
-    const keys = { w:false, a:false, s:false, d:false, ArrowUp:false, ArrowLeft:false, ArrowDown:false, ArrowRight:false };
+    let otherPlayers = {};
+    const keys = {};
+    let camX = 0, camY = 0;
 
-    // --- SUPABASE PROXY INIT ---
-    function initSupabase() {
+    // Define items and their positions relative to the base center
+    const ITEM_DATA = {
+        'dropper_1': { x: -60, y: -60, color: '#00ffaa', income: 1 },
+        'dropper_2': { x: 60, y: -60, color: '#00f2ff', income: 5 },
+        'shield_wall': { x: 0, y: 80, color: '#ff0055', isWall: true },
+        'neon_tower': { x: 0, y: -100, color: '#aa00ff', income: 20 }
+    };
+
+    async function initSupabase() {
         const PROXY_URL = window.location.origin + '/supabase';
         const API_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
-        
         supabaseClient = supabase.createClient(PROXY_URL, API_KEY);
-        document.getElementById('status').innerText = "SYSTEM ONLINE";
         
-        // Fast polling for movement, slower for cleanup
-        setInterval(syncMyPosition, 100);
-        setInterval(fetchOtherPlayers, 100);
-        setInterval(updateLeaderboard, 1000);
+        document.getElementById('status').innerText = "SYSTEM: ONLINE";
+        
+        // Load existing data if any
+        const { data } = await supabaseClient.from('players').select('*').eq('id', myId).single();
+        if (data) {
+            myData.cash = data.cash;
+            myData.unlocked = data.unlocked_items || [];
+        }
+
+        setInterval(syncToDB, 500);
+        setInterval(fetchOthers, 500);
+        setInterval(processIncome, 1000);
     }
 
-    async function syncMyPosition() {
+    function processIncome() {
+        myData.unlocked.forEach(itemId => {
+            if (ITEM_DATA[itemId]?.income) {
+                myData.cash += ITEM_DATA[itemId].income;
+            }
+        });
+        document.getElementById('cash-display').innerText = "$" + Math.floor(myData.cash);
+    }
+
+    async function syncToDB() {
         if (!supabaseClient) return;
-        await supabaseClient.from('players').upsert({ 
-            id: myId, name: myPlayer.name, x: myPlayer.x, y: myPlayer.y, 
-            score: Math.floor(myPlayer.score), color: myColor, last_seen: new Date().toISOString() 
+        await supabaseClient.from('players').upsert({
+            id: myId, name: myData.name, cash: myData.cash,
+            unlocked_items: myData.unlocked, x: myData.x, y: myData.y,
+            color: myData.color, last_seen: new Date().toISOString()
         });
     }
 
-    async function fetchOtherPlayers() {
+    async function fetchOthers() {
         if (!supabaseClient) return;
         const { data } = await supabaseClient.from('players').select('*').neq('id', myId);
         if (data) {
-            const now = new Date();
             data.forEach(p => {
-                // Ignore players who haven't updated in 5 seconds (ghosts)
-                if (now - new Date(p.last_seen) > 5000) return; 
-
-                if (!players[p.id]) {
-                    // New player discovered
-                    players[p.id] = { ...p, targetX: p.x, targetY: p.y, history: [] };
-                } else {
-                    // Update target for Lerping
-                    players[p.id].targetX = p.x;
-                    players[p.id].targetY = p.y;
-                    players[p.id].score = p.score;
-                    players[p.id].color = p.color;
-                }
+                if (new Date() - new Date(p.last_seen) > 10000) return; // Cleanup stale
+                otherPlayers[p.id] = p;
             });
         }
     }
 
-    function updateLeaderboard() {
-        let all = Object.values(players);
-        all.push({ name: myPlayer.name, score: Math.floor(myPlayer.score), color: myColor });
-        all.sort((a, b) => b.score - a.score);
-        
-        let html = '';
-        all.slice(0, 5).forEach((p, i) => {
-            html += `<div style="color:${p.color}; margin-bottom:5px;">${i+1}. ${p.name} - ${p.score}</div>`;
-        });
-        document.getElementById('lb-list').innerHTML = html;
-    }
-
-    // --- GAME ENGINE ---
-    function startGame() {
-        const name = document.getElementById('username').value.trim();
-        if (!name) return;
-        myPlayer.name = name;
-        document.getElementById('login-overlay').style.display = 'none';
-        initSupabase();
-        requestAnimationFrame(gameLoop);
-    }
-
-    function gameLoop() {
-        // 1. Physics & Movement (Momentum based)
-        const accel = 0.4;
-        const friction = 0.96; // Sliding friction
-
-        if (keys.w || keys.ArrowUp) myPlayer.vy -= accel;
-        if (keys.s || keys.ArrowDown) myPlayer.vy += accel;
-        if (keys.a || keys.ArrowLeft) myPlayer.vx -= accel;
-        if (keys.d || keys.ArrowRight) myPlayer.vx += accel;
-
-        myPlayer.vx *= friction;
-        myPlayer.vy *= friction;
-        myPlayer.x += myPlayer.vx;
-        myPlayer.y += myPlayer.vy;
-
-        // Trail history
-        myPlayer.history.push({x: myPlayer.x, y: myPlayer.y});
-        if (myPlayer.history.length > 20) myPlayer.history.shift();
-
-        // 2. Game Logic: King of the Hill (Center 0,0)
-        const distToCenter = Math.hypot(myPlayer.x, myPlayer.y);
-        if (distToCenter < 300) {
-            myPlayer.score += 0.5; // Gain score while in the zone
+    function buyItem(id, cost) {
+        if (myData.cash >= cost && !myData.unlocked.includes(id)) {
+            myData.cash -= cost;
+            myData.unlocked.push(id);
         }
+    }
 
-        // 3. Render Setup
-        ctx.fillStyle = '#0a0a12';
+    function enterGame() {
+        const name = document.getElementById('username').value;
+        if (!name) return;
+        myData.name = name;
+        document.getElementById('login-screen').style.display = 'none';
+        
+        // Assign a random plot position
+        myData.baseX = (Math.floor(Math.random() * 5) - 2) * 800;
+        myData.baseY = (Math.floor(Math.random() * 5) - 2) * 800;
+        myData.x = myData.baseX;
+        myData.y = myData.baseY;
+
+        initSupabase();
+        requestAnimationFrame(loop);
+    }
+
+    function loop() {
+        // Player Movement
+        const speed = 5;
+        if (keys['w'] || keys['ArrowUp']) myData.y -= speed;
+        if (keys['s'] || keys['ArrowDown']) myData.y += speed;
+        if (keys['a'] || keys['ArrowLeft']) myData.x -= speed;
+        if (keys['d'] || keys['ArrowRight']) myData.x += speed;
+
+        // Camera smoothing
+        camX += (myData.x - camX) * 0.1;
+        camY += (myData.y - camY) * 0.1;
+
+        // Draw
+        ctx.fillStyle = '#0f0f1a';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.save();
-        // Camera Follows Player
-        ctx.translate(canvas.width/2 - myPlayer.x, canvas.height/2 - myPlayer.y);
+        ctx.translate(canvas.width/2 - camX, canvas.height/2 - camY);
 
-        // Draw Infinite Grid
-        ctx.strokeStyle = '#222';
-        ctx.lineWidth = 1;
-        const gridSize = 100;
-        const startX = Math.floor((myPlayer.x - canvas.width/2) / gridSize) * gridSize;
-        const startY = Math.floor((myPlayer.y - canvas.height/2) / gridSize) * gridSize;
-        
-        ctx.beginPath();
-        for (let x = startX; x < startX + canvas.width + gridSize; x += gridSize) {
-            ctx.moveTo(x, myPlayer.y - canvas.height); ctx.lineTo(x, myPlayer.y + canvas.height);
+        // Draw Grid
+        ctx.strokeStyle = '#1a1a2e';
+        for(let i = -5000; i < 5000; i += 100) {
+            ctx.beginPath(); ctx.moveTo(i, -5000); ctx.lineTo(i, 5000); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-5000, i); ctx.lineTo(5000, i); ctx.stroke();
         }
-        for (let y = startY; y < startY + canvas.height + gridSize; y += gridSize) {
-            ctx.moveTo(myPlayer.x - canvas.width, y); ctx.lineTo(myPlayer.x + canvas.width, y);
-        }
-        ctx.stroke();
 
-        // Draw The "Hill" (Scoring Zone)
-        ctx.beginPath();
-        ctx.arc(0, 0, 300, 0, Math.PI * 2);
-        ctx.fillStyle = distToCenter < 300 ? 'rgba(0, 242, 255, 0.15)' : 'rgba(255, 0, 85, 0.05)';
-        ctx.fill();
-        ctx.strokeStyle = distToCenter < 300 ? '#00f2ff' : '#ff0055';
-        ctx.lineWidth = 3;
-        ctx.stroke();
+        // Draw My Tycoon Plot
+        drawTycoon(myData.baseX, myData.baseY, myData.name, myData.unlocked, true);
 
-        // Draw Other Players (With LERP and Trails)
-        for (let id in players) {
-            let p = players[id];
+        // Draw Others
+        for (let id in otherPlayers) {
+            let p = otherPlayers[id];
+            // Plot is always at a fixed location based on where they started
+            // For simplicity in this demo, we assume their base is near where they are
+            drawTycoon(p.x - (p.x % 100), p.y - (p.y % 100), p.name, p.unlocked_items || [], false);
             
-            // LERP: Move 15% towards the database target frame
-            p.x += (p.targetX - p.x) * 0.15;
-            p.y += (p.targetY - p.y) * 0.15;
-
-            p.history.push({x: p.x, y: p.y});
-            if (p.history.length > 20) p.history.shift();
-
-            drawShip(p.x, p.y, p.name, p.color, p.history);
+            // Draw their ship
+            ctx.fillStyle = p.color || '#fff';
+            ctx.fillRect(p.x - 10, p.y - 10, 20, 20);
         }
 
-        // Draw Local Player
-        drawShip(myPlayer.x, myPlayer.y, myPlayer.name, myColor, myPlayer.history);
+        // Draw My Ship
+        ctx.fillStyle = '#fff';
+        ctx.shadowBlur = 15; ctx.shadowColor = '#00f2ff';
+        ctx.fillRect(myData.x - 12, myData.y - 12, 24, 24);
+        ctx.shadowBlur = 0;
 
         ctx.restore();
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(loop);
     }
 
-    function drawShip(x, y, name, color, history) {
-        // Draw Trail
-        if (history.length > 1) {
-            ctx.beginPath();
-            ctx.moveTo(history[0].x, history[0].y);
-            for (let i = 1; i < history.length; i++) ctx.lineTo(history[i].x, history[i].y);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 4;
-            ctx.globalAlpha = 0.4;
-            ctx.stroke();
-            ctx.globalAlpha = 1.0;
-        }
+    function drawTycoon(bx, by, name, items, isMe) {
+        // Floor
+        ctx.fillStyle = isMe ? '#16162d' : '#2d1616';
+        ctx.fillRect(bx - 200, by - 200, 400, 400);
+        ctx.strokeStyle = isMe ? '#00f2ff' : '#ff4444';
+        ctx.strokeRect(bx - 200, by - 200, 400, 400);
+        
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.fillText(name + "'s Factory", bx, by - 210);
 
-        // Draw glowing ship core
-        ctx.beginPath();
-        ctx.arc(x, y, 12, 0, Math.PI * 2);
-        ctx.fillStyle = '#fff';
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 15;
-        ctx.fill();
-        ctx.shadowBlur = 0; // reset
-
-        // Draw name
-        ctx.fillStyle = '#fff';
-        ctx.font = '12px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(name, x, y - 20);
+        // Draw Buildings
+        items.forEach(itemId => {
+            const config = ITEM_DATA[itemId];
+            if (config) {
+                ctx.fillStyle = config.color;
+                if (config.isWall) {
+                    ctx.fillRect(bx + config.x - 150, by + config.y, 300, 20);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(bx + config.x, by + config.y, 25, 0, Math.PI*2);
+                    ctx.fill();
+                    // Glow effect
+                    ctx.shadowBlur = 10; ctx.shadowColor = config.color;
+                    ctx.stroke(); ctx.shadowBlur = 0;
+                }
+            }
+        });
     }
 
-    // Input listening
-    window.addEventListener('keydown', e => { if (keys.hasOwnProperty(e.key)) keys[e.key] = true; });
-    window.addEventListener('keyup', e => { if (keys.hasOwnProperty(e.key)) keys[e.key] = false; });
+    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 </script>
 
 </body>
