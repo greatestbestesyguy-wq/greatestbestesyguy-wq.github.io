@@ -6,40 +6,45 @@
     <title>Supabase Speed Race</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { margin: 0; background: #1a1a1a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
-        #ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 2px solid #3ecf8e; box-shadow: 0 0 20px rgba(62, 207, 142, 0.3); z-index: 10; }
-        input { padding: 12px; font-size: 18px; border-radius: 8px; border: 1px solid #444; background: #222; color: white; outline: none; width: 200px; }
-        button { padding: 12px 25px; font-size: 18px; background: #3ecf8e; color: #111; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:hover { background: #2eb87b; transform: scale(1.05); }
+        body { margin: 0; background: #1a1a1a; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        #ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 2px solid #3ecf8e; z-index: 10; }
+        input { padding: 12px; font-size: 18px; border-radius: 8px; border: 1px solid #444; background: #222; color: white; width: 200px; margin-bottom: 10px; }
+        button { padding: 12px 25px; font-size: 18px; background: #3ecf8e; color: #111; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         canvas { display: block; background: #222; }
-        #leaderboard { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; border-left: 4px solid #3ecf8e; pointer-events: none; }
+        #leaderboard { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; border-left: 4px solid #3ecf8e; }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        <h1 style="color: #3ecf8e; margin-top: 0;">SUPABASE RACE</h1>
+        <h1 style="color: #3ecf8e;">SUPABASE RACE</h1>
         <input type="text" id="nameInput" placeholder="Your Name..." maxlength="12">
+        <br>
         <button onclick="startGame()">START RACE</button>
-        <p style="opacity: 0.7; font-size: 14px;">Arrows to Move & Jump</p>
+        <p style="opacity: 0.7;">Arrows to Move & Jump</p>
     </div>
 
     <div id="leaderboard">
         <strong>Players Online: <span id="count">0</span></strong>
-        <div id="playerList" style="font-size: 13px; margin-top: 5px; opacity: 0.8;"></div>
+        <div id="playerList" style="font-size: 13px; margin-top: 5px;"></div>
     </div>
     <canvas id="gameCanvas"></canvas>
 
 <script>
-    // --- YOUR SUPABASE CONFIG ---
-    // (Updated with your project details)
-    const SUPABASE_URL = 'https://greatestbestesyguy-wq.supabase.co'; 
+    // --- UPDATED WITH YOUR REAL PROJECT DATA ---
+    const SUPABASE_URL = 'https://wraecvlsqeevehjiqfrg.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
     
     const { createClient } = supabase;
-    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // Initializing with extra settings to help bypass strict firewalls
+    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+        realtime: {
+            params: { eventsPerSecond: 10 },
+            config: { heartbeatIntervalMs: 3000 }
+        }
+    });
 
-    // --- GAME CONSTANTS ---
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
@@ -56,11 +61,7 @@
 
     let myPlayer = { 
         id: Math.random().toString(36).substring(7), 
-        name: '', 
-        x: 100, 
-        y: 0, 
-        vx: 0, 
-        vy: 0, 
+        name: '', x: 100, y: 0, vx: 0, vy: 0, 
         color: `hsl(${Math.random() * 360}, 80%, 60%)`, 
         jumping: false 
     };
@@ -75,51 +76,47 @@
 
     async function startGame() {
         const name = document.getElementById('nameInput').value.trim();
-        if (!name) return alert("Please enter a name first!");
+        if (!name) return alert("Please enter a name!");
         
         myPlayer.name = name;
         document.getElementById('ui').style.display = 'none';
         gameActive = true;
 
-        // Create Realtime Channel
+        // Create the Channel
         channel = _supabase.channel('main-room', {
-            config: { 
-                broadcast: { ack: false, self: false }, 
-                presence: { key: myPlayer.id } 
-            }
+            config: { broadcast: { self: false }, presence: { key: myPlayer.id } }
         });
 
-        // 1. Listen for Movement
+        // Handle incoming moves
         channel.on('broadcast', { event: 'player_pos' }, ({ payload }) => {
             otherPlayers[payload.id] = payload;
         });
 
-        // 2. Track Presence (Online List)
+        // Handle Player List
         channel.on('presence', { event: 'sync' }, () => {
             const state = channel.presenceState();
-            const activeIds = Object.keys(state);
+            const ids = Object.keys(state);
+            document.getElementById('count').innerText = ids.length;
             
-            document.getElementById('count').innerText = activeIds.length;
-            
-            // Clean up players who disconnected
+            // Clean up players who left
             Object.keys(otherPlayers).forEach(id => {
-                if (!activeIds.includes(id)) delete otherPlayers[id];
+                if (!ids.includes(id)) delete otherPlayers[id];
             });
 
-            // Update simple leaderboard text
             let listHTML = "";
-            activeIds.forEach(id => {
+            ids.forEach(id => {
                 const p = state[id][0];
-                listHTML += `<div>• ${p.name || 'Anonymous'}</div>`;
+                listHTML += `<div>• ${p.name || 'Joining...'}</div>`;
             });
             document.getElementById('playerList').innerHTML = listHTML;
         });
 
-        // 3. Connect!
         await channel.subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
                 await channel.track({ name: myPlayer.name, color: myPlayer.color });
                 requestAnimationFrame(gameLoop);
+            } else if (status === 'CHANNEL_ERROR') {
+                alert("Connection Blocked! Try a different network (like a phone hotspot).");
             }
         });
     }
@@ -127,7 +124,6 @@
     function update() {
         if (!gameActive) return;
 
-        // Input
         if (keys['ArrowRight'] || keys['d']) myPlayer.vx = 7;
         else if (keys['ArrowLeft'] || keys['a']) myPlayer.vx = -7;
         else myPlayer.vx *= 0.85;
@@ -137,12 +133,10 @@
             myPlayer.jumping = true;
         }
 
-        // Apply Physics
         myPlayer.x += myPlayer.vx;
         myPlayer.y += myPlayer.vy;
         myPlayer.vy += GRAVITY;
 
-        // Collision: Floor
         const groundY = canvas.height - GROUND_HEIGHT - PLAYER_SIZE;
         if (myPlayer.y > groundY) {
             myPlayer.y = groundY;
@@ -150,56 +144,31 @@
             myPlayer.jumping = false;
         }
 
-        // Screen wrap
         if (myPlayer.x > canvas.width) myPlayer.x = -PLAYER_SIZE;
         if (myPlayer.x < -PLAYER_SIZE) myPlayer.x = canvas.width;
 
-        // Broadcast Position (Only send if moving to save bandwidth)
+        // Send movement data
         if (Math.abs(myPlayer.vx) > 0.05 || Math.abs(myPlayer.vy) > 0.05 || myPlayer.jumping) {
             channel.send({
                 type: 'broadcast',
                 event: 'player_pos',
-                payload: { 
-                    id: myPlayer.id, 
-                    name: myPlayer.name, 
-                    x: myPlayer.x, 
-                    y: myPlayer.y, 
-                    color: myPlayer.color 
-                }
+                payload: { id: myPlayer.id, name: myPlayer.name, x: myPlayer.x, y: myPlayer.y, color: myPlayer.color }
             });
         }
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw Ground
         ctx.fillStyle = '#333';
         ctx.fillRect(0, canvas.height - GROUND_HEIGHT, canvas.width, GROUND_HEIGHT);
-        ctx.strokeStyle = '#3ecf8e';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(0, canvas.height - GROUND_HEIGHT, canvas.width, 2);
-
-        // Draw finish line area (visual only)
-        ctx.fillStyle = 'rgba(255, 255, 0, 0.1)';
-        ctx.fillRect(canvas.width - 150, 0, 150, canvas.height - GROUND_HEIGHT);
-
-        // Draw local player
+        
         drawPlayer(myPlayer);
-
-        // Draw others
         Object.values(otherPlayers).forEach(drawPlayer);
     }
 
     function drawPlayer(p) {
-        // Body
         ctx.fillStyle = p.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = p.color;
         ctx.fillRect(p.x, p.y, PLAYER_SIZE, PLAYER_SIZE);
-        ctx.shadowBlur = 0;
-
-        // Name Tag
         ctx.fillStyle = 'white';
         ctx.font = 'bold 14px Arial';
         ctx.textAlign = 'center';
