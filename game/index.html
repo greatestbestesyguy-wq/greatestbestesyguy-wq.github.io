@@ -3,116 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiplayer Platformer - School Network Fix</title>
+    <title>Multiplayer - HTTP Proxy Mode</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; color: white; }
         canvas { display: block; background: #333; }
-        #ui { position: absolute; top: 10px; left: 10px; color: white; pointer-events: none; }
+        #ui { position: absolute; top: 10px; left: 10px; pointer-events: none; }
         #login { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: white; padding: 20px; border-radius: 8px; z-index: 100; 
+            background: white; padding: 20px; border-radius: 8px; z-index: 100; color: black;
         }
-        input, button { padding: 10px; font-size: 16px; cursor: pointer; }
+        input, button { padding: 10px; margin-top: 10px; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div id="login">
-    <h3>Join the Race</h3>
-    <input type="text" id="username" placeholder="Your Name" maxlength="10">
-    <button onclick="startGame()">Start Game</button>
+    <h3 style="margin-top:0">Join Race</h3>
+    <input type="text" id="username" placeholder="Name" maxlength="10">
+    <button onclick="startGame()">Connect</button>
 </div>
 
 <div id="ui">
-    <div id="status">Waiting for login...</div>
+    <div id="status">Ready</div>
 </div>
 
 <canvas id="gameCanvas"></canvas>
 
 <script>
-    // 1. Setup Canvas (Wait for DOM to be ready)
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // 2. Global Variables
-    let supabaseClient; // Renamed to avoid library conflict
+    let supabaseClient;
     let channel;
     let myId = Math.random().toString(36).substr(2, 9);
     let players = {};
     let myPlayer = { x: 100, y: 100, vx: 0, vy: 0, name: '' };
 
-    // 3. Initialize Connection
     function initSupabase() {
+        // We use the Vercel proxy path
         const PROXY_URL = window.location.origin + '/supabase';
         const API_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
 
-        // FORCE LONG POLLING: This makes traffic look like normal web requests
+        // Initialize with global fetch settings to ensure headers pass through Vercel
         supabaseClient = supabase.createClient(PROXY_URL, API_KEY, {
             realtime: {
+                // This tells the library to expect a non-standard socket environment
                 params: {
                     eventsPerSecond: 10
                 }
             }
         });
         
-        channel = supabaseClient.channel('race-room', {
-            config: { 
-                presence: { key: myId }
-            }
-        });
+        // Use a high-level channel config
+        channel = supabaseClient.channel('race-room');
 
         channel
-            .on('presence', { event: 'sync' }, () => {
-                console.log('Syncing presence...');
-            })
             .on('broadcast', { event: 'move' }, ({ payload }) => {
                 players[payload.id] = payload;
             })
-            .subscribe(async (status) => {
+            .subscribe((status) => {
+                document.getElementById('status').innerText = "Status: " + status;
                 if (status === 'SUBSCRIBED') {
-                    document.getElementById('status').innerText = "Status: Connected via Proxy";
-                    await channel.track({ id: myId, name: myPlayer.name, x: myPlayer.x, y: myPlayer.y });
-                } else {
-                    document.getElementById('status').innerText = "Status: " + status;
+                    // Start sending position updates
+                    setInterval(sendUpdate, 50); 
                 }
             });
     }
 
-    // 4. Start Game logic
-    function startGame() {
-        const name = document.getElementById('username').value;
-        if (!name) {
-            alert("Please enter a name!");
-            return;
-        }
-        myPlayer.name = name;
-        document.getElementById('login').style.display = 'none';
-        
-        initSupabase();
-        requestAnimationFrame(gameLoop);
-    }
-
-    // 5. Physics and Drawing
-    function gameLoop() {
-        // Simple platformer gravity
-        myPlayer.vy += 0.8; 
-        myPlayer.y += myPlayer.vy;
-        myPlayer.x += myPlayer.vx;
-
-        // Ground collision
-        if (myPlayer.y > canvas.height - 50) {
-            myPlayer.y = canvas.height - 50;
-            myPlayer.vy = 0;
-        }
-
-        // Screen boundaries
-        if (myPlayer.x < 0) myPlayer.x = 0;
-        if (myPlayer.x > canvas.width - 30) myPlayer.x = canvas.width - 30;
-
-        // Send movement to others
+    function sendUpdate() {
         if (channel && channel.state === 'joined') {
             channel.send({
                 type: 'broadcast',
@@ -120,37 +81,50 @@
                 payload: { id: myId, x: myPlayer.x, y: myPlayer.y, name: myPlayer.name }
             });
         }
+    }
 
-        // Render Frame
+    function startGame() {
+        const name = document.getElementById('username').value;
+        if (!name) return;
+        myPlayer.name = name;
+        document.getElementById('login').style.display = 'none';
+        initSupabase();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function gameLoop() {
+        myPlayer.vy += 0.8; 
+        myPlayer.y += myPlayer.vy;
+        myPlayer.x += myPlayer.vx;
+
+        if (myPlayer.y > canvas.height - 50) {
+            myPlayer.y = canvas.height - 50;
+            myPlayer.vy = 0;
+        }
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Draw Current Player
+        // Draw Me
         ctx.fillStyle = '#00f2ff';
         ctx.fillRect(myPlayer.x, myPlayer.y, 30, 30);
-        ctx.fillStyle = 'white';
         ctx.fillText(myPlayer.name, myPlayer.x, myPlayer.y - 10);
 
-        // Draw Other Players
+        // Draw Others
         ctx.fillStyle = '#ff4b2b';
         for (let id in players) {
             if (id !== myId) {
                 let p = players[id];
                 ctx.fillRect(p.x, p.y, 30, 30);
-                ctx.fillStyle = 'white';
                 ctx.fillText(p.name, p.x, p.y - 10);
             }
         }
-
         requestAnimationFrame(gameLoop);
     }
 
-    // 6. Controls
     window.addEventListener('keydown', e => {
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') myPlayer.vx = -7;
         if (e.code === 'ArrowRight' || e.code === 'KeyD') myPlayer.vx = 7;
-        if ((e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') && myPlayer.vy === 0) {
-            myPlayer.vy = -15;
-        }
+        if ((e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') && myPlayer.vy === 0) myPlayer.vy = -15;
     });
     window.addEventListener('keyup', e => {
         if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) myPlayer.vx = 0;
