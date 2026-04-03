@@ -2,148 +2,135 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Metro Track Meet - Multiplayer</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.40.0/dist/umd/supabase.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Platformer - Proxy Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { margin: 0; background: #2c3e50; color: white; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
-        #debug { position: absolute; bottom: 10px; left: 10px; font-size: 10px; color: #aaa; background: rgba(0,0,0,0.5); padding: 5px; }
-        #ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; padding: 40px; border: 4px solid #3ecf8e; text-align: center; }
-        canvas { display: block; background: linear-gradient(#2c3e50, #000); }
-        .stat-box { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 5px; border-left: 5px solid #3ecf8e; }
-        button { background: #3ecf8e; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; font-size: 18px; }
+        body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
+        canvas { display: block; background: #333; }
+        #ui { position: absolute; top: 10px; left: 10px; color: white; pointer-events: none; }
+        #login { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <div id="ui">
-        <h1 style="color: #3ecf8e; margin: 0;">TRACK MEET</h1>
-        <p>Sprint to the finish line!</p>
-        <input type="text" id="nameInput" placeholder="Runner Name..." style="padding: 10px; font-size: 16px;"><br><br>
-        <button onclick="initGame()">ENTER STADIUM</button>
-    </div>
+<div id="login">
+    <input type="text" id="username" placeholder="Enter Name">
+    <button onclick="startGame()">Join Race</button>
+</div>
 
-    <div class="stat-box">
-        <strong>LEADERBOARD</strong>
-        <div id="leaderboard">Connecting...</div>
-    </div>
+<div id="ui">
+    <div id="status">Connecting via Proxy...</div>
+    <div id="player-list"></div>
+</div>
 
-    <div id="debug">System: Idle</div>
-    <canvas id="game"></canvas>
+<canvas id="gameCanvas"></canvas>
 
 <script>
-    const CONFIG = {
-        url: 'https://wraecvlsqeevehjiqfrg.supabase.com',
-        key: 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7',
-        g: 0.8 // Gravity constant
-    };
-
-    const canvas = document.getElementById('game');
+    const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const debug = document.getElementById('debug');
-    
-    let me = { id: Math.random().toString(36).slice(2, 7), name: '', x: 50, y: 0, vy: 0, laps: 0, color: `hsl(${Math.random()*360}, 70%, 60%)` };
-    let others = {};
-    let isLive = false;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let supabase;
     let channel;
+    let myId = Math.random().toString(36).substr(2, 9);
+    let players = {};
+    let myPlayer = { x: 100, y: 100, vx: 0, vy: 0, name: '' };
 
-    function log(msg) { debug.innerText = `System: ${msg}`; console.log(msg); }
+    // --- PROXY INITIALIZATION ---
+    // Instead of the .supabase.co URL, we use /supabase which Vercel forwards
+    function initSupabase() {
+        const PROXY_URL = window.location.origin + '/supabase';
+        const API_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
 
-    async function initGame() {
-        me.name = document.getElementById('nameInput').value || 'Guest';
-        document.getElementById('ui').style.display = 'none';
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const _supabase = window.supabase.createClient(CONFIG.url, CONFIG.key);
-        log("Attempting handshake...");
-
-        channel = _supabase.channel('stadium_v1');
-
-        channel.on('broadcast', { event: 'pos' }, ({ payload }) => {
-            others[payload.id] = payload;
+        supabase = supabase.createClient(PROXY_URL, API_KEY);
+        
+        // Listen for presence and movement
+        channel = supabase.channel('race-room', {
+            config: {
+                presence: { key: myId },
+            },
         });
 
-        channel.on('presence', { event: 'sync' }, () => {
-            const state = channel.presenceState();
-            let html = "";
-            Object.values(state).forEach(p => {
-                html += `<div>• ${p[0].name}</div>`;
+        channel
+            .on('presence', { event: 'sync' }, () => {
+                const state = channel.presenceState();
+                console.log('Players online:', state);
+            })
+            .on('broadcast', { event: 'move' }, ({ payload }) => {
+                players[payload.id] = payload;
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    document.getElementById('status').innerText = "Connected (Proxied)";
+                    await channel.track({ id: myId, name: myPlayer.name, x: myPlayer.x, y: myPlayer.y });
+                } else {
+                    document.getElementById('status').innerText = "Blocked or Offline";
+                }
             });
-            document.getElementById('leaderboard').innerHTML = html;
-        });
-
-        await channel.subscribe(async (status) => {
-            log(status);
-            if (status === 'SUBSCRIBED') {
-                await channel.track({ name: me.name });
-                isLive = true;
-                requestAnimationFrame(loop);
-            } else {
-                log("BLOCKED: School firewall detected.");
-            }
-        });
     }
 
-    const keys = {};
-    window.onkeydown = (e) => keys[e.key] = true;
-    window.onkeyup = (e) => keys[e.key] = false;
+    function startGame() {
+        const name = document.getElementById('username').value;
+        if (!name) return;
+        myPlayer.name = name;
+        document.getElementById('login').style.display = 'none';
+        initSupabase();
+        requestAnimationFrame(gameLoop);
+    }
 
-    function update() {
-        if (!isLive) return;
+    function gameLoop() {
+        // Simple Physics
+        myPlayer.vy += 0.5; // gravity
+        myPlayer.y += myPlayer.vy;
+        myPlayer.x += myPlayer.vx;
 
-        // Physics: v = v0 + gt
-        if (keys['ArrowRight']) me.x += 8;
-        if (keys['ArrowLeft']) me.x -= 8;
-        
-        // Jump logic
-        if (keys['ArrowUp'] && me.y >= canvas.height - 100) me.vy = -18;
-        
-        me.y += me.vy;
-        if (me.y < canvas.height - 100) {
-            me.vy += CONFIG.g;
-        } else {
-            me.y = canvas.height - 100;
-            me.vy = 0;
+        if (myPlayer.y > canvas.height - 50) {
+            myPlayer.y = canvas.height - 50;
+            myPlayer.vy = 0;
         }
 
-        // Win/Lap Condition
-        if (me.x > canvas.width) {
-            me.x = 0;
-            me.laps++;
-            log(`Lap ${me.laps} complete!`);
+        // Broadcast position
+        if (channel && channel.state === 'joined') {
+            channel.send({
+                type: 'broadcast',
+                event: 'move',
+                payload: { id: myId, x: myPlayer.x, y: myPlayer.y, name: myPlayer.name }
+            });
         }
 
-        // Broadcast move
-        channel.send({ type: 'broadcast', event: 'pos', payload: me });
-    }
-
-    function drawPlayer(p, isMe) {
-        ctx.fillStyle = p.color;
-        ctx.shadowBlur = isMe ? 20 : 0;
-        ctx.shadowColor = p.color;
-        ctx.fillRect(p.x, p.y - 40, 40, 40);
-        ctx.shadowBlur = 0;
-        
-        ctx.fillStyle = "white";
-        ctx.font = "12px Arial";
-        ctx.fillText(`${p.name} (Laps: ${p.laps || 0})`, p.x - 10, p.y - 50);
-    }
-
-    function loop() {
+        // Draw
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Ground / Track
-        ctx.fillStyle = "#c0392b";
-        ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, canvas.height - 58, canvas.width, 2); // Lane line
+        // Draw me
+        ctx.fillStyle = 'cyan';
+        ctx.fillRect(myPlayer.x, myPlayer.y, 30, 30);
+        ctx.fillText(myPlayer.name, myPlayer.x, myPlayer.y - 10);
 
-        drawPlayer(me, true);
-        Object.values(others).forEach(p => drawPlayer(p, false));
+        // Draw others
+        ctx.fillStyle = 'red';
+        for (let id in players) {
+            if (id !== myId) {
+                let p = players[id];
+                ctx.fillRect(p.x, p.y, 30, 30);
+                ctx.fillText(p.name, p.x, p.y - 10);
+            }
+        }
 
-        update();
-        requestAnimationFrame(loop);
+        requestAnimationFrame(gameLoop);
     }
+
+    // Input handling
+    window.addEventListener('keydown', e => {
+        if (e.code === 'ArrowLeft') myPlayer.vx = -5;
+        if (e.code === 'ArrowRight') myPlayer.vx = 5;
+        if (e.code === 'Space' && myPlayer.vy === 0) myPlayer.vy = -10;
+    });
+    window.addEventListener('keyup', e => {
+        if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') myPlayer.vx = 0;
+    });
 </script>
+
 </body>
 </html>
