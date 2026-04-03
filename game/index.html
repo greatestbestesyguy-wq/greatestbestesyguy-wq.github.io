@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Speed Race</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { margin: 0; background: #222; color: white; font-family: sans-serif; overflow: hidden; }
+        #ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px; }
+        input { padding: 10px; font-size: 16px; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; font-size: 16px; background: #3ecf8e; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 5px; }
+        canvas { display: block; background: #333; }
+        #leaderboard { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <h1>Speed Race</h1>
+        <input type="text" id="nameInput" placeholder="Enter Name..." maxlength="10">
+        <button onclick="startGame()">Join Race</button>
+        <p>Use Arrow Keys to Move & Jump</p>
+    </div>
+
+    <div id="leaderboard">Players Online: <span id="count">0</span></div>
+    <canvas id="gameCanvas"></canvas>
+
+<script>
+    // --- SUPABASE CONFIG ---
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL'; 
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const { createClient } = supabase;
+    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // --- GAME CONSTANTS ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const GRAVITY = 0.5;
+    const GROUND_Y = canvas.height - 50;
+    const FINISH_LINE = canvas.width - 100;
+
+    let myPlayer = { id: Math.random().toString(36).substring(7), name: '', x: 50, y: 0, vx: 0, vy: 0, color: `hsl(${Math.random() * 360}, 70%, 60%)`, jumping: false };
+    let otherPlayers = {};
+    let gameActive = false;
+    let channel;
+
+    // --- INPUT HANDLING ---
+    const keys = {};
+    window.onkeydown = (e) => keys[e.key] = true;
+    window.onkeyup = (e) => keys[e.key] = false;
+
+    async function startGame() {
+        const name = document.getElementById('nameInput').value;
+        if (!name) return alert("Enter a name!");
+        
+        myPlayer.name = name;
+        document.getElementById('ui').style.display = 'none';
+        gameActive = true;
+
+        // Initialize Realtime Channel
+        channel = _supabase.channel('race-room', {
+            config: { broadcast: { self: false }, presence: { key: myPlayer.id } }
+        });
+
+        // Listen for moves
+        channel.on('broadcast', { event: 'move' }, ({ payload }) => {
+            otherPlayers[payload.id] = payload;
+        });
+
+        // Listen for players joining/leaving
+        channel.on('presence', { event: 'sync' }, () => {
+            const state = channel.presenceState();
+            document.getElementById('count').innerText = Object.keys(state).length;
+            
+            // Clean up players who left
+            const activeIds = Object.keys(state);
+            Object.keys(otherPlayers).forEach(id => {
+                if (!activeIds.includes(id)) delete otherPlayers[id];
+            });
+        });
+
+        await channel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await channel.track({ name: myPlayer.name, color: myPlayer.color });
+            }
+        });
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function update() {
+        if (!gameActive) return;
+
+        // Horizontal Movement
+        if (keys['ArrowRight']) myPlayer.vx = 5;
+        else if (keys['ArrowLeft']) myPlayer.vx = -5;
+        else myPlayer.vx *= 0.8;
+
+        // Jump
+        if (keys['ArrowUp'] && !myPlayer.jumping) {
+            myPlayer.vy = -12;
+            myPlayer.jumping = true;
+        }
+
+        // Physics
+        myPlayer.x += myPlayer.vx;
+        myPlayer.y += myPlayer.vy;
+        myPlayer.vy += GRAVITY;
+
+        // Ground Collision
+        if (myPlayer.y > GROUND_Y - 30) {
+            myPlayer.y = GROUND_Y - 30;
+            myPlayer.vy = 0;
+            myPlayer.jumping = false;
+        }
+
+        // Broadcast position to others
+        if (Math.abs(myPlayer.vx) > 0.1 || Math.abs(myPlayer.vy) > 0.1) {
+            channel.send({
+                type: 'broadcast',
+                event: 'move',
+                payload: { id: myPlayer.id, name: myPlayer.name, x: myPlayer.x, y: myPlayer.y, color: myPlayer.color }
+            });
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Ground
+        ctx.fillStyle = '#555';
+        ctx.fillRect(0, GROUND_Y, canvas.width, 50);
+
+        // Draw Finish Line
+        ctx.fillStyle = 'yellow';
+        ctx.fillRect(FINISH_LINE, GROUND_Y - 100, 10, 100);
+
+        // Draw Me
+        drawPlayer(myPlayer);
+
+        // Draw Others
+        Object.values(otherPlayers).forEach(p => drawPlayer(p));
+    }
+
+    function drawPlayer(p) {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 30, 30);
+        ctx.fillStyle = 'white';
+        ctx.font = '12px Arial';
+        ctx.fillText(p.name, p.x, p.y - 10);
+    }
+
+    function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    window.onresize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+</script>
+</body>
+</html>
