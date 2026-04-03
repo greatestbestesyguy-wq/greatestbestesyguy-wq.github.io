@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supabase Speed Race</title>
+    <title>Supabase Speed Race - School Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; background: #1a1a1a; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
@@ -31,17 +31,18 @@
     <canvas id="gameCanvas"></canvas>
 
 <script>
-    // --- UPDATED WITH YOUR REAL PROJECT DATA ---
+    // --- SUPABASE CONFIG ---
     const SUPABASE_URL = 'https://wraecvlsqeevehjiqfrg.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
     
     const { createClient } = supabase;
     
-    // Initializing with extra settings to help bypass strict firewalls
+    // FORCING LONG POLLING: This makes the traffic look like standard HTTP 
+    // to try and sneak past the school firewall.
     const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
         realtime: {
-            params: { eventsPerSecond: 10 },
-            config: { heartbeatIntervalMs: 3000 }
+            params: { eventsPerSecond: 5 }, // Lowering frequency helps stability
+            transport: 'longpolling' 
         }
     });
 
@@ -82,23 +83,19 @@
         document.getElementById('ui').style.display = 'none';
         gameActive = true;
 
-        // Create the Channel
         channel = _supabase.channel('main-room', {
             config: { broadcast: { self: false }, presence: { key: myPlayer.id } }
         });
 
-        // Handle incoming moves
         channel.on('broadcast', { event: 'player_pos' }, ({ payload }) => {
             otherPlayers[payload.id] = payload;
         });
 
-        // Handle Player List
         channel.on('presence', { event: 'sync' }, () => {
             const state = channel.presenceState();
             const ids = Object.keys(state);
             document.getElementById('count').innerText = ids.length;
             
-            // Clean up players who left
             Object.keys(otherPlayers).forEach(id => {
                 if (!ids.includes(id)) delete otherPlayers[id];
             });
@@ -116,7 +113,8 @@
                 await channel.track({ name: myPlayer.name, color: myPlayer.color });
                 requestAnimationFrame(gameLoop);
             } else if (status === 'CHANNEL_ERROR') {
-                alert("Connection Blocked! Try a different network (like a phone hotspot).");
+                // If even long-polling fails, the school is blocking the domain entirely.
+                alert("The school network is still blocking the connection. Try a phone hotspot!");
             }
         });
     }
@@ -147,8 +145,7 @@
         if (myPlayer.x > canvas.width) myPlayer.x = -PLAYER_SIZE;
         if (myPlayer.x < -PLAYER_SIZE) myPlayer.x = canvas.width;
 
-        // Send movement data
-        if (Math.abs(myPlayer.vx) > 0.05 || Math.abs(myPlayer.vy) > 0.05 || myPlayer.jumping) {
+        if (Math.abs(myPlayer.vx) > 0.1 || Math.abs(myPlayer.vy) > 0.1 || myPlayer.jumping) {
             channel.send({
                 type: 'broadcast',
                 event: 'player_pos',
