@@ -2,179 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supabase Speed Race - School Edition</title>
+    <title>Supabase Race - .COM Version</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { margin: 0; background: #1a1a1a; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        #ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 2px solid #3ecf8e; z-index: 10; }
-        input { padding: 12px; font-size: 18px; border-radius: 8px; border: 1px solid #444; background: #222; color: white; width: 200px; margin-bottom: 10px; }
-        button { padding: 12px 25px; font-size: 18px; background: #3ecf8e; color: #111; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        canvas { display: block; background: #222; }
-        #leaderboard { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; border-left: 4px solid #3ecf8e; }
+        body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; text-align: center; }
+        #ui { margin-top: 20vh; background: #333; padding: 20px; display: inline-block; border-radius: 10px; border: 2px solid #3ecf8e; }
+        canvas { display: block; background: #222; margin: 0 auto; }
+        input, button { padding: 10px; margin: 5px; border-radius: 5px; border: none; }
+        button { background: #3ecf8e; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        <h1 style="color: #3ecf8e;">SUPABASE RACE</h1>
-        <input type="text" id="nameInput" placeholder="Your Name..." maxlength="12">
-        <br>
-        <button onclick="startGame()">START RACE</button>
-        <p style="opacity: 0.7;">Arrows to Move & Jump</p>
+        <h1>SUPABASE RACE</h1>
+        <input type="text" id="nameInput" placeholder="Name..." maxlength="10">
+        <button onclick="startGame()">JOIN</button>
     </div>
-
-    <div id="leaderboard">
-        <strong>Players Online: <span id="count">0</span></strong>
-        <div id="playerList" style="font-size: 13px; margin-top: 5px;"></div>
-    </div>
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="gameCanvas" style="display:none;"></canvas>
 
 <script>
-    // --- SUPABASE CONFIG ---
+    // --- STEP 1: CHANGE .CO TO .COM ---
     const SUPABASE_URL = 'https://wraecvlsqeevehjiqfrg.supabase.com'; 
     const SUPABASE_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
     
     const { createClient } = supabase;
-    
-    // FORCING LONG POLLING: This makes the traffic look like standard HTTP 
-    // to try and sneak past the school firewall.
-    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-        realtime: {
-            params: { eventsPerSecond: 5 }, // Lowering frequency helps stability
-            transport: 'longpolling' 
-        }
-    });
+
+    // --- STEP 2: REMOVE CUSTOM TRANSPORT FOR NOW ---
+    // Sometimes the "this.transport" error is caused by the library 
+    // failing to find the 'longpolling' module if the CDN is partially blocked.
+    // Let's try the default first with the .com URL.
+    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.onresize = resize;
-    resize();
-
-    const GRAVITY = 0.6;
-    const GROUND_HEIGHT = 60;
-    const PLAYER_SIZE = 35;
-
-    let myPlayer = { 
-        id: Math.random().toString(36).substring(7), 
-        name: '', x: 100, y: 0, vx: 0, vy: 0, 
-        color: `hsl(${Math.random() * 360}, 80%, 60%)`, 
-        jumping: false 
-    };
-    
+    let myPlayer = { id: Math.random().toString(36).substring(7), name: '', x: 50, y: 100, color: 'lime' };
     let otherPlayers = {};
-    let gameActive = false;
     let channel;
 
-    const keys = {};
-    window.onkeydown = (e) => keys[e.key] = true;
-    window.onkeyup = (e) => keys[e.key] = false;
-
     async function startGame() {
-        const name = document.getElementById('nameInput').value.trim();
-        if (!name) return alert("Please enter a name!");
-        
-        myPlayer.name = name;
+        myPlayer.name = document.getElementById('nameInput').value || 'Player';
         document.getElementById('ui').style.display = 'none';
-        gameActive = true;
+        canvas.style.display = 'block';
+        canvas.width = 800;
+        canvas.height = 400;
 
-        channel = _supabase.channel('main-room', {
-            config: { broadcast: { self: false }, presence: { key: myPlayer.id } }
-        });
+        channel = _supabase.channel('room1');
 
-        channel.on('broadcast', { event: 'player_pos' }, ({ payload }) => {
+        channel.on('broadcast', { event: 'move' }, ({ payload }) => {
             otherPlayers[payload.id] = payload;
         });
 
-        channel.on('presence', { event: 'sync' }, () => {
-            const state = channel.presenceState();
-            const ids = Object.keys(state);
-            document.getElementById('count').innerText = ids.length;
-            
-            Object.keys(otherPlayers).forEach(id => {
-                if (!ids.includes(id)) delete otherPlayers[id];
-            });
-
-            let listHTML = "";
-            ids.forEach(id => {
-                const p = state[id][0];
-                listHTML += `<div>• ${p.name || 'Joining...'}</div>`;
-            });
-            document.getElementById('playerList').innerHTML = listHTML;
-        });
-
-        await channel.subscribe(async (status) => {
+        await channel.subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-                await channel.track({ name: myPlayer.name, color: myPlayer.color });
-                requestAnimationFrame(gameLoop);
-            } else if (status === 'CHANNEL_ERROR') {
-                // If even long-polling fails, the school is blocking the domain entirely.
-                alert("The school network is still blocking the connection. Try a phone hotspot!");
+                console.log("Connected successfully!");
+                gameLoop();
+            } else {
+                console.log("Status:", status);
             }
         });
     }
 
-    function update() {
-        if (!gameActive) return;
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw Ground
+        ctx.fillStyle = '#444';
+        ctx.fillRect(0, 350, 800, 50);
 
-        if (keys['ArrowRight'] || keys['d']) myPlayer.vx = 7;
-        else if (keys['ArrowLeft'] || keys['a']) myPlayer.vx = -7;
-        else myPlayer.vx *= 0.85;
-
-        if ((keys['ArrowUp'] || keys['w'] || keys[' ']) && !myPlayer.jumping) {
-            myPlayer.vy = -15;
-            myPlayer.jumping = true;
-        }
-
-        myPlayer.x += myPlayer.vx;
-        myPlayer.y += myPlayer.vy;
-        myPlayer.vy += GRAVITY;
-
-        const groundY = canvas.height - GROUND_HEIGHT - PLAYER_SIZE;
-        if (myPlayer.y > groundY) {
-            myPlayer.y = groundY;
-            myPlayer.vy = 0;
-            myPlayer.jumping = false;
-        }
-
-        if (myPlayer.x > canvas.width) myPlayer.x = -PLAYER_SIZE;
-        if (myPlayer.x < -PLAYER_SIZE) myPlayer.x = canvas.width;
-
-        if (Math.abs(myPlayer.vx) > 0.1 || Math.abs(myPlayer.vy) > 0.1 || myPlayer.jumping) {
+        // Movement (Simple)
+        window.onkeydown = (e) => {
+            if (e.key === 'ArrowRight') myPlayer.x += 10;
+            if (e.key === 'ArrowLeft') myPlayer.x -= 10;
+            
+            // Send position
             channel.send({
                 type: 'broadcast',
-                event: 'player_pos',
-                payload: { id: myPlayer.id, name: myPlayer.name, x: myPlayer.x, y: myPlayer.y, color: myPlayer.color }
+                event: 'move',
+                payload: myPlayer
             });
-        }
-    }
+        };
 
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#333';
-        ctx.fillRect(0, canvas.height - GROUND_HEIGHT, canvas.width, GROUND_HEIGHT);
-        
-        drawPlayer(myPlayer);
-        Object.values(otherPlayers).forEach(drawPlayer);
-    }
-
-    function drawPlayer(p) {
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, PLAYER_SIZE, PLAYER_SIZE);
+        // Draw Me
+        ctx.fillStyle = myPlayer.color;
+        ctx.fillRect(myPlayer.x, 320, 30, 30);
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 14px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(p.name, p.x + PLAYER_SIZE/2, p.y - 15);
-    }
+        ctx.fillText(myPlayer.name, myPlayer.x, 310);
 
-    function gameLoop() {
-        update();
-        draw();
+        // Draw Others
+        Object.values(otherPlayers).forEach(p => {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(p.x, 320, 30, 30);
+            ctx.fillText(p.name, p.x, 310);
+        });
+
         requestAnimationFrame(gameLoop);
     }
 </script>
