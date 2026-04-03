@@ -4,108 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multiplayer Platformer - Proxy Edition</title>
-<script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // CHANGED: Rename the variable so it doesn't clash with the library name
-    let supabaseClient; 
-    let channel;
-    let myId = Math.random().toString(36).substr(2, 9);
-    let players = {};
-    let myPlayer = { x: 100, y: 100, vx: 0, vy: 0, name: '' };
-
-    function initSupabase() {
-        const PROXY_URL = window.location.origin + '/supabase';
-        const API_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
-
-        // Use the global 'supabase' object to create our 'supabaseClient'
-        supabaseClient = supabase.createClient(PROXY_URL, API_KEY);
-        
-        channel = supabaseClient.channel('race-room', {
-            config: {
-                presence: { key: myId },
-            },
-        });
-
-        channel
-            .on('presence', { event: 'sync' }, () => {
-                const state = channel.presenceState();
-                console.log('Players online:', state);
-            })
-            .on('broadcast', { event: 'move' }, ({ payload }) => {
-                players[payload.id] = payload;
-            })
-            .subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') {
-                    document.getElementById('status').innerText = "Connected (Proxied)";
-                    await channel.track({ id: myId, name: myPlayer.name, x: myPlayer.x, y: myPlayer.y });
-                } else {
-                    document.getElementById('status').innerText = "Status: " + status;
-                }
-            });
-    }
-
-    // This function is now properly defined because the script won't crash above
-    function startGame() {
-        const name = document.getElementById('username').value;
-        if (!name) return;
-        myPlayer.name = name;
-        document.getElementById('login').style.display = 'none';
-        initSupabase();
-        requestAnimationFrame(gameLoop);
-    }
-
-    function gameLoop() {
-        myPlayer.vy += 0.5; 
-        myPlayer.y += myPlayer.vy;
-        myPlayer.x += myPlayer.vx;
-
-        if (myPlayer.y > canvas.height - 50) {
-            myPlayer.y = canvas.height - 50;
-            myPlayer.vy = 0;
-        }
-
-        if (channel && channel.state === 'joined') {
-            channel.send({
-                type: 'broadcast',
-                event: 'move',
-                payload: { id: myId, x: myPlayer.x, y: myPlayer.y, name: myPlayer.name }
-            });
-        }
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'cyan';
-        ctx.fillRect(myPlayer.x, myPlayer.y, 30, 30);
-        ctx.fillText(myPlayer.name, myPlayer.x, myPlayer.y - 10);
-
-        ctx.fillStyle = 'red';
-        for (let id in players) {
-            if (id !== myId) {
-                let p = players[id];
-                ctx.fillRect(p.x, p.y, 30, 30);
-                ctx.fillText(p.name, p.x, p.y - 10);
-            }
-        }
-        requestAnimationFrame(gameLoop);
-    }
-
-    window.addEventListener('keydown', e => {
-        if (e.code === 'ArrowLeft') myPlayer.vx = -5;
-        if (e.code === 'ArrowRight') myPlayer.vx = 5;
-        if (e.code === 'Space' && myPlayer.vy === 0) myPlayer.vy = -10;
-    });
-    window.addEventListener('keyup', e => {
-        if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') myPlayer.vx = 0;
-    });
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; }
         canvas { display: block; background: #333; }
         #ui { position: absolute; top: 10px; left: 10px; color: white; pointer-events: none; }
-        #login { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; }
+        #login { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; z-index: 10; }
     </style>
 </head>
 <body>
@@ -117,7 +21,6 @@
 
 <div id="ui">
     <div id="status">Connecting via Proxy...</div>
-    <div id="player-list"></div>
 </div>
 
 <canvas id="gameCanvas"></canvas>
@@ -125,44 +28,39 @@
 <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    
+    // Set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    let supabase;
+    let supabaseClient; 
     let channel;
     let myId = Math.random().toString(36).substr(2, 9);
     let players = {};
     let myPlayer = { x: 100, y: 100, vx: 0, vy: 0, name: '' };
 
-    // --- PROXY INITIALIZATION ---
-    // Instead of the .supabase.co URL, we use /supabase which Vercel forwards
     function initSupabase() {
         const PROXY_URL = window.location.origin + '/supabase';
         const API_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
 
-        supabase = supabase.createClient(PROXY_URL, API_KEY);
+        supabaseClient = supabase.createClient(PROXY_URL, API_KEY);
         
-        // Listen for presence and movement
-        channel = supabase.channel('race-room', {
-            config: {
-                presence: { key: myId },
-            },
+        channel = supabaseClient.channel('race-room', {
+            config: { presence: { key: myId } },
         });
 
         channel
             .on('presence', { event: 'sync' }, () => {
                 const state = channel.presenceState();
-                console.log('Players online:', state);
+                console.log('Sync:', state);
             })
             .on('broadcast', { event: 'move' }, ({ payload }) => {
                 players[payload.id] = payload;
             })
             .subscribe(async (status) => {
                 if (status === 'SUBSCRIBED') {
-                    document.getElementById('status').innerText = "Connected (Proxied)";
+                    document.getElementById('status').innerText = "Connected!";
                     await channel.track({ id: myId, name: myPlayer.name, x: myPlayer.x, y: myPlayer.y });
-                } else {
-                    document.getElementById('status').innerText = "Blocked or Offline";
                 }
             });
     }
@@ -178,7 +76,7 @@
 
     function gameLoop() {
         // Simple Physics
-        myPlayer.vy += 0.5; // gravity
+        myPlayer.vy += 0.5; 
         myPlayer.y += myPlayer.vy;
         myPlayer.x += myPlayer.vx;
 
@@ -187,7 +85,7 @@
             myPlayer.vy = 0;
         }
 
-        // Broadcast position
+        // Send updates
         if (channel && channel.state === 'joined') {
             channel.send({
                 type: 'broadcast',
@@ -199,12 +97,10 @@
         // Draw
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Draw me
         ctx.fillStyle = 'cyan';
         ctx.fillRect(myPlayer.x, myPlayer.y, 30, 30);
         ctx.fillText(myPlayer.name, myPlayer.x, myPlayer.y - 10);
 
-        // Draw others
         ctx.fillStyle = 'red';
         for (let id in players) {
             if (id !== myId) {
@@ -213,11 +109,9 @@
                 ctx.fillText(p.name, p.x, p.y - 10);
             }
         }
-
         requestAnimationFrame(gameLoop);
     }
 
-    // Input handling
     window.addEventListener('keydown', e => {
         if (e.code === 'ArrowLeft') myPlayer.vx = -5;
         if (e.code === 'ArrowRight') myPlayer.vx = 5;
