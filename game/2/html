@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platformer Race</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: #1a1a2e; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; }
+        canvas { display: block; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(26, 26, 46, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        .panel { background: #16213e; padding: 30px; border-radius: 12px; border: 2px solid #0f3460; text-align: center; width: 400px; margin-bottom: 20px; }
+        input, button, select { width: 100%; padding: 12px; margin-top: 10px; border-radius: 6px; border: none; font-size: 16px; box-sizing: border-box; }
+        input, select { background: #0f3460; color: white; }
+        button { background: #e94560; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #ff5773; }
+        .hidden { display: none !important; }
+        .lobby-list { max-height: 200px; overflow-y: auto; margin-top: 15px; text-align: left; background: #0f3460; padding: 10px; border-radius: 6px; }
+        .lobby-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #1a1a2e; cursor: pointer; }
+        .lobby-item:hover { background: #1a1a2e; }
+        #ui { position: absolute; top: 20px; left: 20px; z-index: 50; pointer-events: none; }
+        .hud-box { background: rgba(22, 33, 62, 0.9); padding: 12px 20px; border-left: 4px solid #e94560; border-radius: 4px; font-size: 20px; font-weight: bold; }
+        #leaderboard { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 40px; border-radius: 10px; text-align: center; z-index: 80; }
+    </style>
+</head>
+<body>
+
+<div id="menu-overlay" class="overlay">
+    <div class="panel">
+        <h1 style="color:#e94560; margin:0 0 10px 0;">PLATFORM RACER</h1>
+        <input type="text" id="username" placeholder="Enter Username" maxlength="12">
+        <button onclick="createLobby()">Create New Lobby</button>
+        <div class="lobby-list" id="active-lobbies">
+            <div style="text-align: center; color: #888;">Loading active lobbies...</div>
+        </div>
+    </div>
+</div>
+
+<div id="lobby-overlay" class="overlay hidden">
+    <div class="panel" style="position: absolute; top: 20px; right: 20px; width: 300px; background: rgba(22, 33, 62, 0.8);">
+        <h2 id="lobby-title">Lobby</h2>
+        <div id="host-controls" class="hidden">
+            <select id="map-select">
+                <option value="0">Map 1: The Basics (Easy)</option>
+                <option value="1">Map 2: High Jumps (Medium)</option>
+                <option value="2">Map 3: The Abyss (Hard)</option>
+            </select>
+            <label style="display: block; margin-top: 10px; text-align: left;">
+                <input type="checkbox" id="double-jump-toggle" checked style="width: auto;"> Allow Double Jump
+            </label>
+            <button onclick="startGame()">START RACE</button>
+        </div>
+        <div id="guest-controls">
+            <p>Waiting for host to start...</p>
+        </div>
+        <button onclick="leaveLobby()" style="background: #444;">Leave</button>
+    </div>
+    </div>
+
+<div id="ui" class="hidden">
+    <div class="hud-box" id="timer-display">00:00.00</div>
+</div>
+
+<div id="leaderboard" class="hidden">
+    <h2>Race Results</h2>
+    <div id="results-list" style="margin-bottom: 20px; font-size: 18px; line-height: 1.6;"></div>
+    <button onclick="returnToLobby()">Back to Lobby</button>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // --- GAME DATA & CONFIG ---
+    let supabaseClient;
+    const myId = Math.random().toString(36).substr(2, 9);
+    let myData = { id: myId, name: '', x: 100, y: 100, vx: 0, vy: 0, color: `hsl(${Math.random()*360}, 100%, 60%)`, finished: false, time: 0 };
+    let players = {};
+    let currentRoomId = null;
+    let roomState = 'menu'; // menu, lobby, playing, finished
+    let isHost = false;
+    let startTime = 0;
+    
+    // Physics & Controls
+    const keys = { ArrowUp: false, ArrowLeft: false, ArrowRight: false, Space: false };
+    const GRAVITY = 0.6;
+    const FRICTION = 0.8;
+    const SPEED = 5;
+    const JUMP_FORCE = -12;
+    let jumpsLeft = 1;
+    let roomSettings = { map: 0, doubleJump: true };
+    let camera = { x: 0, y: 0 };
+
+    // Maps (0 = easy, 1 = medium, 2 = hard)
+    // 1 = block, 2 = lava/death, 3 = finish line
+    const MAPS = [
+        {
+            width: 3000, height: 800, spawn: {x: 100, y: 600},
+            blocks: [
+                {x: 0, y: 700, w: 3000, h: 100, type: 1}, // Floor
+                {x: 500, y: 600, w: 100, h: 20, type: 1}, // Platform
+                {x: 800, y: 500, w: 100, h: 20, type: 1},
+                {x: 2800, y: 500, w: 100, h: 200, type: 3} // Finish
+            ]
+        },
+        // Add more complex maps here
+    ];
+    let currentMap = MAPS[0];
+
+    // --- INITIALIZATION ---
+    async function initSupabase() {
+        // Note: Using your provided Supabase credentials. 
+        // You MUST ensure your database has a "rooms" table and a "players" table.
+        supabaseClient = supabase.createClient(window.location.origin + '/supabase', 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7');
+        
+        setInterval(fetchLobbies, 3000);
+        setInterval(syncPlayer, 50); // Fast sync for platforming
+        setInterval(syncRoom, 500);
+        
+        requestAnimationFrame(gameLoop);
+        fetchLobbies();
+    }
+
+    // --- UI LOGIC ---
+    async function fetchLobbies() {
+        if(roomState !== 'menu') return;
+        const { data } = await supabaseClient.from('rooms').select('*').eq('state', 'lobby');
+        const list = document.getElementById('active-lobbies');
+        list.innerHTML = '';
+        if(!data || data.length === 0) {
+            list.innerHTML = '<div style="color:#888;">No active lobbies. Create one!</div>';
+            return;
+        }
+        data.forEach(room => {
+            const div = document.createElement('div');
+            div.className = 'lobby-item';
+            div.innerHTML = `<span>Room: ${room.id.substring(0,4)}</span> <button style="width:auto; padding: 4px 8px; margin:0;" onclick="joinLobby('${room.id}')">Join</button>`;
+            list.appendChild(div);
+        });
+    }
+
+    async function createLobby() {
+        const name = document.getElementById('username').value.trim() || 'Guest';
+        myData.name = name;
+        currentRoomId = 'room_' + Math.random().toString(36).substr(2, 6);
+        isHost = true;
+        roomState = 'lobby';
+        
+        await supabaseClient.from('rooms').insert({
+            id: currentRoomId, host_id: myId, state: 'lobby', settings: roomSettings
+        });
+        
+        enterLobbyUI();
+    }
+
+    async function joinLobby(roomId) {
+        const name = document.getElementById('username').value.trim() || 'Guest';
+        myData.name = name;
+        currentRoomId = roomId;
+        isHost = false;
+        roomState = 'lobby';
+        enterLobbyUI();
+    }
+
+    function enterLobbyUI() {
+        document.getElementById('menu-overlay').classList.add('hidden');
+        document.getElementById('lobby-overlay').classList.remove('hidden');
+        document.getElementById('host-controls').classList.toggle('hidden', !isHost);
+        document.getElementById('guest-controls').classList.toggle('hidden', isHost);
+        resetPlayer(MAPS[0].spawn);
+    }
+
+    async function leaveLobby() {
+        if(isHost) await supabaseClient.from('rooms').delete().eq('id', currentRoomId);
+        currentRoomId = null;
+        roomState = 'menu';
+        document.getElementById('lobby-overlay').classList.add('hidden');
+        document.getElementById('menu-overlay').classList.remove('hidden');
+    }
+
+    async function startGame() {
+        if(!isHost) return;
+        roomSettings.map = parseInt(document.getElementById('map-select').value) || 0;
+        roomSettings.doubleJump = document.getElementById('double-jump-toggle').checked;
+        await supabaseClient.from('rooms').update({ state: 'playing', settings: roomSettings }).eq('id', currentRoomId);
+    }
+
+    function returnToLobby() {
+        document.getElementById('leaderboard').classList.add('hidden');
+        if(isHost) supabaseClient.from('rooms').update({ state: 'lobby' }).eq('id', currentRoomId);
+    }
+
+    // --- SYNC LOGIC ---
+    async function syncPlayer() {
+        if(!currentRoomId) return;
+        await supabaseClient.from('players').upsert({
+            id: myId, room_id: currentRoomId, name: myData.name, 
+            x: myData.x, y: myData.y, color: myData.color, 
+            finished: myData.finished, time: myData.time, last_seen: new Date().toISOString()
+        });
+        
+        const { data } = await supabaseClient.from('players').select('*').eq('room_id', currentRoomId).neq('id', myId);
+        if(data) {
+            let activeIds = [];
+            data.forEach(p => {
+                activeIds.push(p.id);
+                if(!players[p.id]) players[p.id] = { ...p, tx: p.x, ty: p.y };
+                else {
+                    players[p.id].tx = p.x; players[p.id].ty = p.y;
+                    players[p.id].finished = p.finished; players[p.id].time = p.time;
+                }
+            });
+            // Cleanup stale players
+            for(let id in players) if(!activeIds.includes(id)) delete players[id];
+        }
+    }
+
+    async function syncRoom() {
+        if(!currentRoomId) return;
+        const { data } = await supabaseClient.from('rooms').select('*').eq('id', currentRoomId).maybeSingle();
+        if(data) {
+            roomSettings = data.settings;
+            if(data.state === 'playing' && roomState === 'lobby') {
+                // Game started!
+                roomState = 'playing';
+                currentMap = MAPS[roomSettings.map] || MAPS[0];
+                resetPlayer(currentMap.spawn);
+                startTime = Date.now();
+                document.getElementById('lobby-overlay').classList.add('hidden');
+                document.getElementById('ui').classList.remove('hidden');
+            } else if (data.state === 'lobby' && (roomState === 'playing' || roomState === 'finished')) {
+                // Returned to lobby
+                roomState = 'lobby';
+                document.getElementById('ui').classList.add('hidden');
+                document.getElementById('leaderboard').classList.add('hidden');
+                document.getElementById('lobby-overlay').classList.remove('hidden');
+                resetPlayer(MAPS[0].spawn);
+            }
+        }
+    }
+
+    // --- PHYSICS & GAMEPLAY ---
+    function resetPlayer(spawnPos) {
+        myData.x = spawnPos.x;
+        myData.y = spawnPos.y;
+        myData.vx = 0;
+        myData.vy = 0;
+        myData.finished = false;
+        myData.time = 0;
+    }
+
+    function checkCollision(x, y, w, h) {
+        for(let b of currentMap.blocks) {
+            if(x < b.x + b.w && x + w > b.x && y < b.y + b.h && y + h > b.y) return b;
+        }
+        return null;
+    }
+
+    function updatePhysics() {
+        if(roomState === 'menu' || myData.finished) return;
+
+        myData.vy += GRAVITY;
+        if(keys.ArrowLeft) myData.vx -= 1;
+        if(keys.ArrowRight) myData.vx += 1;
+        myData.vx *= FRICTION;
+
+        // X Collision
+        myData.x += myData.vx;
+        let colX = checkCollision(myData.x, myData.y, 30, 30);
+        if(colX) {
+            if(colX.type === 3) finishRace();
+            else if(colX.type === 2) resetPlayer(currentMap.spawn); // Death
+            else {
+                if(myData.vx > 0) myData.x = colX.x - 30;
+                else myData.x = colX.x + colX.w;
+                myData.vx = 0;
+            }
+        }
+
+        // Y Collision
+        myData.y += myData.vy;
+        let colY = checkCollision(myData.x, myData.y, 30, 30);
+        if(colY) {
+            if(colY.type === 3) finishRace();
+            else if(colY.type === 2) resetPlayer(currentMap.spawn);
+            else {
+                if(myData.vy > 0) { // Landed on ground
+                    myData.y = colY.y - 30;
+                    jumpsLeft = roomSettings.doubleJump ? 2 : 1;
+                } else { // Hit ceiling
+                    myData.y = colY.y + colY.h;
+                }
+                myData.vy = 0;
+            }
+        }
+
+        // Boundaries
+        if(myData.y > currentMap.height + 500) resetPlayer(currentMap.spawn);
+    }
+
+    window.addEventListener('keydown', e => {
+        if(keys.hasOwnProperty(e.code)) keys[e.code] = true;
+        if((e.code === 'Space' || e.code === 'ArrowUp') && jumpsLeft > 0 && !myData.finished) {
+            myData.vy = JUMP_FORCE;
+            jumpsLeft--;
+        }
+    });
+    window.addEventListener('keyup', e => {
+        if(keys.hasOwnProperty(e.code)) keys[e.code] = false;
+    });
+
+    function finishRace() {
+        myData.finished = true;
+        myData.time = Date.now() - startTime;
+        roomState = 'finished';
+        document.getElementById('ui').classList.add('hidden');
+        showLeaderboard();
+    }
+
+    function showLeaderboard() {
+        const lb = document.getElementById('leaderboard');
+        const list = document.getElementById('results-list');
+        lb.classList.remove('hidden');
+        
+        // Show host "Back to Lobby" button, hide for guests
+        lb.querySelector('button').style.display = isHost ? 'inline-block' : 'none';
+
+        let allPlayers = Object.values(players).concat(myData);
+        allPlayers.sort((a,b) => {
+            if(!a.finished && !b.finished) return 0;
+            if(!a.finished) return 1;
+            if(!b.finished) return -1;
+            return a.time - b.time;
+        });
+
+        list.innerHTML = allPlayers.map((p, i) => {
+            let timeStr = p.finished ? (p.time / 1000).toFixed(2) + "s" : "DNF";
+            return `<div>${i+1}. <span style="color:${p.color}">${p.name}</span> - ${timeStr}</div>`;
+        }).join('');
+    }
+
+    // --- RENDER LOOP ---
+    function gameLoop() {
+        updatePhysics();
+
+        // Update Timer UI
+        if(roomState === 'playing' && !myData.finished) {
+            let t = Date.now() - startTime;
+            document.getElementById('timer-display').innerText = (t/1000).toFixed(2) + "s";
+        }
+
+        // Camera follow
+        camera.x += (myData.x - canvas.width/2 - camera.x) * 0.1;
+        camera.y += (myData.y - canvas.height/2 - camera.y) * 0.1;
+
+        // Draw
+        ctx.fillStyle = '#1a1a2e'; 
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        
+        ctx.save();
+        if(roomState !== 'menu') {
+            ctx.translate(-camera.x, -camera.y);
+            
+            // Draw Map
+            currentMap.blocks.forEach(b => {
+                if(b.type === 1) ctx.fillStyle = '#0f3460'; // Normal
+                if(b.type === 2) ctx.fillStyle = '#e94560'; // Death/Lava
+                if(b.type === 3) ctx.fillStyle = '#00ffaa'; // Finish Line
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                if(b.type===1) { ctx.strokeStyle='#16213e'; ctx.strokeRect(b.x,b.y,b.w,b.h); }
+            });
+
+            // Draw Other Players (Interpolated)
+            for(let id in players) {
+                let p = players[id];
+                p.x += (p.tx - p.x) * 0.3; // Smooth position sync
+                p.y += (p.ty - p.y) * 0.3;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, 30, 30);
+                ctx.fillStyle = 'white'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText(p.name, p.x + 15, p.y - 5);
+            }
+
+            // Draw Local Player
+            ctx.fillStyle = myData.color;
+            ctx.fillRect(myData.x, myData.y, 30, 30);
+            ctx.fillStyle = 'white'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText(myData.name, myData.x + 15, myData.y - 5);
+        }
+        ctx.restore();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Start everything
+    initSupabase();
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+</script>
+</body>
+</html>
