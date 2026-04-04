@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Ascent - Platformer</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #0a0a0f; font-family: 'Segoe UI', sans-serif; }
+        canvas { display: block; }
+        #ui {
+            position: absolute; top: 20px; left: 20px; color: #00f2ff;
+            pointer-events: none; text-shadow: 0 0 10px rgba(0,242,255,0.5);
+        }
+        .instr { font-size: 14px; color: #888; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <div style="font-size: 24px; font-weight: bold;">NEON ASCENT</div>
+    <div id="status">Explore the level...</div>
+    <div class="instr">WASD/Arrows to Move • Space to Double Jump</div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game Constants
+    const GRAVITY = 0.5;
+    const JUMP_FORCE = -10;
+    const SPEED = 5;
+    const LEVEL_WIDTH = 8000; // Very long level
+    const LEVEL_HEIGHT = 1200;
+
+    let player = {
+        x: 100, y: 500, w: 30, h: 40,
+        vx: 0, vy: 0,
+        jumps: 0,
+        checkpoint: { x: 100, y: 500 },
+        color: '#00f2ff'
+    };
+
+    let camera = { x: 0, y: 0 };
+    const keys = {};
+
+    // Platforms & Hazards
+    // Type: 0 = Solid, 1 = Hazard (Lava), 2 = Checkpoint, 3 = Goal
+    const world = [
+        // Starting Area
+        { x: 0, y: 700, w: 600, h: 100, type: 0 },
+        { x: 700, y: 650, w: 200, h: 20, type: 0 },
+        { x: 1000, y: 600, w: 200, h: 20, type: 0 },
+        
+        // First Checkpoint
+        { x: 1300, y: 550, w: 100, h: 10, type: 2, name: "Checkpoint 1" },
+        { x: 1250, y: 600, w: 200, h: 100, type: 0 },
+
+        // The Hazard Gap
+        { x: 1500, y: 850, w: 1000, h: 50, type: 1 }, // Lava floor
+        { x: 1600, y: 500, w: 100, h: 20, type: 0 },
+        { x: 1850, y: 450, w: 100, h: 20, type: 0 },
+        { x: 2100, y: 400, w: 100, h: 20, type: 0 },
+
+        // Second Checkpoint
+        { x: 2400, y: 400, w: 100, h: 10, type: 2, name: "Checkpoint 2" },
+        { x: 2350, y: 450, w: 200, h: 400, type: 0 },
+
+        // The Moving Isles (Static logic for now, but high stakes)
+        { x: 2700, y: 400, w: 50, h: 15, type: 0 },
+        { x: 2900, y: 300, w: 50, h: 15, type: 0 },
+        { x: 3100, y: 400, w: 50, h: 15, type: 0 },
+        { x: 3300, y: 250, w: 50, h: 15, type: 0 },
+
+        // Third Checkpoint (Mid-point)
+        { x: 3600, y: 300, w: 100, h: 10, type: 2 },
+        { x: 3550, y: 350, w: 300, h: 600, type: 0 },
+
+        // The Giant Staircase
+        { x: 4000, y: 800, w: 150, h: 20, type: 0 },
+        { x: 4200, y: 700, w: 150, h: 20, type: 0 },
+        { x: 4400, y: 600, w: 150, h: 20, type: 0 },
+        { x: 4600, y: 500, w: 150, h: 20, type: 0 },
+        
+        // Final Stretch Checkpoint
+        { x: 5000, y: 450, w: 100, h: 10, type: 2 },
+        { x: 4950, y: 500, w: 300, h: 100, type: 0 },
+
+        // Vertical Parkour
+        { x: 5400, y: 400, w: 80, h: 15, type: 0 },
+        { x: 5400, y: 250, w: 80, h: 15, type: 0 },
+        { x: 5600, y: 150, w: 80, h: 15, type: 0 },
+        { x: 5800, y: 300, w: 80, h: 15, type: 0 },
+        { x: 6000, y: 450, w: 80, h: 15, type: 0 },
+
+        // The Maze
+        { x: 6300, y: 200, w: 1000, h: 20, type: 0 },
+        { x: 6300, y: 600, w: 1000, h: 20, type: 0 },
+        { x: 6600, y: 220, w: 20, h: 300, type: 0 },
+        { x: 6900, y: 350, w: 20, h: 250, type: 0 },
+
+        // The Goal
+        { x: 7700, y: 100, w: 50, h: 50, type: 3 },
+        { x: 7600, y: 200, w: 400, h: 1000, type: 0 }
+    ];
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function update() {
+        // Horizontal Movement
+        if (keys['ArrowLeft'] || keys['a']) player.vx = -SPEED;
+        else if (keys['ArrowRight'] || keys['d']) player.vx = SPEED;
+        else player.vx *= 0.8;
+
+        player.x += player.vx;
+
+        // Vertical Movement
+        player.vy += GRAVITY;
+        player.y += player.vy;
+
+        let onGround = false;
+
+        // Collision Detection
+        world.forEach(obj => {
+            if (player.x < obj.x + obj.w && player.x + player.w > obj.x &&
+                player.y < obj.y + obj.h && player.y + player.h > obj.y) {
+                
+                if (obj.type === 0) { // Solid
+                    if (player.vy > 0 && player.y + player.h - player.vy <= obj.y) {
+                        player.y = obj.y - player.h;
+                        player.vy = 0;
+                        player.jumps = 0;
+                        onGround = true;
+                    } else if (player.vy < 0 && player.y - player.vy >= obj.y + obj.h) {
+                        player.y = obj.y + obj.h;
+                        player.vy = 0;
+                    }
+                } else if (obj.type === 1) { // Hazard
+                    respawn();
+                } else if (obj.type === 2) { // Checkpoint
+                    player.checkpoint = { x: obj.x + 10, y: obj.y - 50 };
+                    document.getElementById('status').innerText = "Checkpoint Saved!";
+                    obj.active = true;
+                } else if (obj.type === 3) { // Goal
+                    document.getElementById('status').innerText = "YOU WIN! Level Complete.";
+                    document.getElementById('status').style.color = "#ffaa00";
+                }
+            }
+        });
+
+        // Death by Void
+        if (player.y > LEVEL_HEIGHT) respawn();
+
+        // Camera Follow
+        camera.x = player.x - canvas.width / 2;
+        camera.y = player.y - canvas.height / 2;
+        
+        // Clamp Camera
+        camera.x = Math.max(0, Math.min(camera.x, LEVEL_WIDTH - canvas.width));
+    }
+
+    function respawn() {
+        player.x = player.checkpoint.x;
+        player.y = player.checkpoint.y;
+        player.vx = 0;
+        player.vy = 0;
+        document.getElementById('status').innerText = "Restarting at Checkpoint...";
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.translate(-camera.x, -camera.y);
+
+        // Draw World
+        world.forEach(obj => {
+            ctx.shadowBlur = 0;
+            if (obj.type === 0) {
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.strokeStyle = '#303050';
+                ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+            } else if (obj.type === 1) {
+                ctx.fillStyle = '#ff0044';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ff0044';
+                ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+            } else if (obj.type === 2) {
+                ctx.fillStyle = obj.active ? '#00ff88' : '#0088ff';
+                ctx.fillRect(obj.x + obj.w/2 - 2, obj.y - 40, 4, 40); // Flag pole
+                ctx.beginPath();
+                ctx.moveTo(obj.x + obj.w/2, obj.y - 40);
+                ctx.lineTo(obj.x + obj.w/2 + 20, obj.y - 30);
+                ctx.lineTo(obj.x + obj.w/2, obj.y - 20);
+                ctx.fill();
+            } else if (obj.type === 3) {
+                ctx.fillStyle = '#ffaa00';
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#ffaa00';
+                ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.fillStyle = '#fff';
+                ctx.font = "bold 12px sans-serif";
+                ctx.fillText("GOAL", obj.x + 8, obj.y + 30);
+            }
+        });
+
+        // Draw Player
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = player.color;
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x, player.y, player.w, player.h);
+        
+        ctx.restore();
+
+        update();
+        requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('keydown', e => {
+        keys[e.key] = true;
+        if ((e.key === ' ' || e.key === 'w' || e.key === 'ArrowUp') && player.jumps < 2) {
+            player.vy = JUMP_FORCE;
+            player.jumps++;
+        }
+    });
+    window.addEventListener('keyup', e => keys[e.key] = false);
+
+    draw();
+</script>
+</body>
+</html>
