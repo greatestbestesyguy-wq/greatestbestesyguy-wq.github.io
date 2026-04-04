@@ -3,70 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber-Factory Tycoon</title>
+    <title>Neon Tycoon Wars</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #0f0f1a; font-family: 'Segoe UI', sans-serif; color: white; }
+        body { margin: 0; overflow: hidden; background: #050510; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; user-select: none; }
         canvas { display: block; }
-        
-        /* UI Overlay */
-        #gui { position: absolute; top: 20px; left: 20px; pointer-events: none; }
-        .stat-card { background: rgba(20, 20, 35, 0.8); padding: 15px; border-left: 4px solid #00f2ff; border-radius: 4px; margin-bottom: 10px; }
-        
-        /* Shop Menu */
-        #shop { 
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
-            background: #1a1a2e; padding: 15px; border-radius: 10px; display: flex; gap: 10px;
-            border: 1px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        #ui { position: absolute; top: 20px; left: 20px; pointer-events: none; text-shadow: 0 0 5px black; }
+        .hud-box { background: rgba(10, 10, 20, 0.8); padding: 15px; border-left: 4px solid #00f2ff; border-radius: 4px; margin-bottom: 10px; font-size: 18px; }
+        #status { font-size: 12px; color: #00ffaa; margin-top: 5px; }
+        #login-overlay { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            background: rgba(5, 5, 16, 0.95); display: flex; justify-content: center; align-items: center; z-index: 100;
         }
-        .shop-item { 
-            background: #252545; padding: 10px; border-radius: 5px; cursor: pointer; 
-            text-align: center; width: 100px; transition: 0.2s; font-size: 12px;
-        }
-        .shop-item:hover { background: #353565; transform: translateY(-5px); }
-        .shop-item.locked { opacity: 0.5; cursor: not-allowed; }
-
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0f0f1a; display: flex; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .login-box { background: #1a1a2e; padding: 40px; border-radius: 15px; text-align: center; border: 1px solid #00f2ff; }
-        input { padding: 10px; width: 200px; border-radius: 5px; border: none; margin-bottom: 10px; }
-        button { padding: 10px 20px; background: #00f2ff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .panel { background: #111122; padding: 40px; border-radius: 12px; border: 1px solid #333; text-align: center; width: 320px; box-shadow: 0 0 30px rgba(0, 242, 255, 0.1); }
+        input, button { width: 100%; padding: 12px; margin-top: 15px; box-sizing: border-box; border-radius: 6px; border: none; font-size: 16px; outline: none; }
+        input { background: #050510; color: white; border: 1px solid #444; }
+        input:focus { border-color: #00f2ff; }
+        button { background: #00f2ff; color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #00c2cc; transform: scale(1.02); }
+        #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: red; opacity: 0; pointer-events: none; transition: opacity 0.1s; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="login-box">
-        <h1 style="color:#00f2ff">CYBER TYCOON</h1>
-        <input type="text" id="username" placeholder="Pilot Name" maxlength="12"><br>
-        <button onclick="enterGame()">INITIALIZE BASE</button>
+<div id="login-overlay">
+    <div class="panel">
+        <h1 style="color:#00f2ff; margin-top:0;">NEON TYCOON</h1>
+        <p style="color:#888; font-size:14px;">Claim your plot. Build your empire. Destroy your rivals.</p>
+        <input type="text" id="username" placeholder="Enter Name" maxlength="12">
+        <button onclick="joinGame()">ENTER HUB</button>
     </div>
 </div>
 
-<div id="gui">
-    <div class="stat-card">
-        <div style="font-size: 12px; color: #aaa;">CREDITS</div>
-        <div id="cash-display" style="font-size: 24px; font-weight: bold; color: #00f2ff;">$0</div>
+<div id="ui">
+    <div class="hud-box">
+        <div style="font-size: 12px; color: #aaa;">WALLET</div>
+        <div id="wallet-display" style="font-size: 28px; font-weight: bold; color: #00ffaa;">$0</div>
     </div>
-    <div id="status" style="font-size: 12px; color: #00ffaa;">Connecting...</div>
+    <div class="hud-box" style="border-left-color: #ff0055;">
+        <div style="font-size: 12px; color: #aaa;">HEALTH</div>
+        <div id="health-display" style="font-size: 24px; font-weight: bold; color: #ff0055;">100 / 100</div>
+    </div>
+    <div id="status">Waiting to connect...</div>
 </div>
-
-<div id="shop">
-    <div class="shop-item" onclick="buyItem('dropper_1', 50)">
-        <b>Dropper T1</b><br>$50
-    </div>
-    <div class="shop-item" onclick="buyItem('dropper_2', 250)">
-        <b>Dropper T2</b><br>$250
-    </div>
-    <div class="shop-item" onclick="buyItem('shield_wall', 500)">
-        <b>Shield Wall</b><br>$500
-    </div>
-    <div class="shop-item" onclick="buyItem('neon_tower', 1000)">
-        <b>Neon Tower</b><br>$1000
-    </div>
-</div>
+<div id="damage-overlay"></div>
 
 <canvas id="gameCanvas"></canvas>
 
@@ -76,185 +56,433 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
     let supabaseClient;
     const myId = Math.random().toString(36).substr(2, 9);
     
-    // Game State
-    let myData = {
-        name: '',
-        cash: 100,
-        unlocked: [],
-        x: 0, y: 0,
-        color: '#00f2ff'
+    // --- MAP & LAYOUT ---
+    const PLOTS = [
+        { id: 0, x: 2500, y: 0, color: '#00f2ff' },
+        { id: 1, x: -2500, y: 0, color: '#ff0055' },
+        { id: 2, x: 0, y: 2500, color: '#00ffaa' },
+        { id: 3, x: 0, y: -2500, color: '#ffaa00' }
+    ];
+
+    // Roblox style: Stepping on a button buys the item.
+    // Coordinates are relative to the Plot Center (0,0 of the plot)
+    const ITEMS = {
+        'claim':       { name: "Claim Tycoon", cost: 0, bx: 0, by: 150, req: null, type: 'claim' },
+        'mine_1':      { name: "Basic Mine", cost: 50, bx: -150, by: -100, rx: -150, ry: -150, req: 'claim', type: 'dropper', income: 5 },
+        'walls_1':     { name: "Perimeter Walls", cost: 150, bx: 150, by: 150, req: 'mine_1', type: 'walls' },
+        'mine_2':      { name: "Plasma Mine", cost: 400, bx: -50, by: -100, rx: -50, ry: -150, req: 'walls_1', type: 'dropper', income: 15 },
+        'upgrader':    { name: "Laser Upgrader", cost: 800, bx: 50, by: -100, rx: 50, ry: -150, req: 'mine_2', type: 'dropper', income: 30 },
+        'weapon_1':    { name: "Laser Pistol", cost: 1500, bx: -150, by: 50, req: 'upgrader', type: 'weapon' },
+        'walls_2':     { name: "Neon Shields", cost: 3000, bx: 150, by: 100, req: 'walls_1', type: 'walls_upgrade' },
+        'weapon_2':    { name: "Plasma Rifle", cost: 5000, bx: -150, by: 100, req: 'weapon_1', type: 'weapon' }
     };
 
-    let otherPlayers = {};
-    const keys = {};
+    // --- GAME STATE ---
+    let myData = { name: '', cash: 0, vault: 0, health: 100, plot: -1, unlocked: [], x: 0, y: 0, color: '#ffffff' };
+    let players = {};
+    let lasers = []; // Local visual effects
     let camX = 0, camY = 0;
+    const keys = { w:false, a:false, s:false, d:false };
+    let mouseX = 0, mouseY = 0;
+    let lastShot = 0;
 
-    // Define items and their positions relative to the base center
-    const ITEM_DATA = {
-        'dropper_1': { x: -60, y: -60, color: '#00ffaa', income: 1 },
-        'dropper_2': { x: 60, y: -60, color: '#00f2ff', income: 5 },
-        'shield_wall': { x: 0, y: 80, color: '#ff0055', isWall: true },
-        'neon_tower': { x: 0, y: -100, color: '#aa00ff', income: 20 }
-    };
-
-    async function initSupabase() {
+    // --- INITIALIZATION ---
+    async function joinGame() {
+        const name = document.getElementById('username').value.trim();
+        if (!name) return;
+        myData.name = name;
+        document.getElementById('login-overlay').style.display = 'none';
+        
         const PROXY_URL = window.location.origin + '/supabase';
         const API_KEY = 'sb_publishable_rIUr6wF4GKnrhuG_DMFbEw_9IOrXgw7';
         supabaseClient = supabase.createClient(PROXY_URL, API_KEY);
-        
-        document.getElementById('status').innerText = "SYSTEM: ONLINE";
-        
-        // Load existing data if any
+        document.getElementById('status').innerText = "CONNECTED TO SERVER";
+
+        // Load or initialize
         const { data } = await supabaseClient.from('players').select('*').eq('id', myId).single();
         if (data) {
-            myData.cash = data.cash;
+            myData.cash = data.cash || 0;
+            myData.vault = data.vault || 0;
             myData.unlocked = data.unlocked_items || [];
+            myData.plot = data.plot !== undefined ? data.plot : -1;
+            myData.health = 100;
         }
 
-        setInterval(syncToDB, 500);
-        setInterval(fetchOthers, 500);
-        setInterval(processIncome, 1000);
+        // Start loops
+        setInterval(networkSync, 100);
+        setInterval(economyTick, 1000);
+        requestAnimationFrame(gameLoop);
     }
 
-    function processIncome() {
-        myData.unlocked.forEach(itemId => {
-            if (ITEM_DATA[itemId]?.income) {
-                myData.cash += ITEM_DATA[itemId].income;
-            }
-        });
-        document.getElementById('cash-display').innerText = "$" + Math.floor(myData.cash);
-    }
-
-    async function syncToDB() {
+    // --- NETWORKING ---
+    async function networkSync() {
         if (!supabaseClient) return;
+        
+        // 1. Send my state
         await supabaseClient.from('players').upsert({
-            id: myId, name: myData.name, cash: myData.cash,
-            unlocked_items: myData.unlocked, x: myData.x, y: myData.y,
+            id: myId, name: myData.name, x: myData.x, y: myData.y,
+            cash: myData.cash, vault: myData.vault, health: myData.health,
+            plot: myData.plot, unlocked_items: myData.unlocked,
             color: myData.color, last_seen: new Date().toISOString()
         });
-    }
 
-    async function fetchOthers() {
-        if (!supabaseClient) return;
+        // 2. Fetch others
         const { data } = await supabaseClient.from('players').select('*').neq('id', myId);
         if (data) {
+            const now = new Date();
             data.forEach(p => {
-                if (new Date() - new Date(p.last_seen) > 10000) return; // Cleanup stale
-                otherPlayers[p.id] = p;
+                if (now - new Date(p.last_seen) > 5000) {
+                    delete players[p.id]; // Remove stale players
+                } else {
+                    if(!players[p.id]) players[p.id] = { ...p, smoothX: p.x, smoothY: p.y };
+                    else {
+                        players[p.id] = { ...p, smoothX: players[p.id].smoothX, smoothY: players[p.id].smoothY };
+                    }
+                }
             });
         }
+        updateUI();
     }
 
-    function buyItem(id, cost) {
-        if (myData.cash >= cost && !myData.unlocked.includes(id)) {
-            myData.cash -= cost;
-            myData.unlocked.push(id);
+    async function applyDamage(targetId, amount) {
+        if (!players[targetId]) return;
+        let newHealth = Math.max(0, players[targetId].health - amount);
+        // Direct DB update (Firewall bypass friendly)
+        await supabaseClient.from('players').update({ health: newHealth }).eq('id', targetId);
+    }
+
+    // --- GAME LOGIC ---
+    function economyTick() {
+        if (myData.plot === -1) return; // Must have a plot
+        let income = 0;
+        myData.unlocked.forEach(id => {
+            if (ITEMS[id] && ITEMS[id].income) income += ITEMS[id].income;
+        });
+        myData.vault += income;
+    }
+
+    function updateUI() {
+        document.getElementById('wallet-display').innerText = "$" + Math.floor(myData.cash);
+        document.getElementById('health-display').innerText = myData.health + " / 100";
+    }
+
+    function die() {
+        document.getElementById('damage-overlay').style.opacity = '0.5';
+        setTimeout(() => document.getElementById('damage-overlay').style.opacity = '0', 200);
+        
+        myData.health = 100;
+        myData.cash = Math.max(0, myData.cash - 100); // Lose cash penalty
+        
+        // Respawn at Hub
+        myData.x = 0;
+        myData.y = 0;
+    }
+
+    function checkInteractions() {
+        // 1. Hub Teleporters
+        if (Math.hypot(myData.x, myData.y) < 400) {
+            PLOTS.forEach(plot => {
+                const tx = Math.cos(plot.id * Math.PI/2) * 150;
+                const ty = Math.sin(plot.id * Math.PI/2) * 150;
+                if (Math.hypot(myData.x - tx, myData.y - ty) < 30) {
+                    // Teleport to plot!
+                    myData.x = plot.x; myData.y = plot.y + 200;
+                }
+            });
+        }
+
+        // 2. Base Teleporter (Return to Hub)
+        if (myData.plot !== -1) {
+            const px = PLOTS[myData.plot].x;
+            const py = PLOTS[myData.plot].y;
+            if (Math.hypot(myData.x - (px + 0), myData.y - (py + 200)) < 30) {
+                myData.x = 0; myData.y = 0; // Teleport to Hub
+            }
+        }
+
+        // 3. Tycoon Buttons (Only in YOUR base)
+        if (myData.plot !== -1) {
+            const px = PLOTS[myData.plot].x;
+            const py = PLOTS[myData.plot].y;
+            
+            // Collect Vault Cash (Green pad at center of base)
+            if (Math.hypot(myData.x - px, myData.y - py) < 40 && myData.vault > 0) {
+                myData.cash += myData.vault;
+                myData.vault = 0;
+            }
+
+            // Purchase Items
+            for (let id in ITEMS) {
+                const item = ITEMS[id];
+                // Skip if already owned, or if requirement isn't met
+                if (myData.unlocked.includes(id)) continue;
+                if (item.req && !myData.unlocked.includes(item.req)) continue;
+
+                const buttonWorldX = px + item.bx;
+                const buttonWorldY = py + item.by;
+
+                if (Math.hypot(myData.x - buttonWorldX, myData.y - buttonWorldY) < 25) {
+                    if (item.type === 'claim' && myData.unlocked.length === 0) {
+                        myData.plot = getAvailablePlot();
+                        myData.unlocked.push(id);
+                        myData.color = PLOTS[myData.plot].color;
+                    } 
+                    else if (myData.cash >= item.cost) {
+                        myData.cash -= item.cost;
+                        myData.unlocked.push(id);
+                    }
+                }
+            }
         }
     }
 
-    function enterGame() {
-        const name = document.getElementById('username').value;
-        if (!name) return;
-        myData.name = name;
-        document.getElementById('login-screen').style.display = 'none';
-        
-        // Assign a random plot position
-        myData.baseX = (Math.floor(Math.random() * 5) - 2) * 800;
-        myData.baseY = (Math.floor(Math.random() * 5) - 2) * 800;
-        myData.x = myData.baseX;
-        myData.y = myData.baseY;
-
-        initSupabase();
-        requestAnimationFrame(loop);
+    function getAvailablePlot() {
+        let taken = Object.values(players).map(p => p.plot);
+        for(let i=0; i<4; i++) { if(!taken.includes(i)) return i; }
+        return Math.floor(Math.random() * 4); // Fallback
     }
 
-    function loop() {
-        // Player Movement
-        const speed = 5;
-        if (keys['w'] || keys['ArrowUp']) myData.y -= speed;
-        if (keys['s'] || keys['ArrowDown']) myData.y += speed;
-        if (keys['a'] || keys['ArrowLeft']) myData.x -= speed;
-        if (keys['d'] || keys['ArrowRight']) myData.x += speed;
+    // --- COMBAT ---
+    window.addEventListener('mousedown', () => {
+        const hasPistol = myData.unlocked.includes('weapon_1');
+        const hasRifle = myData.unlocked.includes('weapon_2');
+        if (!hasPistol && !hasRifle) return;
 
-        // Camera smoothing
+        const now = Date.now();
+        const cooldown = hasRifle ? 200 : 500;
+        if (now - lastShot < cooldown) return;
+        lastShot = now;
+
+        const damage = hasRifle ? 20 : 10;
+        
+        // Calculate world click pos
+        const targetX = mouseX - canvas.width/2 + camX;
+        const targetY = mouseY - canvas.height/2 + camY;
+        const angle = Math.atan2(targetY - myData.y, targetX - myData.x);
+        
+        // Range
+        const range = hasRifle ? 800 : 500;
+        const endX = myData.x + Math.cos(angle) * range;
+        const endY = myData.y + Math.sin(angle) * range;
+
+        // Visual laser
+        lasers.push({ x1: myData.x, y1: myData.y, x2: endX, y2: endY, alpha: 1, color: hasRifle ? '#ff00ff' : '#ff0000' });
+
+        // Hit detection (Math distance to line segment)
+        for (let id in players) {
+            let p = players[id];
+            if (p.health <= 0) continue;
+            
+            const dist = pointToLineDistance(p.smoothX, p.smoothY, myData.x, myData.y, endX, endY);
+            if (dist < 30) {
+                // Hit!
+                applyDamage(id, damage);
+            }
+        }
+    });
+
+    function pointToLineDistance(px, py, x1, y1, x2, y2) {
+        const A = px - x1, B = py - y1, C = x2 - x1, D = y2 - y1;
+        const dot = A * C + B * D;
+        const lenSq = C * C + D * D;
+        let param = -1;
+        if (lenSq !== 0) param = dot / lenSq;
+        let xx, yy;
+        if (param < 0) { xx = x1; yy = y1; }
+        else if (param > 1) { xx = x2; yy = y2; }
+        else { xx = x1 + param * C; yy = y1 + param * D; }
+        return Math.hypot(px - xx, py - yy);
+    }
+
+    // --- RENDERING & MAIN LOOP ---
+    function gameLoop() {
+        if (myData.health <= 0) die();
+
+        // Movement
+        const speed = 6;
+        if (keys.w) myData.y -= speed;
+        if (keys.s) myData.y += speed;
+        if (keys.a) myData.x -= speed;
+        if (keys.d) myData.x += speed;
+
+        checkInteractions();
+
+        // Camera Lerp
         camX += (myData.x - camX) * 0.1;
         camY += (myData.y - camY) * 0.1;
 
         // Draw
-        ctx.fillStyle = '#0f0f1a';
+        ctx.fillStyle = '#050510';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+        
         ctx.save();
         ctx.translate(canvas.width/2 - camX, canvas.height/2 - camY);
 
-        // Draw Grid
-        ctx.strokeStyle = '#1a1a2e';
-        for(let i = -5000; i < 5000; i += 100) {
-            ctx.beginPath(); ctx.moveTo(i, -5000); ctx.lineTo(i, 5000); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-5000, i); ctx.lineTo(5000, i); ctx.stroke();
-        }
-
-        // Draw My Tycoon Plot
-        drawTycoon(myData.baseX, myData.baseY, myData.name, myData.unlocked, true);
-
-        // Draw Others
-        for (let id in otherPlayers) {
-            let p = otherPlayers[id];
-            // Plot is always at a fixed location based on where they started
-            // For simplicity in this demo, we assume their base is near where they are
-            drawTycoon(p.x - (p.x % 100), p.y - (p.y % 100), p.name, p.unlocked_items || [], false);
-            
-            // Draw their ship
-            ctx.fillStyle = p.color || '#fff';
-            ctx.fillRect(p.x - 10, p.y - 10, 20, 20);
-        }
-
-        // Draw My Ship
-        ctx.fillStyle = '#fff';
-        ctx.shadowBlur = 15; ctx.shadowColor = '#00f2ff';
-        ctx.fillRect(myData.x - 12, myData.y - 12, 24, 24);
-        ctx.shadowBlur = 0;
-
-        ctx.restore();
-        requestAnimationFrame(loop);
-    }
-
-    function drawTycoon(bx, by, name, items, isMe) {
-        // Floor
-        ctx.fillStyle = isMe ? '#16162d' : '#2d1616';
-        ctx.fillRect(bx - 200, by - 200, 400, 400);
-        ctx.strokeStyle = isMe ? '#00f2ff' : '#ff4444';
-        ctx.strokeRect(bx - 200, by - 200, 400, 400);
+        drawGrid();
+        drawHub();
         
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.fillText(name + "'s Factory", bx, by - 210);
-
-        // Draw Buildings
-        items.forEach(itemId => {
-            const config = ITEM_DATA[itemId];
-            if (config) {
-                ctx.fillStyle = config.color;
-                if (config.isWall) {
-                    ctx.fillRect(bx + config.x - 150, by + config.y, 300, 20);
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(bx + config.x, by + config.y, 25, 0, Math.PI*2);
-                    ctx.fill();
-                    // Glow effect
-                    ctx.shadowBlur = 10; ctx.shadowColor = config.color;
-                    ctx.stroke(); ctx.shadowBlur = 0;
+        // Draw all plots
+        PLOTS.forEach(plot => {
+            // Find who owns this plot
+            let owner = null;
+            let items = [];
+            let vaultCash = 0;
+            
+            if (myData.plot === plot.id) {
+                owner = myData.name;
+                items = myData.unlocked;
+                vaultCash = myData.vault;
+            } else {
+                for (let id in players) {
+                    if (players[id].plot === plot.id) {
+                        owner = players[id].name;
+                        items = players[id].unlocked_items || [];
+                        vaultCash = players[id].vault || 0;
+                        break;
+                    }
                 }
             }
+            drawPlot(plot, owner, items, vaultCash, myData.plot === plot.id);
+        });
+
+        // Draw Lasers
+        for (let i = lasers.length - 1; i >= 0; i--) {
+            let l = lasers[i];
+            ctx.beginPath(); ctx.moveTo(l.x1, l.y1); ctx.lineTo(l.x2, l.y2);
+            ctx.strokeStyle = l.color; ctx.lineWidth = 4; ctx.globalAlpha = l.alpha;
+            ctx.shadowBlur = 10; ctx.shadowColor = l.color;
+            ctx.stroke();
+            ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+            l.alpha -= 0.1;
+            if (l.alpha <= 0) lasers.splice(i, 1);
+        }
+
+        // Draw Others
+        for (let id in players) {
+            let p = players[id];
+            p.smoothX += (p.x - p.smoothX) * 0.2;
+            p.smoothY += (p.y - p.smoothY) * 0.2;
+            if (p.health > 0) drawPlayer(p.smoothX, p.smoothY, p.name, p.color, p.health);
+        }
+
+        // Draw Me
+        drawPlayer(myData.x, myData.y, myData.name, myData.color, myData.health);
+
+        ctx.restore();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function drawGrid() {
+        ctx.strokeStyle = '#111'; ctx.lineWidth = 1;
+        const sX = Math.floor((camX - canvas.width/2)/100)*100;
+        const sY = Math.floor((camY - canvas.height/2)/100)*100;
+        ctx.beginPath();
+        for(let x=sX; x<sX+canvas.width+100; x+=100) { ctx.moveTo(x, camY-canvas.height); ctx.lineTo(x, camY+canvas.height); }
+        for(let y=sY; y<sY+canvas.height+100; y+=100) { ctx.moveTo(camX-canvas.width, y); ctx.lineTo(camX+canvas.width, y); }
+        ctx.stroke();
+    }
+
+    function drawHub() {
+        ctx.fillStyle = '#111118'; ctx.beginPath(); ctx.arc(0, 0, 400, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 5; ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = '24px sans-serif';
+        ctx.fillText("CENTRAL HUB", 0, -30);
+        ctx.font = '14px sans-serif'; ctx.fillStyle = '#888';
+        ctx.fillText("Step on a pad to teleport to a plot", 0, 0);
+
+        PLOTS.forEach(plot => {
+            const tx = Math.cos(plot.id * Math.PI/2) * 150;
+            const ty = Math.sin(plot.id * Math.PI/2) * 150;
+            ctx.beginPath(); ctx.arc(tx, ty, 30, 0, Math.PI*2);
+            ctx.fillStyle = plot.color; ctx.globalAlpha = 0.5; ctx.fill();
+            ctx.globalAlpha = 1; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
         });
     }
 
-    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
-</script>
+    function drawPlot(plot, ownerName, items, vaultCash, isMine) {
+        const px = plot.x, py = plot.y;
+        
+        // Floor
+        ctx.fillStyle = '#151520'; ctx.fillRect(px - 300, py - 300, 600, 600);
+        ctx.strokeStyle = plot.color; ctx.lineWidth = 2; ctx.strokeRect(px - 300, py - 300, 600, 600);
+        
+        // Owner Text
+        ctx.fillStyle = "#fff"; ctx.font = "20px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText(ownerName ? `${ownerName}'s Tycoon` : "Unclaimed Plot", px, py - 320);
 
+        // Vault Pad (Center)
+        ctx.fillStyle = vaultCash > 0 ? '#00ffaa' : '#333';
+        ctx.fillRect(px - 40, py - 40, 80, 80);
+        if (vaultCash > 0) {
+            ctx.fillStyle = '#000'; ctx.font = 'bold 16px sans-serif';
+            ctx.fillText("$" + vaultCash, px, py + 5);
+        }
+
+        // Return to Hub Pad
+        ctx.beginPath(); ctx.arc(px, py + 200, 30, 0, Math.PI*2);
+        ctx.fillStyle = '#444'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif'; ctx.fillText("TO HUB", px, py + 203);
+
+        // Draw Unlocked Items
+        const hasNeon = items.includes('walls_2');
+        items.forEach(id => {
+            const it = ITEMS[id];
+            if (!it) return;
+            if (it.type === 'dropper') {
+                ctx.fillStyle = plot.color;
+                ctx.fillRect(px + it.rx - 20, py + it.ry - 20, 40, 40);
+                // Conveyor line
+                ctx.strokeStyle = '#555'; ctx.lineWidth = 10;
+                ctx.beginPath(); ctx.moveTo(px + it.rx, py + it.ry); ctx.lineTo(px, py); ctx.stroke();
+            }
+            if (it.type === 'walls' || it.type === 'walls_upgrade') {
+                ctx.strokeStyle = hasNeon ? plot.color : '#555';
+                ctx.lineWidth = hasNeon ? 10 : 5;
+                if(hasNeon) { ctx.shadowBlur = 15; ctx.shadowColor = plot.color; }
+                ctx.strokeRect(px - 300, py - 300, 600, 600);
+                ctx.shadowBlur = 0;
+            }
+        });
+
+        // Draw Purchase Buttons (Only for the owner)
+        if (isMine) {
+            for (let id in ITEMS) {
+                const item = ITEMS[id];
+                if (items.includes(id)) continue;
+                if (item.req && !items.includes(item.req)) continue;
+
+                const bx = px + item.bx, by = py + item.by;
+                ctx.fillStyle = myData.cash >= item.cost ? '#00ffaa' : '#ff0055';
+                ctx.beginPath(); ctx.arc(bx, by, 20, 0, Math.PI*2); ctx.fill();
+                
+                ctx.fillStyle = '#fff'; ctx.font = '12px sans-serif';
+                ctx.fillText(item.name, bx, by - 25);
+                ctx.fillText("$" + item.cost, bx, by - 12);
+            }
+        }
+    }
+
+    function drawPlayer(x, y, name, color, health) {
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI*2); 
+        ctx.shadowBlur = 15; ctx.shadowColor = color; ctx.fill(); ctx.shadowBlur = 0;
+        
+        ctx.fillStyle = '#fff'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(name, x, y - 30);
+        
+        // Health bar
+        ctx.fillStyle = '#555'; ctx.fillRect(x - 20, y - 25, 40, 5);
+        ctx.fillStyle = '#ff0055'; ctx.fillRect(x - 20, y - 25, 40 * (health/100), 5);
+    }
+
+    window.addEventListener('keydown', e => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true; });
+    window.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false; });
+    window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
+</script>
 </body>
 </html>
