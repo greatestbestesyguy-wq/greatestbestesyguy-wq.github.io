@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Tycoon Wars</title>
+    <title>Neon Tycoon Wars - V2</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #050510; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; user-select: none; }
+        body { margin: 0; overflow: hidden; background: #050510; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; user-select: none; }
         canvas { display: block; }
         #ui { position: absolute; top: 20px; left: 20px; pointer-events: none; text-shadow: 0 0 5px black; }
         .hud-box { background: rgba(10, 10, 20, 0.8); padding: 15px; border-left: 4px solid #00f2ff; border-radius: 4px; margin-bottom: 10px; font-size: 18px; }
@@ -29,7 +29,6 @@
 <div id="login-overlay">
     <div class="panel">
         <h1 style="color:#00f2ff; margin-top:0;">NEON TYCOON</h1>
-        <p style="color:#888; font-size:14px;">Claim your plot. Build your empire. Destroy your rivals.</p>
         <input type="text" id="username" placeholder="Enter Name" maxlength="12">
         <button onclick="joinGame()">ENTER HUB</button>
     </div>
@@ -61,16 +60,20 @@
     let supabaseClient;
     const myId = Math.random().toString(36).substr(2, 9);
     
-    // --- MAP & LAYOUT ---
-    const PLOTS = [
-        { id: 0, x: 2500, y: 0, color: '#00f2ff' },
-        { id: 1, x: -2500, y: 0, color: '#ff0055' },
-        { id: 2, x: 0, y: 2500, color: '#00ffaa' },
-        { id: 3, x: 0, y: -2500, color: '#ffaa00' }
-    ];
+    // --- MAP & LAYOUT (8 Plots) ---
+    const PLOT_DIST = 3500;
+    const PLOTS = [];
+    const colors = ['#00f2ff', '#ff0055', '#00ffaa', '#ffaa00', '#aa00ff', '#ffff00', '#00ff00', '#ff00ff'];
+    for(let i=0; i<8; i++) {
+        const angle = i * (Math.PI / 4);
+        PLOTS.push({
+            id: i,
+            x: Math.cos(angle) * PLOT_DIST,
+            y: Math.sin(angle) * PLOT_DIST,
+            color: colors[i]
+        });
+    }
 
-    // Roblox style: Stepping on a button buys the item.
-    // Coordinates are relative to the Plot Center (0,0 of the plot)
     const ITEMS = {
         'claim':       { name: "Claim Tycoon", cost: 0, bx: 0, by: 150, req: null, type: 'claim' },
         'mine_1':      { name: "Basic Mine", cost: 50, bx: -150, by: -100, rx: -150, ry: -150, req: 'claim', type: 'dropper', income: 5 },
@@ -82,16 +85,15 @@
         'weapon_2':    { name: "Plasma Rifle", cost: 5000, bx: -150, by: 100, req: 'weapon_1', type: 'weapon' }
     };
 
-    // --- GAME STATE ---
-    let myData = { name: '', cash: 0, vault: 0, health: 100, plot: -1, unlocked: [], x: 0, y: 0, color: '#ffffff' };
+    let myData = { id: myId, name: '', cash: 0, vault: 0, health: 100, plot: -1, unlocked: [], x: 0, y: 0, color: '#ffffff' };
     let players = {};
-    let lasers = []; // Local visual effects
+    let lasers = []; 
     let camX = 0, camY = 0;
     const keys = { w:false, a:false, s:false, d:false };
     let mouseX = 0, mouseY = 0;
     let lastShot = 0;
+    let lastFreeCash = 0;
 
-    // --- INITIALIZATION ---
     async function joinGame() {
         const name = document.getElementById('username').value.trim();
         if (!name) return;
@@ -103,27 +105,23 @@
         supabaseClient = supabase.createClient(PROXY_URL, API_KEY);
         document.getElementById('status').innerText = "CONNECTED TO SERVER";
 
-        // Load or initialize
-        const { data } = await supabaseClient.from('players').select('*').eq('id', myId).single();
+        // FIX: maybeSingle() prevents the 406 Error when the row doesn't exist yet
+        const { data } = await supabaseClient.from('players').select('*').eq('id', myId).maybeSingle();
         if (data) {
             myData.cash = data.cash || 0;
             myData.vault = data.vault || 0;
             myData.unlocked = data.unlocked_items || [];
             myData.plot = data.plot !== undefined ? data.plot : -1;
-            myData.health = 100;
+            if(myData.plot !== -1) myData.color = PLOTS[myData.plot].color;
         }
 
-        // Start loops
         setInterval(networkSync, 100);
         setInterval(economyTick, 1000);
         requestAnimationFrame(gameLoop);
     }
 
-    // --- NETWORKING ---
     async function networkSync() {
         if (!supabaseClient) return;
-        
-        // 1. Send my state
         await supabaseClient.from('players').upsert({
             id: myId, name: myData.name, x: myData.x, y: myData.y,
             cash: myData.cash, vault: myData.vault, health: myData.health,
@@ -131,18 +129,14 @@
             color: myData.color, last_seen: new Date().toISOString()
         });
 
-        // 2. Fetch others
         const { data } = await supabaseClient.from('players').select('*').neq('id', myId);
         if (data) {
             const now = new Date();
             data.forEach(p => {
-                if (now - new Date(p.last_seen) > 5000) {
-                    delete players[p.id]; // Remove stale players
-                } else {
+                if (now - new Date(p.last_seen) > 5000) delete players[p.id]; 
+                else {
                     if(!players[p.id]) players[p.id] = { ...p, smoothX: p.x, smoothY: p.y };
-                    else {
-                        players[p.id] = { ...p, smoothX: players[p.id].smoothX, smoothY: players[p.id].smoothY };
-                    }
+                    else players[p.id] = { ...p, smoothX: players[p.id].smoothX, smoothY: players[p.id].smoothY };
                 }
             });
         }
@@ -152,17 +146,13 @@
     async function applyDamage(targetId, amount) {
         if (!players[targetId]) return;
         let newHealth = Math.max(0, players[targetId].health - amount);
-        // Direct DB update (Firewall bypass friendly)
         await supabaseClient.from('players').update({ health: newHealth }).eq('id', targetId);
     }
 
-    // --- GAME LOGIC ---
     function economyTick() {
-        if (myData.plot === -1) return; // Must have a plot
+        if (myData.plot === -1) return; 
         let income = 0;
-        myData.unlocked.forEach(id => {
-            if (ITEMS[id] && ITEMS[id].income) income += ITEMS[id].income;
-        });
+        myData.unlocked.forEach(id => { if (ITEMS[id] && ITEMS[id].income) income += ITEMS[id].income; });
         myData.vault += income;
     }
 
@@ -174,80 +164,81 @@
     function die() {
         document.getElementById('damage-overlay').style.opacity = '0.5';
         setTimeout(() => document.getElementById('damage-overlay').style.opacity = '0', 200);
-        
         myData.health = 100;
-        myData.cash = Math.max(0, myData.cash - 100); // Lose cash penalty
-        
-        // Respawn at Hub
-        myData.x = 0;
-        myData.y = 0;
+        myData.cash = Math.max(0, myData.cash - 100); 
+        myData.x = 0; myData.y = 0; // Respawn Hub
+    }
+
+    function getPlotOwner(plotId) {
+        if (myData.plot === plotId) return myData;
+        for (let id in players) if (players[id].plot === plotId) return players[id];
+        return null;
     }
 
     function checkInteractions() {
-        // 1. Hub Teleporters
-        if (Math.hypot(myData.x, myData.y) < 400) {
+        // 1. Hub Logic
+        if (Math.hypot(myData.x, myData.y) < 800) {
+            // Hub Teleporters
             PLOTS.forEach(plot => {
-                const tx = Math.cos(plot.id * Math.PI/2) * 150;
-                const ty = Math.sin(plot.id * Math.PI/2) * 150;
+                const angle = plot.id * (Math.PI / 4);
+                const tx = Math.cos(angle) * 200;
+                const ty = Math.sin(angle) * 200;
                 if (Math.hypot(myData.x - tx, myData.y - ty) < 30) {
-                    // Teleport to plot!
-                    myData.x = plot.x; myData.y = plot.y + 200;
+                    myData.x = plot.x; myData.y = plot.y + 400; // Teleport to front of plot
                 }
             });
-        }
-
-        // 2. Base Teleporter (Return to Hub)
-        if (myData.plot !== -1) {
-            const px = PLOTS[myData.plot].x;
-            const py = PLOTS[myData.plot].y;
-            if (Math.hypot(myData.x - (px + 0), myData.y - (py + 200)) < 30) {
-                myData.x = 0; myData.y = 0; // Teleport to Hub
+            // Free Cash Pad
+            if (Math.hypot(myData.x, myData.y) < 60) {
+                if (Date.now() - lastFreeCash > 2000) {
+                    myData.cash += 10;
+                    lastFreeCash = Date.now();
+                }
             }
         }
 
-        // 3. Tycoon Buttons (Only in YOUR base)
-        if (myData.plot !== -1) {
-            const px = PLOTS[myData.plot].x;
-            const py = PLOTS[myData.plot].y;
-            
-            // Collect Vault Cash (Green pad at center of base)
-            if (Math.hypot(myData.x - px, myData.y - py) < 40 && myData.vault > 0) {
-                myData.cash += myData.vault;
-                myData.vault = 0;
+        // 2. Plot Logic (Checks the plot you are currently near)
+        PLOTS.forEach(plot => {
+            const px = plot.x, py = plot.y;
+            if (Math.hypot(myData.x - px, myData.y - py) > 1200) return; // Not near this plot
+
+            // Teleport back to Hub pad
+            if (Math.hypot(myData.x - px, myData.y - (py + 400)) < 30) {
+                myData.x = 0; myData.y = 0;
             }
 
-            // Purchase Items
-            for (let id in ITEMS) {
-                const item = ITEMS[id];
-                // Skip if already owned, or if requirement isn't met
-                if (myData.unlocked.includes(id)) continue;
-                if (item.req && !myData.unlocked.includes(item.req)) continue;
+            const owner = getPlotOwner(plot.id);
 
-                const buttonWorldX = px + item.bx;
-                const buttonWorldY = py + item.by;
+            // A. If unclaimed, check if I stepped on the Claim pad
+            if (!owner && myData.plot === -1) {
+                const claimItem = ITEMS['claim'];
+                if (Math.hypot(myData.x - (px + claimItem.bx), myData.y - (py + claimItem.by)) < 25) {
+                    myData.plot = plot.id;
+                    myData.unlocked.push('claim');
+                    myData.color = plot.color;
+                }
+            } 
+            // B. If I own it, check vault and purchases
+            else if (owner && owner.id === myId) {
+                if (Math.hypot(myData.x - px, myData.y - py) < 40 && myData.vault > 0) {
+                    myData.cash += myData.vault; myData.vault = 0;
+                }
+                for (let id in ITEMS) {
+                    if (id === 'claim') continue;
+                    const item = ITEMS[id];
+                    if (myData.unlocked.includes(id)) continue;
+                    if (item.req && !myData.unlocked.includes(item.req)) continue;
 
-                if (Math.hypot(myData.x - buttonWorldX, myData.y - buttonWorldY) < 25) {
-                    if (item.type === 'claim' && myData.unlocked.length === 0) {
-                        myData.plot = getAvailablePlot();
-                        myData.unlocked.push(id);
-                        myData.color = PLOTS[myData.plot].color;
-                    } 
-                    else if (myData.cash >= item.cost) {
-                        myData.cash -= item.cost;
-                        myData.unlocked.push(id);
+                    if (Math.hypot(myData.x - (px + item.bx), myData.y - (py + item.by)) < 25) {
+                        if (myData.cash >= item.cost) {
+                            myData.cash -= item.cost;
+                            myData.unlocked.push(id);
+                        }
                     }
                 }
             }
-        }
+        });
     }
 
-    function getAvailablePlot() {
-        let taken = Object.values(players).map(p => p.plot);
-        for(let i=0; i<4; i++) { if(!taken.includes(i)) return i; }
-        return Math.floor(Math.random() * 4); // Fallback
-    }
-
-    // --- COMBAT ---
     window.addEventListener('mousedown', () => {
         const hasPistol = myData.unlocked.includes('weapon_1');
         const hasRifle = myData.unlocked.includes('weapon_2');
@@ -259,52 +250,35 @@
         lastShot = now;
 
         const damage = hasRifle ? 20 : 10;
-        
-        // Calculate world click pos
         const targetX = mouseX - canvas.width/2 + camX;
         const targetY = mouseY - canvas.height/2 + camY;
         const angle = Math.atan2(targetY - myData.y, targetX - myData.x);
-        
-        // Range
         const range = hasRifle ? 800 : 500;
         const endX = myData.x + Math.cos(angle) * range;
         const endY = myData.y + Math.sin(angle) * range;
 
-        // Visual laser
         lasers.push({ x1: myData.x, y1: myData.y, x2: endX, y2: endY, alpha: 1, color: hasRifle ? '#ff00ff' : '#ff0000' });
 
-        // Hit detection (Math distance to line segment)
         for (let id in players) {
             let p = players[id];
             if (p.health <= 0) continue;
             
-            const dist = pointToLineDistance(p.smoothX, p.smoothY, myData.x, myData.y, endX, endY);
-            if (dist < 30) {
-                // Hit!
-                applyDamage(id, damage);
-            }
+            const A = p.smoothX - myData.x, B = p.smoothY - myData.y, C = endX - myData.x, D = endY - myData.y;
+            const dot = A * C + B * D, lenSq = C * C + D * D;
+            let param = -1; if (lenSq !== 0) param = dot / lenSq;
+            let xx, yy;
+            if (param < 0) { xx = myData.x; yy = myData.y; }
+            else if (param > 1) { xx = endX; yy = endY; }
+            else { xx = myData.x + param * C; yy = myData.y + param * D; }
+            
+            if (Math.hypot(p.smoothX - xx, p.smoothY - yy) < 30) applyDamage(id, damage);
         }
     });
 
-    function pointToLineDistance(px, py, x1, y1, x2, y2) {
-        const A = px - x1, B = py - y1, C = x2 - x1, D = y2 - y1;
-        const dot = A * C + B * D;
-        const lenSq = C * C + D * D;
-        let param = -1;
-        if (lenSq !== 0) param = dot / lenSq;
-        let xx, yy;
-        if (param < 0) { xx = x1; yy = y1; }
-        else if (param > 1) { xx = x2; yy = y2; }
-        else { xx = x1 + param * C; yy = y1 + param * D; }
-        return Math.hypot(px - xx, py - yy);
-    }
-
-    // --- RENDERING & MAIN LOOP ---
     function gameLoop() {
         if (myData.health <= 0) die();
 
-        // Movement
-        const speed = 6;
+        const speed = 7;
         if (keys.w) myData.y -= speed;
         if (keys.s) myData.y += speed;
         if (keys.a) myData.x -= speed;
@@ -312,65 +286,34 @@
 
         checkInteractions();
 
-        // Camera Lerp
-        camX += (myData.x - camX) * 0.1;
-        camY += (myData.y - camY) * 0.1;
+        camX += (myData.x - camX) * 0.1; camY += (myData.y - camY) * 0.1;
 
-        // Draw
-        ctx.fillStyle = '#050510';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.save();
-        ctx.translate(canvas.width/2 - camX, canvas.height/2 - camY);
+        ctx.fillStyle = '#050510'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.save(); ctx.translate(canvas.width/2 - camX, canvas.height/2 - camY);
 
         drawGrid();
         drawHub();
         
-        // Draw all plots
         PLOTS.forEach(plot => {
-            // Find who owns this plot
-            let owner = null;
-            let items = [];
-            let vaultCash = 0;
-            
-            if (myData.plot === plot.id) {
-                owner = myData.name;
-                items = myData.unlocked;
-                vaultCash = myData.vault;
-            } else {
-                for (let id in players) {
-                    if (players[id].plot === plot.id) {
-                        owner = players[id].name;
-                        items = players[id].unlocked_items || [];
-                        vaultCash = players[id].vault || 0;
-                        break;
-                    }
-                }
-            }
-            drawPlot(plot, owner, items, vaultCash, myData.plot === plot.id);
+            let owner = getPlotOwner(plot.id);
+            drawPlot(plot, owner ? owner.name : null, owner ? (owner.unlocked_items || owner.unlocked || []) : [], owner ? owner.vault : 0, owner && owner.id === myId);
         });
 
-        // Draw Lasers
         for (let i = lasers.length - 1; i >= 0; i--) {
             let l = lasers[i];
             ctx.beginPath(); ctx.moveTo(l.x1, l.y1); ctx.lineTo(l.x2, l.y2);
             ctx.strokeStyle = l.color; ctx.lineWidth = 4; ctx.globalAlpha = l.alpha;
-            ctx.shadowBlur = 10; ctx.shadowColor = l.color;
-            ctx.stroke();
+            ctx.shadowBlur = 10; ctx.shadowColor = l.color; ctx.stroke();
             ctx.globalAlpha = 1; ctx.shadowBlur = 0;
-            l.alpha -= 0.1;
-            if (l.alpha <= 0) lasers.splice(i, 1);
+            l.alpha -= 0.1; if (l.alpha <= 0) lasers.splice(i, 1);
         }
 
-        // Draw Others
         for (let id in players) {
             let p = players[id];
-            p.smoothX += (p.x - p.smoothX) * 0.2;
-            p.smoothY += (p.y - p.smoothY) * 0.2;
+            p.smoothX += (p.x - p.smoothX) * 0.2; p.smoothY += (p.y - p.smoothY) * 0.2;
             if (p.health > 0) drawPlayer(p.smoothX, p.smoothY, p.name, p.color, p.health);
         }
 
-        // Draw Me
         drawPlayer(myData.x, myData.y, myData.name, myData.color, myData.health);
 
         ctx.restore();
@@ -388,16 +331,32 @@
     }
 
     function drawHub() {
-        ctx.fillStyle = '#111118'; ctx.beginPath(); ctx.arc(0, 0, 400, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#111118'; ctx.beginPath(); ctx.arc(0, 0, 600, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = '#333'; ctx.lineWidth = 5; ctx.stroke();
+        
         ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = '24px sans-serif';
-        ctx.fillText("CENTRAL HUB", 0, -30);
-        ctx.font = '14px sans-serif'; ctx.fillStyle = '#888';
-        ctx.fillText("Step on a pad to teleport to a plot", 0, 0);
+        ctx.fillText("CENTRAL HUB", 0, -100);
+
+        // Leaderboard
+        let all = Object.values(players);
+        all.push(myData);
+        all.sort((a,b) => (b.cash||0) - (a.cash||0));
+        ctx.font = '16px sans-serif'; ctx.fillStyle = '#00ffaa';
+        ctx.fillText("--- SERVER RICHEST ---", 0, -60);
+        all.slice(0, 3).forEach((p, i) => {
+            ctx.fillStyle = p.color;
+            ctx.fillText(`${i+1}. ${p.name} ($${Math.floor(p.cash||0)})`, 0, -35 + (i*20));
+        });
+
+        // Free Cash Pad
+        ctx.beginPath(); ctx.arc(0, 0, 60, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.2)'; ctx.fill();
+        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#ffd700'; ctx.font = '12px sans-serif'; ctx.fillText("FREE CASH", 0, 4);
 
         PLOTS.forEach(plot => {
-            const tx = Math.cos(plot.id * Math.PI/2) * 150;
-            const ty = Math.sin(plot.id * Math.PI/2) * 150;
+            const angle = plot.id * (Math.PI / 4);
+            const tx = Math.cos(angle) * 200, ty = Math.sin(angle) * 200;
             ctx.beginPath(); ctx.arc(tx, ty, 30, 0, Math.PI*2);
             ctx.fillStyle = plot.color; ctx.globalAlpha = 0.5; ctx.fill();
             ctx.globalAlpha = 1; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
@@ -407,62 +366,53 @@
     function drawPlot(plot, ownerName, items, vaultCash, isMine) {
         const px = plot.x, py = plot.y;
         
-        // Floor
         ctx.fillStyle = '#151520'; ctx.fillRect(px - 300, py - 300, 600, 600);
         ctx.strokeStyle = plot.color; ctx.lineWidth = 2; ctx.strokeRect(px - 300, py - 300, 600, 600);
         
-        // Owner Text
         ctx.fillStyle = "#fff"; ctx.font = "20px sans-serif"; ctx.textAlign = "center";
         ctx.fillText(ownerName ? `${ownerName}'s Tycoon` : "Unclaimed Plot", px, py - 320);
 
-        // Vault Pad (Center)
+        // Vault Pad
         ctx.fillStyle = vaultCash > 0 ? '#00ffaa' : '#333';
         ctx.fillRect(px - 40, py - 40, 80, 80);
-        if (vaultCash > 0) {
-            ctx.fillStyle = '#000'; ctx.font = 'bold 16px sans-serif';
-            ctx.fillText("$" + vaultCash, px, py + 5);
-        }
+        if (vaultCash > 0) { ctx.fillStyle = '#000'; ctx.font = 'bold 16px sans-serif'; ctx.fillText("$" + vaultCash, px, py + 5); }
 
-        // Return to Hub Pad
-        ctx.beginPath(); ctx.arc(px, py + 200, 30, 0, Math.PI*2);
+        // Return Pad
+        ctx.beginPath(); ctx.arc(px, py + 400, 30, 0, Math.PI*2);
         ctx.fillStyle = '#444'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.stroke();
-        ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif'; ctx.fillText("TO HUB", px, py + 203);
+        ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif'; ctx.fillText("TO HUB", px, py + 403);
 
-        // Draw Unlocked Items
         const hasNeon = items.includes('walls_2');
         items.forEach(id => {
-            const it = ITEMS[id];
-            if (!it) return;
+            const it = ITEMS[id]; if (!it) return;
             if (it.type === 'dropper') {
-                ctx.fillStyle = plot.color;
-                ctx.fillRect(px + it.rx - 20, py + it.ry - 20, 40, 40);
-                // Conveyor line
+                ctx.fillStyle = plot.color; ctx.fillRect(px + it.rx - 20, py + it.ry - 20, 40, 40);
                 ctx.strokeStyle = '#555'; ctx.lineWidth = 10;
                 ctx.beginPath(); ctx.moveTo(px + it.rx, py + it.ry); ctx.lineTo(px, py); ctx.stroke();
             }
             if (it.type === 'walls' || it.type === 'walls_upgrade') {
-                ctx.strokeStyle = hasNeon ? plot.color : '#555';
-                ctx.lineWidth = hasNeon ? 10 : 5;
+                ctx.strokeStyle = hasNeon ? plot.color : '#555'; ctx.lineWidth = hasNeon ? 10 : 5;
                 if(hasNeon) { ctx.shadowBlur = 15; ctx.shadowColor = plot.color; }
-                ctx.strokeRect(px - 300, py - 300, 600, 600);
-                ctx.shadowBlur = 0;
+                ctx.strokeRect(px - 300, py - 300, 600, 600); ctx.shadowBlur = 0;
             }
         });
 
-        // Draw Purchase Buttons (Only for the owner)
-        if (isMine) {
+        // Purchase / Claim Buttons
+        if (isMine || (!ownerName && items.length === 0)) {
             for (let id in ITEMS) {
                 const item = ITEMS[id];
                 if (items.includes(id)) continue;
                 if (item.req && !items.includes(item.req)) continue;
+                if (!isMine && item.type !== 'claim') continue; 
 
                 const bx = px + item.bx, by = py + item.by;
                 ctx.fillStyle = myData.cash >= item.cost ? '#00ffaa' : '#ff0055';
+                if(item.type === 'claim') ctx.fillStyle = '#fff';
                 ctx.beginPath(); ctx.arc(bx, by, 20, 0, Math.PI*2); ctx.fill();
                 
                 ctx.fillStyle = '#fff'; ctx.font = '12px sans-serif';
                 ctx.fillText(item.name, bx, by - 25);
-                ctx.fillText("$" + item.cost, bx, by - 12);
+                if(item.cost > 0) ctx.fillText("$" + item.cost, bx, by - 12);
             }
         }
     }
@@ -470,11 +420,7 @@
     function drawPlayer(x, y, name, color, health) {
         ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI*2); 
         ctx.shadowBlur = 15; ctx.shadowColor = color; ctx.fill(); ctx.shadowBlur = 0;
-        
-        ctx.fillStyle = '#fff'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(name, x, y - 30);
-        
-        // Health bar
+        ctx.fillStyle = '#fff'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, x, y - 30);
         ctx.fillStyle = '#555'; ctx.fillRect(x - 20, y - 25, 40, 5);
         ctx.fillStyle = '#ff0055'; ctx.fillRect(x - 20, y - 25, 40 * (health/100), 5);
     }
