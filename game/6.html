@@ -1,45 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ghost Hunter Pro</title>
+    <title>Ghost Hunter: Ultimate</title>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: white; }
         canvas#gameCanvas { display: block; width: 100vw; height: 100vh; }
         #hud { position: absolute; top: 20px; left: 20px; pointer-events: none; }
-        #stamina-bar { width: 200px; height: 10px; border: 1px solid white; margin-top: 5px; }
+        #stamina-bar { width: 200px; height: 8px; border: 1px solid #444; margin-top: 5px; background: #111; }
         #stamina-fill { width: 100%; height: 100%; background: #0f0; transition: width 0.1s; }
-        #minimap-container { position: absolute; bottom: 20px; right: 20px; border: 2px solid #555; background: rgba(0,0,0,0.8); }
-        #minimap-container.hidden { display: none; }
-        #crosshair { position: absolute; top: 50%; left: 50%; color: rgba(255,0,0,0.7); font-size: 24px; transform: translate(-50%, -50%); pointer-events: none; }
-        #overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: rgba(0,0,0,0.85); padding: 40px; border: 1px solid red; }
-        .hidden { display: none; }
+        #minimap-container { position: absolute; bottom: 20px; right: 20px; border: 2px solid #333; background: rgba(0,0,0,0.9); }
+        #crosshair { position: absolute; top: 50%; left: 50%; color: rgba(255,0,0,0.5); font-size: 20px; transform: translate(-50%, -50%); pointer-events: none; }
+        #overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); text-align: center; z-index: 10; }
+        button { padding: 15px 30px; font-family: inherit; font-size: 1.2rem; background: #600; color: white; border: none; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #900; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <div id="overlay">
-        <h1>GHOST HUNTER</h1>
-        <p>COLLECT THE 3 RADIOS TO ESCAPE</p>
-        <p>WASD/Arrows: Move | Shift: Sprint | M: Map | Mouse: Look</p>
-        <button onclick="startGame()" style="padding: 10px 20px; cursor: pointer; background: #900; color: white; border: none;">START MISSION</button>
+        <h1 style="color: #f00; letter-spacing: 10px;">VOID RUNNER</h1>
+        <p>FIND THE 3 GLOWING RADIOS. ESCAPE THROUGH THE STARTING DOOR.</p>
+        <p>Shift: Sprint | M: Map | Mouse: Look</p>
+        <button onclick="startGame()">ENTER THE VOID</button>
     </div>
 
     <div id="hud" class="hidden">
-        <div>OBJECTIVES: <span id="items">0</span> / 3</div>
-        <div>STAMINA</div>
+        <div style="font-size: 1.2rem; color: #ff0;">RADIOS: <span id="items">0</span> / 3</div>
         <div id="stamina-bar"><div id="stamina-fill"></div></div>
     </div>
-
     <div id="crosshair" class="hidden">+</div>
-    
-    <div id="minimap-container" class="hidden">
-        <canvas id="minimap" width="160" height="160"></canvas>
-    </div>
-
+    <div id="minimap-container" class="hidden"><canvas id="minimap" width="160" height="160"></canvas></div>
     <canvas id="gameCanvas"></canvas>
 
 <script>
-/** * GAME CONFIGURATION & MAP
- */
 const map = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
@@ -54,105 +47,92 @@ const map = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ];
 
-const player = { x: 1.5, y: 1.5, dir: 0, stamina: 100, items: 0 };
-const ghost = { x: 14, y: 9, speed: 0.023, active: false };
-const collectibles = [{x: 14, y: 1.5}, {x: 5, y: 5}, {x: 1, y: 9}];
-const keys = {};
-let gameActive = false;
-let audioCtx;
+const player = { x: 1.5, y: 1.5, dir: 0, stamina: 100, items: 0, bob: 0 };
+const ghost = { x: 14, y: 9, speed: 0.025, id: 'ghost' };
+let entities = [
+    ghost,
+    { x: 14, y: 1.5, id: 'radio' },
+    { x: 5, y: 5, id: 'radio' },
+    { x: 1, y: 9, id: 'radio' }
+];
 
-// Textures (Procedural)
-const texSize = 64;
-const wallTex = document.createElement('canvas');
-const ghostTex = document.createElement('canvas');
-[wallTex, ghostTex].forEach(c => { c.width = c.height = texSize; });
+const keys = {};
+let gameActive = false, audioCtx, heartbeat;
 
 function generateTextures() {
-    const wCtx = wallTex.getContext('2d');
-    wCtx.fillStyle = '#333'; wCtx.fillRect(0,0,64,64);
-    wCtx.strokeStyle = '#111';
-    for(let i=0; i<4; i++) wCtx.strokeRect(0, i*16, 64, 16); // Bricks
-    
-    const gCtx = ghostTex.getContext('2d');
-    gCtx.fillStyle = 'red'; gCtx.beginPath(); gCtx.arc(32, 32, 20, 0, Math.PI*2); gCtx.fill();
+    const tex = document.createElement('canvas');
+    tex.width = tex.height = 64;
+    const tCtx = tex.getContext('2d');
+    tCtx.fillStyle = '#222'; tCtx.fillRect(0,0,64,64);
+    tCtx.strokeStyle = '#444';
+    for(let i=0; i<4; i++) tCtx.strokeRect(0, i*16, 64, 16);
+    return tex;
 }
+const wallTex = generateTextures();
 
-/**
- * ENGINE LOGIC (DDA Raycasting)
- */
 function startGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     document.getElementById('overlay').classList.add('hidden');
-    document.getElementById('hud').classList.remove('hidden');
-    document.getElementById('crosshair').classList.remove('hidden');
-    document.getElementById('minimap-container').classList.remove('hidden');
+    document.querySelectorAll('.hidden').forEach(el => el.classList.remove('hidden'));
     document.body.requestPointerLock();
-    generateTextures();
     gameActive = true;
-    ghost.active = true;
     loop();
 }
 
-document.addEventListener('mousemove', (e) => {
-    if (document.pointerLockElement) player.dir += e.movementX * 0.0025;
-});
-
-window.onkeydown = (e) => {
-    keys[e.code] = true;
-    if(e.code === 'KeyM') document.getElementById('minimap-container').classList.toggle('hidden');
-};
-window.onkeyup = (e) => keys[e.code] = false;
+document.addEventListener('mousemove', e => { if (document.pointerLockElement) player.dir += e.movementX * 0.003; });
+window.onkeydown = e => { keys[e.code] = true; if(e.code === 'KeyM') document.getElementById('minimap-container').classList.toggle('hidden'); };
+window.onkeyup = e => keys[e.code] = false;
 
 function update() {
     if (!gameActive) return;
-
-    let speed = (keys['ShiftLeft'] && player.stamina > 0) ? 0.08 : 0.04;
-    if (keys['ShiftLeft'] && player.stamina > 0) player.stamina -= 0.5;
-    else if (player.stamina < 100) player.stamina += 0.2;
+    let isMoving = keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD'];
+    let speed = (keys['ShiftLeft'] && player.stamina > 0 && isMoving) ? 0.09 : 0.045;
+    
+    if (keys['ShiftLeft'] && player.stamina > 0 && isMoving) player.stamina -= 0.6;
+    else if (player.stamina < 100) player.stamina += 0.3;
     document.getElementById('stamina-fill').style.width = player.stamina + '%';
 
     let mvX = 0, mvY = 0;
-    if (keys['KeyW'] || keys['ArrowUp']) { mvX += Math.cos(player.dir); mvY += Math.sin(player.dir); }
-    if (keys['KeyS'] || keys['ArrowDown']) { mvX -= Math.cos(player.dir); mvY -= Math.sin(player.dir); }
-    if (keys['KeyA'] || keys['ArrowLeft']) { mvX += Math.sin(player.dir); mvY -= Math.cos(player.dir); }
-    if (keys['KeyD'] || keys['ArrowRight']) { mvX -= Math.sin(player.dir); mvY += Math.cos(player.dir); }
+    if (keys['KeyW']) { mvX += Math.cos(player.dir); mvY += Math.sin(player.dir); }
+    if (keys['KeyS']) { mvX -= Math.cos(player.dir); mvY -= Math.sin(player.dir); }
+    if (keys['KeyA']) { mvX += Math.sin(player.dir); mvY -= Math.cos(player.dir); }
+    if (keys['KeyD']) { mvX -= Math.sin(player.dir); mvY += Math.cos(player.dir); }
 
-    // Collision with slide
+    if (isMoving) player.bob += 0.15;
     if (map[Math.floor(player.y)][Math.floor(player.x + mvX * speed)] === 0) player.x += mvX * speed;
     if (map[Math.floor(player.y + mvY * speed)][Math.floor(player.x)] === 0) player.y += mvY * speed;
 
-    // Collect Items
-    collectibles.forEach((item, i) => {
-        let d = Math.sqrt((player.x-item.x)**2 + (player.y-item.y)**2);
-        if (d < 0.5) {
-            player.items++;
-            collectibles.splice(i, 1);
-            document.getElementById('items').innerText = player.items;
-            if(player.items === 3) ghost.speed += 0.01; // Enrage ghost
+    // Entity Logic
+    entities = entities.filter(ent => {
+        let dx = player.x - ent.x, dy = player.y - ent.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+        
+        if (ent.id === 'ghost') {
+            ent.x += (dx/dist) * ent.speed;
+            ent.y += (dy/dist) * ent.speed;
+            if (dist < 0.35) gameOver("THE DARKNESS TOOK YOU");
+            return true;
+        } else {
+            if (dist < 0.6) {
+                player.items++;
+                document.getElementById('items').innerText = player.items;
+                ghost.speed += 0.005;
+                return false;
+            }
+            return true;
         }
     });
 
-    // Ghost Movement
-    let gdx = player.x - ghost.x, gdy = player.y - ghost.y;
-    let gDist = Math.sqrt(gdx**2 + gdy**2);
-    ghost.x += (gdx/gDist) * ghost.speed;
-    ghost.y += (gdy/gDist) * ghost.speed;
-
-    if (gDist < 0.4) gameOver("YOU WERE CONSUMED");
-    if (player.items === 3 && player.x < 2 && player.y < 2) gameOver("YOU ESCAPED THE DARK");
+    if (player.items === 3 && player.x < 2 && player.y < 2) gameOver("YOU SURVIVED... THIS TIME");
 }
 
 function gameOver(txt) {
     gameActive = false;
     document.exitPointerLock();
-    const ov = document.getElementById('overlay');
-    ov.innerHTML = `<h1>${txt}</h1><button onclick="location.reload()">RETRY</button>`;
-    ov.classList.remove('hidden');
+    document.getElementById('overlay').innerHTML = `<h1 style="color:red">${txt}</h1><button onclick="location.reload()">TRY AGAIN</button>`;
+    document.getElementById('overlay').classList.remove('hidden');
 }
 
-/**
- * RENDERING
- */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -160,89 +140,95 @@ function draw() {
     const w = canvas.width = window.innerWidth;
     const h = canvas.height = window.innerHeight;
     const zBuffer = new Float32Array(w);
+    const bobOff = Math.sin(player.bob) * 10;
 
-    // Floor and Ceiling (Torch Gradient)
-    let grad = ctx.createRadialGradient(w/2, h/2, 50, w/2, h/2, w/1.2);
-    grad.addColorStop(0, '#111');
-    grad.addColorStop(1, '#000');
-    ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+    // Sky/Floor
+    ctx.fillStyle = '#050000'; ctx.fillRect(0,0,w,h);
 
     const fov = Math.PI / 3;
     for (let x = 0; x < w; x++) {
         let rayAngle = (player.dir - fov/2) + (x / w) * fov;
-        let rDirX = Math.cos(rayAngle), rDirY = Math.sin(rayAngle);
-        
-        let mapX = Math.floor(player.x), mapY = Math.floor(player.y);
-        let deltaDistX = Math.abs(1 / rDirX), deltaDistY = Math.abs(1 / rDirY);
-        
-        let stepX, stepY, sideDistX, sideDistY;
-        if (rDirX < 0) { stepX = -1; sideDistX = (player.x - mapX) * deltaDistX; }
-        else { stepX = 1; sideDistX = (mapX + 1.0 - player.x) * deltaDistX; }
-        if (rDirY < 0) { stepY = -1; sideDistY = (player.y - mapY) * deltaDistY; }
-        else { stepY = 1; sideDistY = (mapY + 1.0 - player.y) * deltaDistY; }
+        let rX = Math.cos(rayAngle), rY = Math.sin(rayAngle);
+        let mX = Math.floor(player.x), mY = Math.floor(player.y);
+        let dX = Math.abs(1/rX), dY = Math.abs(1/rY);
+        let sX, sY, sdX, sdY;
+
+        if (rX < 0) { sX = -1; sdX = (player.x - mX) * dX; }
+        else { sX = 1; sdX = (mX + 1.0 - player.x) * dX; }
+        if (rY < 0) { sY = -1; sdY = (player.y - mY) * dY; }
+        else { sY = 1; sdY = (mY + 1.0 - player.y) * dY; }
 
         let hit = 0, side;
         while (hit === 0) {
-            if (sideDistX < sideDistY) { sideDistX += deltaDistX; mapX += stepX; side = 0; }
-            else { sideDistY += deltaDistY; mapY += stepY; side = 1; }
-            if (map[mapY][mapX] > 0) hit = 1;
+            if (sdX < sdY) { sdX += dX; mX += sX; side = 0; }
+            else { sdY += dY; mY += sY; side = 1; }
+            if (map[mY][mX] > 0) hit = 1;
         }
 
-        let perpWallDist = (side === 0) ? (sideDistX - deltaDistX) : (sideDistY - deltaDistY);
-        zBuffer[x] = perpWallDist;
+        let dist = (side === 0) ? (sdX - dX) : (sdY - dY);
+        zBuffer[x] = dist;
 
-        // Texture Calc
-        let wallX = (side === 0) ? player.y + perpWallDist * rDirY : player.x + perpWallDist * rDirX;
+        let wallX = (side === 0) ? player.y + dist * rY : player.x + dist * rX;
         wallX -= Math.floor(wallX);
-        let texX = Math.floor(wallX * texSize);
-
-        let lineH = h / perpWallDist;
-        let drawStart = -lineH / 2 + h / 2;
+        let lineH = h / (dist * Math.cos(player.dir - rayAngle));
         
-        // Torch effect (darken by distance)
-        let brightness = Math.min(255, 300 / (perpWallDist * 0.8));
-        ctx.globalAlpha = brightness / 255;
-        ctx.drawImage(wallTex, texX, 0, 1, texSize, x, drawStart, 1, lineH);
-        ctx.globalAlpha = 1.0;
+        ctx.globalAlpha = Math.max(0, 1 - dist/8);
+        ctx.drawImage(wallTex, wallX*64, 0, 1, 64, x, (h-lineH)/2 + bobOff, 1, lineH);
     }
 
-    // Render Ghost Sprite
-    let gdx = ghost.x - player.x, gdy = ghost.y - player.y;
-    let gDist = Math.sqrt(gdx**2 + gdy**2);
-    let gAngle = Math.atan2(gdy, gdx) - player.dir;
-    while(gAngle < -Math.PI) gAngle += 2*Math.PI;
-    while(gAngle > Math.PI) gAngle -= 2*Math.PI;
+    // Sprite Rendering (Radios & Ghost)
+    let sorted = entities.map(e => ({...e, d: ((player.x-e.x)**2 + (player.y-e.y)**2)})).sort((a,b) => b.d - a.d);
+    
+    sorted.forEach(ent => {
+        let dx = ent.x - player.x, dy = ent.y - player.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+        let angle = Math.atan2(dy, dx) - player.dir;
+        while(angle < -Math.PI) angle += 2*Math.PI;
+        while(angle > Math.PI) angle -= 2*Math.PI;
 
-    if (Math.abs(gAngle) < fov) {
-        let sx = (0.5 * (gAngle / (fov / 2)) + 0.5) * w;
-        let sh = Math.abs(h / (gDist * Math.cos(gAngle)));
-        if (gDist < zBuffer[Math.floor(sx)]) {
-            ctx.drawImage(ghostTex, sx - sh/4, h/2 - sh/2, sh/2, sh);
+        if (Math.abs(angle) < fov) {
+            let sx = (0.5 * (angle / (fov / 2)) + 0.5) * w;
+            let sh = Math.abs(h / (dist * Math.cos(angle)));
+            if (dist < zBuffer[Math.floor(sx)] && dist < 10) {
+                ctx.globalAlpha = Math.max(0, 1 - dist/10);
+                ctx.fillStyle = ent.id === 'ghost' ? '#f00' : `rgba(255, 255, 0, ${0.5 + Math.sin(Date.now()/200)*0.5})`;
+                ctx.fillRect(sx - sh/8, (h-sh)/2 + bobOff, sh/4, sh);
+                // Glow effect for radios
+                if(ent.id === 'radio') {
+                    ctx.shadowBlur = 20; ctx.shadowColor = "yellow";
+                    ctx.fillRect(sx - sh/10, (h-sh/2)/2 + bobOff, sh/5, sh/2);
+                    ctx.shadowBlur = 0;
+                }
+            }
         }
-    }
+    });
+
+    ctx.globalAlpha = 1;
+    // Torch overlay
+    let torch = ctx.createRadialGradient(w/2, h/2, 10, w/2, h/2, w/1.5);
+    torch.addColorStop(0, 'transparent'); torch.addColorStop(1, 'black');
+    ctx.fillStyle = torch; ctx.fillRect(0,0,w,h);
+    
     drawMinimap();
 }
 
 function drawMinimap() {
-    const mCanvas = document.getElementById('minimap');
-    const mCtx = mCanvas.getContext('2d');
+    const mCtx = document.getElementById('minimap').getContext('2d');
     mCtx.fillStyle = 'black'; mCtx.fillRect(0,0,160,160);
-    let s = 160 / 16;
+    let s = 10;
     for(let y=0; y<map.length; y++) {
         for(let x=0; x<map[y].length; x++) {
-            if(map[y][x]) { mCtx.fillStyle = '#333'; mCtx.fillRect(x*s, y*s, s-1, s-1); }
+            if(map[y][x]) { mCtx.fillStyle = '#222'; mCtx.fillRect(x*s, y*s, s, s); }
         }
     }
     mCtx.fillStyle = 'lime'; mCtx.fillRect(player.x*s-2, player.y*s-2, 4, 4);
-    mCtx.fillStyle = 'red'; mCtx.fillRect(ghost.x*s-2, ghost.y*s-2, 4, 4);
-    mCtx.fillStyle = 'yellow'; collectibles.forEach(it => mCtx.fillRect(it.x*s-1, it.y*s-1, 3, 3));
+    entities.forEach(ent => {
+        mCtx.fillStyle = ent.id === 'ghost' ? 'red' : 'yellow';
+        mCtx.fillRect(ent.x*s-2, ent.y*s-2, 4, 4);
+    });
 }
 
-function loop() {
-    update();
-    draw();
-    if (gameActive) requestAnimationFrame(loop);
-}
+function loop() { if (gameActive) { update(); draw(); requestAnimationFrame(loop); } }
 </script>
 </body>
 </html>
