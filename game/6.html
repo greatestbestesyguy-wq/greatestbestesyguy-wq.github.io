@@ -1,204 +1,248 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ghost Hunter FPS - Fixed Map</title>
+    <title>Ghost Hunter Pro</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: white; }
         canvas#gameCanvas { display: block; width: 100vw; height: 100vh; }
-        
-        #ui { position: absolute; top: 20px; left: 20px; color: #f00; text-shadow: 2px 2px #000; pointer-events: none; }
-        
-        /* Minimap Styling */
-        #minimap-container { 
-            position: absolute; 
-            bottom: 20px; 
-            right: 20px; 
-            border: 2px solid #555; 
-            background: rgba(0,0,0,0.8);
-            transition: all 0.3s ease;
-        }
-        
-        /* Large Map State */
-        #minimap-container.large {
-            bottom: 50%;
-            right: 50%;
-            transform: translate(50%, 50%);
-            width: 400px;
-            height: 400px;
-        }
-
-        #crosshair { position: absolute; top: 50%; left: 50%; color: rgba(255,0,0,0.5); font-size: 24px; transform: translate(-50%, -50%); pointer-events: none; }
-        #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px; }
+        #hud { position: absolute; top: 20px; left: 20px; pointer-events: none; }
+        #stamina-bar { width: 200px; height: 10px; border: 1px solid white; margin-top: 5px; }
+        #stamina-fill { width: 100%; height: 100%; background: #0f0; transition: width 0.1s; }
+        #minimap-container { position: absolute; bottom: 20px; right: 20px; border: 2px solid #555; background: rgba(0,0,0,0.8); }
+        #minimap-container.hidden { display: none; }
+        #crosshair { position: absolute; top: 50%; left: 50%; color: rgba(255,0,0,0.7); font-size: 24px; transform: translate(-50%, -50%); pointer-events: none; }
+        #overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: rgba(0,0,0,0.85); padding: 40px; border: 1px solid red; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div id="msg">CLICK TO START<br>WASD/Arrows to Move | Mouse to Look<br>Press 'M' to Toggle Map</div>
-    <div id="ui"><div id="status">SURVIVE</div></div>
-    <div id="crosshair">+</div>
+    <div id="overlay">
+        <h1>GHOST HUNTER</h1>
+        <p>COLLECT THE 3 RADIOS TO ESCAPE</p>
+        <p>WASD/Arrows: Move | Shift: Sprint | M: Map | Mouse: Look</p>
+        <button onclick="startGame()" style="padding: 10px 20px; cursor: pointer; background: #900; color: white; border: none;">START MISSION</button>
+    </div>
+
+    <div id="hud" class="hidden">
+        <div>OBJECTIVES: <span id="items">0</span> / 3</div>
+        <div>STAMINA</div>
+        <div id="stamina-bar"><div id="stamina-fill"></div></div>
+    </div>
+
+    <div id="crosshair" class="hidden">+</div>
     
-    <div id="minimap-container">
-        <canvas id="minimap" width="200" height="200"></canvas>
+    <div id="minimap-container" class="hidden">
+        <canvas id="minimap" width="160" height="160"></canvas>
     </div>
 
     <canvas id="gameCanvas"></canvas>
 
 <script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const mCanvas = document.getElementById('minimap');
-const mCtx = mCanvas.getContext('2d');
-const mContainer = document.getElementById('minimap-container');
-
-let w, h;
-let mapLarge = false;
-
-function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resize);
-resize();
-
+/** * GAME CONFIGURATION & MAP
+ */
 const map = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
-    [1,0,1,1,0,1,0,1,1,1,1,1,1,0,1],
-    [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
-    [1,0,1,0,1,1,1,1,1,1,1,0,1,0,1],
-    [1,0,0,0,1,0,0,0,0,0,0,0,0,0,1],
-    [1,0,1,0,1,0,1,1,1,0,1,1,1,0,1],
-    [1,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+    [1,0,1,1,1,0,1,1,1,0,1,0,1,1,0,1],
+    [1,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1],
+    [1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,1],
+    [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1],
+    [1,0,1,1,1,1,1,0,1,0,1,1,1,1,0,1],
+    [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1],
+    [1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ];
 
-const player = { x: 2, y: 2, dir: 0, speed: 0.05 };
-const ghost = { x: 13, y: 7, speed: 0.02, active: true };
+const player = { x: 1.5, y: 1.5, dir: 0, stamina: 100, items: 0 };
+const ghost = { x: 14, y: 9, speed: 0.023, active: false };
+const collectibles = [{x: 14, y: 1.5}, {x: 5, y: 5}, {x: 1, y: 9}];
 const keys = {};
+let gameActive = false;
+let audioCtx;
 
-canvas.onclick = () => {
-    canvas.requestPointerLock();
-    document.getElementById('msg').style.display = 'none';
-};
+// Textures (Procedural)
+const texSize = 64;
+const wallTex = document.createElement('canvas');
+const ghostTex = document.createElement('canvas');
+[wallTex, ghostTex].forEach(c => { c.width = c.height = texSize; });
+
+function generateTextures() {
+    const wCtx = wallTex.getContext('2d');
+    wCtx.fillStyle = '#333'; wCtx.fillRect(0,0,64,64);
+    wCtx.strokeStyle = '#111';
+    for(let i=0; i<4; i++) wCtx.strokeRect(0, i*16, 64, 16); // Bricks
+    
+    const gCtx = ghostTex.getContext('2d');
+    gCtx.fillStyle = 'red'; gCtx.beginPath(); gCtx.arc(32, 32, 20, 0, Math.PI*2); gCtx.fill();
+}
+
+/**
+ * ENGINE LOGIC (DDA Raycasting)
+ */
+function startGame() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    document.getElementById('overlay').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    document.getElementById('crosshair').classList.remove('hidden');
+    document.getElementById('minimap-container').classList.remove('hidden');
+    document.body.requestPointerLock();
+    generateTextures();
+    gameActive = true;
+    ghost.active = true;
+    loop();
+}
 
 document.addEventListener('mousemove', (e) => {
-    if (document.pointerLockElement === canvas) {
-        player.dir += e.movementX * 0.003;
-    }
+    if (document.pointerLockElement) player.dir += e.movementX * 0.0025;
 });
 
 window.onkeydown = (e) => {
     keys[e.code] = true;
-    if (e.code === 'KeyM') {
-        mapLarge = !mapLarge;
-        if(mapLarge) {
-            mContainer.classList.add('large');
-            mCanvas.width = 400; mCanvas.height = 400;
-        } else {
-            mContainer.classList.remove('large');
-            mCanvas.width = 200; mCanvas.height = 200;
-        }
-    }
+    if(e.code === 'KeyM') document.getElementById('minimap-container').classList.toggle('hidden');
 };
 window.onkeyup = (e) => keys[e.code] = false;
 
 function update() {
-    let moveX = 0, moveY = 0;
-    if (keys['KeyW'] || keys['ArrowUp']) { moveX += Math.cos(player.dir); moveY += Math.sin(player.dir); }
-    if (keys['KeyS'] || keys['ArrowDown']) { moveX -= Math.cos(player.dir); moveY -= Math.sin(player.dir); }
-    if (keys['KeyA'] || keys['ArrowLeft']) { moveX += Math.sin(player.dir); moveY -= Math.cos(player.dir); }
-    if (keys['KeyD'] || keys['ArrowRight']) { moveX -= Math.sin(player.dir); moveY += Math.cos(player.dir); }
+    if (!gameActive) return;
 
-    let newX = player.x + moveX * player.speed;
-    let newY = player.y + moveY * player.speed;
-    if (map[Math.floor(player.y)][Math.floor(newX)] === 0) player.x = newX;
-    if (map[Math.floor(newY)][Math.floor(player.x)] === 0) player.y = newY;
+    let speed = (keys['ShiftLeft'] && player.stamina > 0) ? 0.08 : 0.04;
+    if (keys['ShiftLeft'] && player.stamina > 0) player.stamina -= 0.5;
+    else if (player.stamina < 100) player.stamina += 0.2;
+    document.getElementById('stamina-fill').style.width = player.stamina + '%';
 
-    let dx = player.x - ghost.x, dy = player.y - ghost.y;
-    let dist = Math.sqrt(dx*dx + dy*dy);
-    ghost.x += (dx / dist) * ghost.speed;
-    ghost.y += (dy / dist) * ghost.speed;
+    let mvX = 0, mvY = 0;
+    if (keys['KeyW'] || keys['ArrowUp']) { mvX += Math.cos(player.dir); mvY += Math.sin(player.dir); }
+    if (keys['KeyS'] || keys['ArrowDown']) { mvX -= Math.cos(player.dir); mvY -= Math.sin(player.dir); }
+    if (keys['KeyA'] || keys['ArrowLeft']) { mvX += Math.sin(player.dir); mvY -= Math.cos(player.dir); }
+    if (keys['KeyD'] || keys['ArrowRight']) { mvX -= Math.sin(player.dir); mvY += Math.cos(player.dir); }
 
-    if (dist < 0.3) {
-        document.getElementById('msg').innerHTML = "YOU WERE CAUGHT<br>Refresh to restart";
-        document.getElementById('msg').style.display = 'block';
-        ghost.active = false;
-        document.exitPointerLock();
-    }
-}
+    // Collision with slide
+    if (map[Math.floor(player.y)][Math.floor(player.x + mvX * speed)] === 0) player.x += mvX * speed;
+    if (map[Math.floor(player.y + mvY * speed)][Math.floor(player.x)] === 0) player.y += mvY * speed;
 
-function drawMinimap() {
-    mCtx.clearRect(0,0,mCanvas.width,mCanvas.height);
-    let size = mCanvas.width / 15;
-    for(let y=0; y<map.length; y++) {
-        for(let x=0; x<map[y].length; x++) {
-            if(map[y][x]) { 
-                mCtx.fillStyle = "#444"; 
-                mCtx.fillRect(x*size, y*size, size-1, size-1); 
-            }
+    // Collect Items
+    collectibles.forEach((item, i) => {
+        let d = Math.sqrt((player.x-item.x)**2 + (player.y-item.y)**2);
+        if (d < 0.5) {
+            player.items++;
+            collectibles.splice(i, 1);
+            document.getElementById('items').innerText = player.items;
+            if(player.items === 3) ghost.speed += 0.01; // Enrage ghost
         }
-    }
-    // Player
-    mCtx.fillStyle = "lime";
-    mCtx.fillRect(player.x*size-3, player.y*size-3, 6, 6);
-    // Ghost
-    mCtx.fillStyle = "red";
-    mCtx.fillRect(ghost.x*size-3, ghost.y*size-3, 6, 6);
+    });
+
+    // Ghost Movement
+    let gdx = player.x - ghost.x, gdy = player.y - ghost.y;
+    let gDist = Math.sqrt(gdx**2 + gdy**2);
+    ghost.x += (gdx/gDist) * ghost.speed;
+    ghost.y += (gdy/gDist) * ghost.speed;
+
+    if (gDist < 0.4) gameOver("YOU WERE CONSUMED");
+    if (player.items === 3 && player.x < 2 && player.y < 2) gameOver("YOU ESCAPED THE DARK");
 }
+
+function gameOver(txt) {
+    gameActive = false;
+    document.exitPointerLock();
+    const ov = document.getElementById('overlay');
+    ov.innerHTML = `<h1>${txt}</h1><button onclick="location.reload()">RETRY</button>`;
+    ov.classList.remove('hidden');
+}
+
+/**
+ * RENDERING
+ */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
 function draw() {
-    ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, w, h/2);
-    ctx.fillStyle = "#111"; ctx.fillRect(0, h/2, w, h/2);
+    const w = canvas.width = window.innerWidth;
+    const h = canvas.height = window.innerHeight;
+    const zBuffer = new Float32Array(w);
+
+    // Floor and Ceiling (Torch Gradient)
+    let grad = ctx.createRadialGradient(w/2, h/2, 50, w/2, h/2, w/1.2);
+    grad.addColorStop(0, '#111');
+    grad.addColorStop(1, '#000');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
 
     const fov = Math.PI / 3;
-    const zBuffer = [];
+    for (let x = 0; x < w; x++) {
+        let rayAngle = (player.dir - fov/2) + (x / w) * fov;
+        let rDirX = Math.cos(rayAngle), rDirY = Math.sin(rayAngle);
+        
+        let mapX = Math.floor(player.x), mapY = Math.floor(player.y);
+        let deltaDistX = Math.abs(1 / rDirX), deltaDistY = Math.abs(1 / rDirY);
+        
+        let stepX, stepY, sideDistX, sideDistY;
+        if (rDirX < 0) { stepX = -1; sideDistX = (player.x - mapX) * deltaDistX; }
+        else { stepX = 1; sideDistX = (mapX + 1.0 - player.x) * deltaDistX; }
+        if (rDirY < 0) { stepY = -1; sideDistY = (player.y - mapY) * deltaDistY; }
+        else { stepY = 1; sideDistY = (mapY + 1.0 - player.y) * deltaDistY; }
 
-    for (let i = 0; i < w; i++) {
-        let rayAngle = (player.dir - fov/2) + (i / w) * fov;
-        let distance = 0;
-        let hit = false;
-        let eyeX = Math.cos(rayAngle), eyeY = Math.sin(rayAngle);
-
-        while (!hit && distance < 15) {
-            distance += 0.02;
-            let tx = Math.floor(player.x + eyeX * distance);
-            let ty = Math.floor(player.y + eyeY * distance);
-            if (map[ty][tx] === 1) hit = true;
+        let hit = 0, side;
+        while (hit === 0) {
+            if (sideDistX < sideDistY) { sideDistX += deltaDistX; mapX += stepX; side = 0; }
+            else { sideDistY += deltaDistY; mapY += stepY; side = 1; }
+            if (map[mapY][mapX] > 0) hit = 1;
         }
 
-        zBuffer[i] = distance;
-        let fixDist = distance * Math.cos(player.dir - rayAngle);
-        let wallH = h / fixDist;
-        let color = 200 / (1 + fixDist * 0.5);
-        ctx.strokeStyle = `rgb(${color},${color/2},${color/2})`;
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(i, h/2 - wallH/2); ctx.lineTo(i, h/2 + wallH/2); ctx.stroke();
+        let perpWallDist = (side === 0) ? (sideDistX - deltaDistX) : (sideDistY - deltaDistY);
+        zBuffer[x] = perpWallDist;
+
+        // Texture Calc
+        let wallX = (side === 0) ? player.y + perpWallDist * rDirY : player.x + perpWallDist * rDirX;
+        wallX -= Math.floor(wallX);
+        let texX = Math.floor(wallX * texSize);
+
+        let lineH = h / perpWallDist;
+        let drawStart = -lineH / 2 + h / 2;
+        
+        // Torch effect (darken by distance)
+        let brightness = Math.min(255, 300 / (perpWallDist * 0.8));
+        ctx.globalAlpha = brightness / 255;
+        ctx.drawImage(wallTex, texX, 0, 1, texSize, x, drawStart, 1, lineH);
+        ctx.globalAlpha = 1.0;
     }
 
-    if (ghost.active) {
-        let gdx = ghost.x - player.x, gdy = ghost.y - player.y;
-        let gDist = Math.sqrt(gdx*gdx + gdy*gdy);
-        let gAngle = Math.atan2(gdy, gdx) - player.dir;
-        while (gAngle < -Math.PI) gAngle += 2 * Math.PI;
-        while (gAngle > Math.PI) gAngle -= 2 * Math.PI;
+    // Render Ghost Sprite
+    let gdx = ghost.x - player.x, gdy = ghost.y - player.y;
+    let gDist = Math.sqrt(gdx**2 + gdy**2);
+    let gAngle = Math.atan2(gdy, gdx) - player.dir;
+    while(gAngle < -Math.PI) gAngle += 2*Math.PI;
+    while(gAngle > Math.PI) gAngle -= 2*Math.PI;
 
-        if (Math.abs(gAngle) < fov) {
-            let screenX = (0.5 * (gAngle / (fov / 2)) + 0.5) * w;
-            let spriteH = h / (gDist * Math.cos(gAngle));
-            if (gDist < zBuffer[Math.floor(screenX)]) {
-                ctx.fillStyle = `rgba(255, 0, 0, ${1.5/gDist})`;
-                ctx.fillRect(screenX - spriteH/4, h/2 - spriteH/2, spriteH/2, spriteH);
-            }
+    if (Math.abs(gAngle) < fov) {
+        let sx = (0.5 * (gAngle / (fov / 2)) + 0.5) * w;
+        let sh = Math.abs(h / (gDist * Math.cos(gAngle)));
+        if (gDist < zBuffer[Math.floor(sx)]) {
+            ctx.drawImage(ghostTex, sx - sh/4, h/2 - sh/2, sh/2, sh);
         }
     }
     drawMinimap();
 }
 
-function loop() {
-    if (ghost.active) update();
-    draw();
-    requestAnimationFrame(loop);
+function drawMinimap() {
+    const mCanvas = document.getElementById('minimap');
+    const mCtx = mCanvas.getContext('2d');
+    mCtx.fillStyle = 'black'; mCtx.fillRect(0,0,160,160);
+    let s = 160 / 16;
+    for(let y=0; y<map.length; y++) {
+        for(let x=0; x<map[y].length; x++) {
+            if(map[y][x]) { mCtx.fillStyle = '#333'; mCtx.fillRect(x*s, y*s, s-1, s-1); }
+        }
+    }
+    mCtx.fillStyle = 'lime'; mCtx.fillRect(player.x*s-2, player.y*s-2, 4, 4);
+    mCtx.fillStyle = 'red'; mCtx.fillRect(ghost.x*s-2, ghost.y*s-2, 4, 4);
+    mCtx.fillStyle = 'yellow'; collectibles.forEach(it => mCtx.fillRect(it.x*s-1, it.y*s-1, 3, 3));
 }
-loop();
+
+function loop() {
+    update();
+    draw();
+    if (gameActive) requestAnimationFrame(loop);
+}
 </script>
 </body>
 </html>
