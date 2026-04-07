@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gem Miner Idle</title>
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e1e; color: #fff; text-align: center; margin: 0; padding: 20px; }
+  button { background: #4caf50; color: white; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 5px; font-size: 16px; transition: 0.2s; }
+  button:hover { background: #45a049; transform: scale(1.02); }
+  button:active { transform: scale(0.98); }
+  button:disabled { background: #555; cursor: not-allowed; transform: none; }
+  #game-container { max-width: 600px; margin: 0 auto; background: #2d2d2d; padding: 20px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.6); }
+  #minigame-area { height: 200px; background: #111; position: relative; margin-top: 20px; border: 2px dashed #4caf50; display: none; overflow: hidden; border-radius: 5px; }
+  #target { position: absolute; width: 40px; height: 40px; background: radial-gradient(circle, gold, darkgoldenrod); border-radius: 50%; cursor: crosshair; display: none; box-shadow: 0 0 10px gold; }
+  .section { margin: 20px 0; padding: 15px; background: #3d3d3d; border-radius: 8px; }
+  h1 { color: #4caf50; }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <h1>Gem Miner Idle</h1>
+  <h2>Gems: <span id="gems">0</span></h2>
+  <p>Passive Income: <span id="gps">0</span> gems/sec</p>
+
+  <button id="click-btn" style="font-size: 24px; padding: 20px 40px; background: #2196F3;">Mine Gem (+<span id="click-power">1</span>)</button>
+
+  <div class="section">
+    <h3>Upgrades</h3>
+    <button id="upg-click" onclick="buyClick()">Upgrade Pickaxe (Cost: <span id="cost-click">10</span>)</button>
+    <button id="upg-auto" onclick="buyAuto()">Hire Miner (Cost: <span id="cost-auto">50</span>)</button>
+  </div>
+
+  <div class="section">
+    <h3>Minigame: Gem Rush</h3>
+    <p>Catch the golden targets! Scales with your stats.</p>
+    <button onclick="startMinigame()" id="minigame-btn">Start Minigame (Cooldown: <span id="mg-cooldown">0</span>s)</button>
+    <div id="minigame-area">
+      <div id="target" onclick="hitTarget()"></div>
+    </div>
+  </div>
+  
+  <button onclick="resetGame()" style="background: #f44336; font-size: 12px; margin-top: 20px;">Hard Reset Progress</button>
+</div>
+
+<script>
+  // Initial Game State
+  let game = {
+    gems: 0,
+    clickPower: 1,
+    autoMiners: 0,
+    clickCost: 10,
+    autoCost: 50
+  };
+  
+  let mgTimer = 0;
+
+  // Local Storage Initialization
+  const savedGame = localStorage.getItem('gemMinerSave');
+  if (savedGame) {
+    // Merge saved data with base state to prevent errors if we add new variables later
+    game = { ...game, ...JSON.parse(savedGame) }; 
+  }
+
+  // UI Refresher
+  function updateUI() {
+    document.getElementById('gems').innerText = Math.floor(game.gems);
+    document.getElementById('gps').innerText = game.autoMiners;
+    document.getElementById('click-power').innerText = game.clickPower;
+    document.getElementById('cost-click').innerText = game.clickCost;
+    document.getElementById('cost-auto').innerText = game.autoCost;
+    
+    // Disable buttons if player can't afford them
+    document.getElementById('upg-click').disabled = game.gems < game.clickCost;
+    document.getElementById('upg-auto').disabled = game.gems < game.autoCost;
+  }
+
+  // Manual Clicking
+  document.getElementById('click-btn').addEventListener('click', () => {
+    game.gems += game.clickPower;
+    updateUI();
+  });
+
+  // Upgrades
+  function buyClick() {
+    if (game.gems >= game.clickCost) {
+      game.gems -= game.clickCost;
+      game.clickPower += 1;
+      game.clickCost = Math.floor(game.clickCost * 1.5); // Exponential scaling
+      updateUI();
+    }
+  }
+
+  function buyAuto() {
+    if (game.gems >= game.autoCost) {
+      game.gems -= game.autoCost;
+      game.autoMiners += 1;
+      game.autoCost = Math.floor(game.autoCost * 1.15); // Exponential scaling
+      updateUI();
+    }
+  }
+
+  // Core Idle Loop (1 tick per second)
+  setInterval(() => {
+    game.gems += game.autoMiners;
+    updateUI();
+  }, 1000);
+
+  // Auto-Save Loop (Every 5 seconds)
+  setInterval(() => {
+    localStorage.setItem('gemMinerSave', JSON.stringify(game));
+  }, 5000);
+
+  function resetGame() {
+    if(confirm("Are you sure? This will wipe all of your local save data!")) {
+      localStorage.removeItem('gemMinerSave');
+      location.reload();
+    }
+  }
+
+  // Minigame Logic
+  let minigameActive = false;
+  let targetTimeout;
+
+  function startMinigame() {
+    if(mgTimer > 0) return;
+    minigameActive = true;
+    document.getElementById('minigame-area').style.display = 'block';
+    document.getElementById('minigame-btn').disabled = true;
+    mgTimer = 60; // 60-second cooldown
+    document.getElementById('mg-cooldown').innerText = mgTimer;
+    
+    moveTarget();
+    
+    // End minigame after 10 seconds
+    setTimeout(() => {
+      minigameActive = false;
+      document.getElementById('minigame-area').style.display = 'none';
+      document.getElementById('target').style.display = 'none';
+      clearTimeout(targetTimeout);
+    }, 10000); 
+  }
+
+  function moveTarget() {
+    if(!minigameActive) return;
+    const target = document.getElementById('target');
+    const area = document.getElementById('minigame-area');
+    
+    target.style.display = 'block';
+    // Randomly place target within the bounds of the minigame box
+    target.style.left = Math.random() * (area.offsetWidth - 40) + 'px';
+    target.style.top = Math.random() * (area.offsetHeight - 40) + 'px';
+    
+    // Target jumps to a new location every 0.6 to 1.2 seconds
+    targetTimeout = setTimeout(moveTarget, 600 + Math.random() * 600);
+  }
+
+  function hitTarget() {
+    if(!minigameActive) return;
+    // Reward scales with your current progression
+    const reward = (game.autoMiners * 15) + (game.clickPower * 50); 
+    game.gems += reward; 
+    
+    // Visual feedback for clicking
+    document.getElementById('target').style.display = 'none';
+    clearTimeout(targetTimeout);
+    updateUI();
+    
+    // Spawn next target slightly faster
+    targetTimeout = setTimeout(moveTarget, 200);
+  }
+
+  // Cooldown Timer Loop for Minigame
+  setInterval(() => {
+    if(mgTimer > 0) {
+      mgTimer--;
+      document.getElementById('mg-cooldown').innerText = mgTimer;
+      if(mgTimer === 0) document.getElementById('minigame-btn').disabled = false;
+    }
+  }, 1000);
+
+  // Initial UI Render
+  updateUI();
+</script>
+</body>
+</html>
