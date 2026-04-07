@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Tycoon: Overdrive Refined</title>
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-pink: #ff0044;
+            --neon-green: #0bda51;
+            --gold: #ffcc00;
+            --panel-bg: #1a1a2e;
+        }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: #05050a; 
+            font-family: 'Segoe UI', sans-serif; 
+            color: white;
+            user-select: none;
+        }
+        canvas { display: block; }
+        
+        #gui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .stat-card {
+            background: rgba(26, 26, 46, 0.9);
+            border-left: 5px solid var(--neon-blue);
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 0 10px 10px 0;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .stat-label { font-size: 10px; text-transform: uppercase; color: #aaa; letter-spacing: 1px; }
+        .stat-value { font-size: 24px; font-weight: bold; color: var(--neon-green); }
+
+        #multi-timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 0, 68, 0.2);
+            border: 2px solid var(--neon-pink);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+            box-shadow: 0 0 15px var(--neon-pink);
+        }
+
+        #tutorial {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid var(--neon-blue);
+            text-align: center;
+            max-width: 450px;
+            z-index: 100;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+        }
+        button.start-btn {
+            background: var(--neon-blue);
+            color: #000;
+            border: none;
+            padding: 12px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        button.start-btn:hover { background: white; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+<div id="gui">
+    <div class="stat-card">
+        <div class="stat-label">Wallet</div>
+        <div class="stat-value" id="cash-display">$0</div>
+    </div>
+    <div class="stat-card" style="border-left-color: var(--neon-pink)">
+        <div class="stat-label">Income / Sec</div>
+        <div class="stat-value" id="pps-display" style="color: var(--neon-pink)">$0</div>
+    </div>
+</div>
+
+<div id="multi-timer">
+    <div style="font-size: 10px; color: var(--neon-pink); letter-spacing: 1px;">OVERDRIVE ACTIVE</div>
+    <div id="multi-val" style="font-size: 24px; font-weight: bold;">3x CASH</div>
+    <div id="multi-clock" style="font-size: 12px;">00:00</div>
+</div>
+
+<div id="tutorial">
+    <h1 style="color: var(--neon-blue); margin-top:0; letter-spacing: 3px;">NEON OVERDRIVE</h1>
+    <p>Build your base on the left.</p>
+    <p>Conquer the <b>Massive Parkour</b> on the right to multiply your income!</p>
+    <button class="start-btn" id="startBtn">START ENGINE</button>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let gameActive = false;
+    let cash = 0;
+    let globalMultiplier = 1;
+    let tycoonMultiplier = 1;
+    let multiTimer = 0;
+    let adminKeys = "";
+
+    const GRAVITY = 0.5;
+    const FRICTION = 0.85;
+    const ACCEL = 1.2;
+    const MAX_SPEED = 8.5;
+    const JUMP_FORCE = -12;
+
+    const player = {
+        x: 150, y: 550, 
+        vx: 0, vy: 0, 
+        w: 30, h: 45, 
+        color: '#00f2ff',
+        jumps: 0,
+        maxJumps: 2,
+        onPlatform: null
+    };
+
+    const camera = { x: 0, y: 0 };
+    const keys = {};
+    const ores = [];
+    const floatingTexts = [];
+
+    const entities = [
+        // FLOOR 1
+        { id: 'floor', type: 'solid', x: -200, y: 600, w: 1200, h: 400, color: '#16213e', border: '#00f2ff', bought: true },
+        { id: 'conveyor', type: 'conveyor', x: 0, y: 590, w: 800, h: 10, speed: 4, bought: true },
+        { id: 'collector', type: 'collector', x: 800, y: 580, w: 100, h: 20, bought: true },
+
+        // DROPPERS
+        { id: 'btn_d1', type: 'button', x: 50, y: 570, w: 70, h: 25, cost: 0, label: 'Starter', target: 'd1', bought: false },
+        { id: 'd1', type: 'dropper', x: 20, y: 450, w: 40, h: 40, val: 2, rate: 120, bought: false },
+        { id: 'btn_d2', type: 'button', x: 150, y: 570, w: 70, h: 25, cost: 300, label: '$300', target: 'd2', bought: false },
+        { id: 'd2', type: 'dropper', x: 120, y: 450, w: 40, h: 40, val: 15, rate: 100, bought: false },
+        { id: 'btn_d3', type: 'button', x: 250, y: 570, w: 70, h: 25, cost: 2500, label: '$2.5k', target: 'd3', bought: false },
+        { id: 'd3', type: 'dropper', x: 220, y: 450, w: 40, h: 40, val: 80, rate: 80, bought: false },
+
+        // FLOOR 2
+        { id: 'btn_floor2', type: 'button', x: 500, y: 570, w: 120, h: 25, cost: 10000, label: 'Floor 2 ($10k)', target: 'floor2_structure', bought: false },
+        { id: 'floor2_structure', type: 'solid', x: -200, y: 300, w: 1000, h: 20, color: '#16213e', border: '#ff0044', bought: false },
+        { id: 'stairs1', type: 'solid', x: 780, y: 300, w: 20, h: 300, color: '#00f2ff', border: '#fff', bought: false },
+        
+        { id: 'btn_d4', type: 'button', x: 50, y: 270, w: 70, h: 25, cost: 20000, label: '$20k', target: 'd4', bought: false, req: 'floor2_structure' },
+        { id: 'd4', type: 'dropper', x: 20, y: 150, w: 40, h: 40, val: 500, rate: 70, bought: false },
+        { id: 'btn_d5', type: 'button', x: 150, y: 270, w: 70, h: 25, cost: 55000, label: '$55k', target: 'd5', bought: false, req: 'floor2_structure' },
+        { id: 'd5', type: 'dropper', x: 120, y: 150, w: 40, h: 40, val: 1500, rate: 60, bought: false },
+        
+        { id: 'btn_mult1', type: 'button', x: 400, y: 270, w: 140, h: 25, cost: 200000, label: '2x Tycoon ($200k)', target: 'up_mult1', bought: false, req: 'floor2_structure' },
+        { id: 'up_mult1', type: 'upgrade_mult', value: 2, bought: false },
+
+        // PARKOUR
+        { id: 'lava', type: 'lava', x: 1000, y: 800, w: 30000, h: 500, bought: true },
+        { id: 'p1', type: 'solid', x: 1200, y: 500, w: 120, h: 20, color: '#1a1a2e', border: '#ff0044', bought: true },
+        { id: 'p2', type: 'solid', x: 1480, y: 440, w: 100, h: 20, color: '#1a1a2e', border: '#ff0044', bought: true },
+        { id: 'p3', type: 'solid', x: 1750, y: 380, w: 80, h: 20, color: '#1a1a2e', border: '#ff0044', bought: true },
+        
+        { id: 'lp1', type: 'solid', x: 2050, y: 380, w: 300, h: 30, color: '#16213e', border: '#ffcc00', bought: true },
+        { id: 'mult_1', type: 'boost', x: 2140, y: 330, w: 120, h: 30, mult: 2.5, duration: 90, label: '2.5x BOOST', bought: true },
+
+        { id: 'mv_1', type: 'solid', x: 2500, y: 380, w: 100, h: 20, color: '#1a1a2e', border: '#0bda51', bought: true, move: { type: 'y', range: 150, speed: 0.04, origin: 380 }, vx: 0, vy: 0 },
+        { id: 'mv_2', type: 'solid', x: 2800, y: 280, w: 100, h: 20, color: '#1a1a2e', border: '#0bda51', bought: true, move: { type: 'x', range: 200, speed: 0.03, origin: 2800 }, vx: 0, vy: 0 },
+        { id: 'mv_3', type: 'solid', x: 3200, y: 180, w: 100, h: 20, color: '#1a1a2e', border: '#0bda51', bought: true, move: { type: 'y', range: 120, speed: 0.05, origin: 180 }, vx: 0, vy: 0 },
+        
+        { id: 'lp2', type: 'solid', x: 3500, y: 250, w: 350, h: 30, color: '#16213e', border: '#ffcc00', bought: true },
+        { id: 'mult_2', type: 'boost', x: 3600, y: 200, w: 150, h: 30, mult: 6, duration: 75, label: '6x OVERDRIVE', bought: true },
+
+        { id: 'mv_4', type: 'solid', x: 4200, y: 100, w: 100, h: 20, color: '#1a1a2e', border: '#00f2ff', bought: true, move: { type: 'x', range: 300, speed: 0.025, origin: 4200 }, vx: 0, vy: 0 },
+        { id: 'mv_5', type: 'solid', x: 4800, y: -50, w: 100, h: 20, color: '#1a1a2e', border: '#00f2ff', bought: true, move: { type: 'y', range: 200, speed: 0.04, origin: -50 }, vx: 0, vy: 0 },
+
+        { id: 'lp3', type: 'solid', x: 5500, y: -150, w: 500, h: 60, color: '#16213e', border: '#ffcc00', bought: true },
+        { id: 'mult_3', type: 'boost', x: 5600, y: -220, w: 300, h: 50, mult: 75, duration: 60, label: '75x GOD MODE', bought: true },
+        
+        { id: 'btn_elite', type: 'button', x: 5650, y: -300, w: 200, h: 35, cost: 1000000, label: 'OMEGA DROPPER ($1M)', target: 'd_elite', bought: false },
+        { id: 'd_elite', type: 'dropper', x: 400, y: 100, w: 60, h: 60, val: 15000, rate: 45, bought: false }
+    ];
+
+    function init() {
+        document.getElementById('startBtn').addEventListener('click', function() {
+            document.getElementById('tutorial').style.display = 'none';
+            gameActive = true;
+        });
+
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            adminKeys += e.key.toUpperCase();
+            if (adminKeys.endsWith("POT")) {
+                cash += 5000000;
+                player.maxJumps = 100;
+                spawnFloatingText(player.x, player.y - 50, "ADMIN MODE", "#ffcc00");
+            }
+            if (adminKeys.length > 10) adminKeys = adminKeys.slice(-10);
+        });
+        window.addEventListener('keyup', e => keys[e.code] = false);
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        requestAnimationFrame(gameLoop);
+    }
+
+    function spawnFloatingText(x, y, text, color) {
+        floatingTexts.push({ x, y, text, color, life: 1.0 });
+    }
+
+    function checkCollision(nx, ny) {
+        for (const e of entities) {
+            if (!e.bought || ['dropper','button','collector','conveyor','boost','upgrade_mult'].includes(e.type)) continue;
+            if (nx < e.x + e.w && nx + player.w > e.x && ny < e.y + e.h && ny + player.h > e.y) return e;
+        }
+        return null;
+    }
+
+    function update() {
+        if (!gameActive) return;
+
+        const time = Date.now() / 10;
+        entities.forEach(e => {
+            if (e.move) {
+                const oldX = e.x; const oldY = e.y;
+                if (e.move.type === 'y') e.y = e.move.origin + Math.sin(time * e.move.speed) * e.move.range;
+                if (e.move.type === 'x') e.x = e.move.origin + Math.cos(time * e.move.speed) * e.move.range;
+                e.vx = e.x - oldX; e.vy = e.y - oldY;
+            }
+        });
+
+        let moveX = 0;
+        if (keys['ArrowLeft'] || keys['KeyA']) moveX -= ACCEL;
+        if (keys['ArrowRight'] || keys['KeyD']) moveX += ACCEL;
+        player.vx += moveX;
+        player.vx *= FRICTION;
+        player.vy += GRAVITY;
+
+        if (player.onPlatform) {
+            player.x += player.onPlatform.vx || 0;
+            player.y += player.onPlatform.vy || 0;
+            if (player.x + player.w < player.onPlatform.x || player.x > player.onPlatform.x + player.onPlatform.w) {
+                player.vx += player.onPlatform.vx || 0;
+                player.onPlatform = null;
+            }
+        }
+
+        player.x += player.vx;
+        let hitX = checkCollision(player.x, player.y);
+        if (hitX) {
+            if (hitX.type === 'lava') return respawn();
+            player.x = player.vx > 0 ? hitX.x - player.w : hitX.x + hitX.w;
+            player.vx = 0;
+        }
+
+        player.y += player.vy;
+        let hitY = checkCollision(player.x, player.y);
+        if (hitY) {
+            if (hitY.type === 'lava') return respawn();
+            if (player.vy >= 0) {
+                player.y = hitY.y - player.h;
+                player.vy = 0; player.jumps = 0;
+                player.onPlatform = hitY;
+            } else {
+                player.y = hitY.y + hitY.h;
+                player.vy = 0;
+            }
+        } else if (!player.onPlatform) {
+            let grounded = checkCollision(player.x, player.y + 2);
+            if (grounded && player.vy >= 0) {
+                player.onPlatform = grounded;
+                player.jumps = 0; player.vy = 0;
+                player.y = grounded.y - player.h;
+            }
+        }
+
+        if ((keys['Space'] || keys['ArrowUp'] || keys['KeyW']) && player.jumps < player.maxJumps) {
+            if (player.onPlatform) {
+                player.vx += player.onPlatform.vx || 0;
+                player.vy = JUMP_FORCE + Math.min(0, player.onPlatform.vy || 0);
+            } else { player.vy = JUMP_FORCE; }
+            player.jumps++; player.onPlatform = null;
+            keys['Space'] = keys['ArrowUp'] = keys['KeyW'] = false;
+        }
+
+        if (multiTimer > 0) {
+            multiTimer--;
+            document.getElementById('multi-timer').style.display = 'block';
+            document.getElementById('multi-clock').innerText = Math.ceil(multiTimer / 60) + "s";
+            if (multiTimer <= 0) { globalMultiplier = 1; document.getElementById('multi-timer').style.display = 'none'; }
+        }
+
+        entities.forEach(e => {
+            if (e.type === 'button' && !e.bought) {
+                const reqMet = !e.req || entities.find(r => r.id === e.req).bought;
+                if (reqMet && player.x < e.x + e.w && player.x + player.w > e.x && player.y < e.y + e.h && player.y + player.h > e.y) {
+                    if (cash >= e.cost) { 
+                        cash -= e.cost; e.bought = true; 
+                        const target = entities.find(t => t.id === e.target);
+                        if (target) {
+                            target.bought = true;
+                            if (target.type === 'upgrade_mult') tycoonMultiplier *= target.value;
+                        }
+                        spawnFloatingText(e.x, e.y, "PURCHASED!", "#0bda51");
+                    }
+                }
+            }
+            if (e.type === 'boost') {
+                if (player.x < e.x + e.w && player.x + player.w > e.x && player.y < e.y + e.h && player.y + player.h > e.y) {
+                    if (globalMultiplier < e.mult || multiTimer < 60) {
+                        globalMultiplier = e.mult; multiTimer = e.duration * 60;
+                        document.getElementById('multi-val').innerText = e.mult + "x CASH";
+                        spawnFloatingText(player.x, player.y, `${e.mult}x MULTIPLIER`, 'var(--neon-pink)');
+                    }
+                }
+            }
+            if (e.type === 'dropper' && e.bought) {
+                if (!e.t) e.t = 0; e.t++;
+                if (e.t >= e.rate) { 
+                    ores.push({ x: e.x + e.w/4, y: e.y + e.h, w: 14, h: 14, vy: 3, val: e.val }); 
+                    e.t = 0; 
+                }
+            }
+        });
+
+        for (let i = ores.length - 1; i >= 0; i--) {
+            let o = ores[i]; o.y += o.vy;
+            entities.forEach(e => {
+                if (e.bought && e.type === 'conveyor' && o.x < e.x + e.w && o.x + o.w > e.x && o.y + o.h > e.y && o.y < e.y + e.h) { 
+                    o.y = e.y - o.h; o.x += e.speed; 
+                }
+                if (e.bought && e.type === 'collector' && o.x < e.x + e.w && o.x + o.w > e.x && o.y + o.h > e.y && o.y < e.y + e.h) {
+                    cash += o.val * globalMultiplier * tycoonMultiplier;
+                    ores.splice(i, 1);
+                }
+            });
+            if (o.y > 2000) ores.splice(i, 1);
+        }
+
+        document.getElementById('cash-display').innerText = '$' + Math.floor(cash).toLocaleString();
+        let pps = 0;
+        entities.forEach(e => { if (e.type === 'dropper' && e.bought) pps += (e.val / (e.rate/60)); });
+        document.getElementById('pps-display').innerText = '$' + Math.floor(pps * globalMultiplier * tycoonMultiplier).toLocaleString();
+
+        camera.x += (player.x - canvas.width / 2 - camera.x) * 0.15;
+        camera.y += (player.y - canvas.height / 2 - camera.y) * 0.15;
+        if (player.y > 2500) respawn();
+
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+            floatingTexts[i].y -= 1; floatingTexts[i].life -= 0.02;
+            if (floatingTexts[i].life <= 0) floatingTexts.splice(i, 1);
+        }
+    }
+
+    function respawn() { player.x = 150; player.y = 550; player.vx = 0; player.vy = 0; player.onPlatform = null; }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(-camera.x, -camera.y);
+
+        entities.forEach(e => {
+            if (!e.bought && !['button','boost'].includes(e.type)) return;
+            if (e.type === 'button' && e.bought) return;
+            if (e.type === 'button' && e.req && !entities.find(r => r.id === e.req).bought) return;
+
+            if (e.type === 'button') {
+                ctx.fillStyle = cash >= e.cost ? '#0bda51' : '#ff0044'; 
+                ctx.fillRect(e.x, e.y, e.w, e.h);
+                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(e.label, e.x + e.w/2, e.y + 22);
+            } else if (e.type === 'boost') {
+                ctx.fillStyle = '#ffcc00'; ctx.fillRect(e.x, e.y, e.w, e.h);
+                ctx.fillStyle = '#000'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(e.label, e.x + e.w/2, e.y + e.h/2 + 5);
+            } else if (e.type === 'lava') {
+                ctx.fillStyle = '#ff0044'; ctx.fillRect(e.x, e.y, e.w, e.h);
+            } else if (e.type === 'upgrade_mult') {
+                return; 
+            } else {
+                ctx.fillStyle = e.color || '#222'; ctx.fillRect(e.x, e.y, e.w, e.h);
+                if (e.border) { ctx.strokeStyle = e.border; ctx.lineWidth = 2; ctx.strokeRect(e.x, e.y, e.w, e.h); }
+            }
+        });
+
+        ores.forEach(o => { ctx.fillStyle = '#00f2ff'; ctx.fillRect(o.x, o.y, o.w, o.h); });
+
+        floatingTexts.forEach(t => { 
+            ctx.globalAlpha = t.life; ctx.fillStyle = t.color; ctx.font = 'bold 18px Arial'; 
+            ctx.fillText(t.text, t.x, t.y); 
+        });
+        ctx.globalAlpha = 1.0;
+
+        ctx.fillStyle = player.color;
+        ctx.shadowBlur = 15; ctx.shadowColor = player.color;
+        ctx.fillRect(player.x, player.y, player.w, player.h);
+        ctx.shadowBlur = 0;
+        
+        ctx.restore();
+    }
+
+    function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
+    init();
+</script>
+</body>
+</html>
