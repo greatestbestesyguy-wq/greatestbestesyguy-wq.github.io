@@ -2,123 +2,324 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Gem Miner Idle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gem Miner Idle: Ascended</title>
 <style>
-  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e1e; color: #fff; text-align: center; margin: 0; padding: 20px; }
-  button { background: #4caf50; color: white; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 5px; font-size: 16px; transition: 0.2s; }
-  button:hover { background: #45a049; transform: scale(1.02); }
-  button:active { transform: scale(0.98); }
-  button:disabled { background: #555; cursor: not-allowed; transform: none; }
-  #game-container { max-width: 600px; margin: 0 auto; background: #2d2d2d; padding: 20px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.6); }
-  #minigame-area { height: 200px; background: #111; position: relative; margin-top: 20px; border: 2px dashed #4caf50; display: none; overflow: hidden; border-radius: 5px; }
-  #target { position: absolute; width: 40px; height: 40px; background: radial-gradient(circle, gold, darkgoldenrod); border-radius: 50%; cursor: crosshair; display: none; box-shadow: 0 0 10px gold; }
-  .section { margin: 20px 0; padding: 15px; background: #3d3d3d; border-radius: 8px; }
-  h1 { color: #4caf50; }
+  :root { --bg: #121212; --panel: #1e1e1e; --accent: #4caf50; --text: #e0e0e0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
+  
+  /* Header & Resources */
+  #header { width: 100%; background: var(--panel); padding: 20px 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.5); position: sticky; top: 0; z-index: 100; }
+  h1 { margin: 0 0 10px 0; color: var(--accent); font-size: 24px; }
+  .resource-text { font-size: 28px; font-weight: bold; margin: 5px 0; color: #fff; }
+  .sub-text { font-size: 14px; color: #aaa; }
+  
+  /* Tabs */
+  .tabs { display: flex; justify-content: center; background: #2a2a2a; width: 100%; border-bottom: 2px solid #333; }
+  .tab-btn { background: none; border: none; padding: 15px 30px; color: #aaa; cursor: pointer; font-size: 16px; transition: 0.3s; }
+  .tab-btn:hover { color: #fff; background: #333; }
+  .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); font-weight: bold; }
+  
+  /* Main Content Area */
+  #game-container { max-width: 800px; width: 90%; margin: 20px auto; }
+  .tab-content { display: none; background: var(--panel); padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+  .tab-content.active { display: block; }
+  
+  /* Buttons */
+  button { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+  button:hover:not(:disabled) { background: #45a049; transform: scale(1.02); }
+  button:active:not(:disabled) { transform: scale(0.98); }
+  button:disabled { background: #444; color: #777; cursor: not-allowed; }
+  
+  /* Big Click Area */
+  #mine-area { position: relative; text-align: center; margin: 30px 0; padding: 40px; background: #252525; border-radius: 12px; border: 2px dashed #444; user-select: none; }
+  #main-click-btn { font-size: 24px; padding: 20px 40px; background: #2196F3; font-weight: bold; border-radius: 50px; box-shadow: 0 6px 0 #1565C0; transition: 0.1s; }
+  #main-click-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #1565C0; }
+  
+  /* Floating Text Animation */
+  .floating-text { position: absolute; font-weight: bold; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.8); pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 10; }
+  @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(1.2); } }
+  
+  /* Upgrades & Buildings */
+  .store-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #333; background: #2a2a2a; margin-bottom: 10px; border-radius: 6px; }
+  .store-info h3 { margin: 0 0 5px 0; color: #fff; }
+  .store-info p { margin: 0; font-size: 12px; color: #aaa; }
+  
+  /* Minigame */
+  #minigame-area { height: 250px; background: #111; position: relative; margin-top: 20px; border: 2px solid var(--accent); display: none; overflow: hidden; border-radius: 8px; cursor: crosshair; }
+  #target { position: absolute; width: 45px; height: 45px; background: radial-gradient(circle, #ffeb3b, #f57f17); border-radius: 50%; display: none; box-shadow: 0 0 15px #ffeb3b; }
+  
+  /* Prestige */
+  .prestige-panel { text-align: center; padding: 30px; background: #3e2723; border: 2px solid #ff9800; border-radius: 8px; }
+  .prestige-panel h2 { color: #ff9800; }
+  
+  /* Offline Modal */
+  #offline-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+  .modal-content { background: var(--panel); padding: 30px; border-radius: 10px; text-align: center; border: 2px solid var(--accent); max-width: 400px; }
 </style>
 </head>
 <body>
 
-<div id="game-container">
+<div id="header">
   <h1>Gem Miner Idle</h1>
-  <h2>Gems: <span id="gems">0</span></h2>
-  <p>Passive Income: <span id="gps">0</span> gems/sec</p>
+  <div class="resource-text"><span id="gems">0</span> Gems</div>
+  <div class="sub-text"><span id="gps">0</span> gems/sec | Mult: x<span id="mult">1.00</span></div>
+</div>
 
-  <button id="click-btn" style="font-size: 24px; padding: 20px 40px; background: #2196F3;">Mine Gem (+<span id="click-power">1</span>)</button>
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('tab-mine')">Mining</button>
+  <button class="tab-btn" onclick="switchTab('tab-buildings')">Buildings</button>
+  <button class="tab-btn" onclick="switchTab('tab-minigame')">Minigames</button>
+  <button class="tab-btn" onclick="switchTab('tab-prestige')">Prestige</button>
+</div>
 
-  <div class="section">
-    <h3>Upgrades</h3>
-    <button id="upg-click" onclick="buyClick()">Upgrade Pickaxe (Cost: <span id="cost-click">10</span>)</button>
-    <button id="upg-auto" onclick="buyAuto()">Hire Miner (Cost: <span id="cost-auto">50</span>)</button>
-  </div>
-
-  <div class="section">
-    <h3>Minigame: Gem Rush</h3>
-    <p>Catch the golden targets! Scales with your stats.</p>
-    <button onclick="startMinigame()" id="minigame-btn">Start Minigame (Cooldown: <span id="mg-cooldown">0</span>s)</button>
-    <div id="minigame-area">
-      <div id="target" onclick="hitTarget()"></div>
+<div id="game-container">
+  
+  <div id="tab-mine" class="tab-content active">
+    <div id="mine-area" onclick="spawnFloatingText(event)">
+      <button id="main-click-btn" onclick="manualClick()">⛏️ Mine Gem</button>
+      <p class="sub-text" style="margin-top: 20px;">Click Power: <span id="click-power">1</span></p>
+    </div>
+    
+    <div class="store-item">
+      <div class="store-info">
+        <h3>Sharpen Pickaxe</h3>
+        <p>Increases manual click power by 1.</p>
+      </div>
+      <button id="btn-upg-click" onclick="buyClick()">Cost: <span id="cost-click">10</span></button>
     </div>
   </div>
-  
-  <button onclick="resetGame()" style="background: #f44336; font-size: 12px; margin-top: 20px;">Hard Reset Progress</button>
+
+  <div id="tab-buildings" class="tab-content">
+    <h2>Automated Mining</h2>
+    <div id="buildings-container"></div>
+  </div>
+
+  <div id="tab-minigame" class="tab-content">
+    <h2>Gem Rush</h2>
+    <p>Catch the golden targets before they disappear! Rewards scale with your GPS and Click Power.</p>
+    <button onclick="startMinigame()" id="minigame-btn">Start Event (Cooldown: <span id="mg-cooldown">0</span>s)</button>
+    <div id="minigame-area">
+      <div id="target" onmousedown="hitTarget()"></div>
+    </div>
+  </div>
+
+  <div id="tab-prestige" class="tab-content">
+    <div class="prestige-panel">
+      <h2>Ascend</h2>
+      <p>Reset your Gems, Click Power, and Buildings to earn <strong>Gem Dust</strong>.</p>
+      <p>Each Gem Dust provides a permanent +10% bonus to overall production.</p>
+      <br>
+      <p>You have: <span id="dust-owned" style="color:#ff9800; font-weight:bold; font-size:18px;">0</span> Gem Dust</p>
+      <p>Ascending now will grant: <span id="dust-pending" style="color:#4caf50; font-weight:bold; font-size:18px;">0</span> Gem Dust</p>
+      <p class="sub-text">(Requires 10,000 total lifetime gems to earn 1 Dust)</p>
+      <button onclick="prestige()" id="btn-prestige" style="background:#ff9800; font-size:18px; margin-top:15px;" disabled>Ascend Now</button>
+    </div>
+    <button onclick="hardReset()" style="background: #f44336; font-size: 12px; margin-top: 40px;">Wipe Save Data</button>
+  </div>
+
+</div>
+
+<div id="offline-modal">
+  <div class="modal-content">
+    <h2>Welcome Back!</h2>
+    <p>While you were away for <span id="offline-time">0</span>, your miners kept working (at 50% efficiency).</p>
+    <h3 style="color: var(--accent);">+<span id="offline-gains">0</span> Gems</h3>
+    <button onclick="closeOfflineModal()">Awesome!</button>
+  </div>
 </div>
 
 <script>
-  // Initial Game State
-  let game = {
+  // --- STATE MANAGEMENT ---
+  const defaultState = {
     gems: 0,
+    totalGemsLifetime: 0, // Used for calculating prestige
     clickPower: 1,
-    autoMiners: 0,
     clickCost: 10,
-    autoCost: 50
+    dust: 0,
+    lastSaveTime: Date.now(),
+    buildings: [
+      { id: 'b1', name: 'Apprentice Miner', baseCost: 15, costMult: 1.15, count: 0, baseGPS: 1 },
+      { id: 'b2', name: 'Steam Drill', baseCost: 200, costMult: 1.15, count: 0, baseGPS: 10 },
+      { id: 'b3', name: 'Explosives Crew', baseCost: 3500, costMult: 1.15, count: 0, baseGPS: 100 },
+      { id: 'b4', name: 'Deep Earth Excavator', baseCost: 50000, costMult: 1.15, count: 0, baseGPS: 1200 }
+    ]
   };
-  
+
+  let game = JSON.parse(JSON.stringify(defaultState)); // Deep copy
   let mgTimer = 0;
-
-  // Local Storage Initialization
-  const savedGame = localStorage.getItem('gemMinerSave');
-  if (savedGame) {
-    // Merge saved data with base state to prevent errors if we add new variables later
-    game = { ...game, ...JSON.parse(savedGame) }; 
-  }
-
-  // UI Refresher
-  function updateUI() {
-    document.getElementById('gems').innerText = Math.floor(game.gems);
-    document.getElementById('gps').innerText = game.autoMiners;
-    document.getElementById('click-power').innerText = game.clickPower;
-    document.getElementById('cost-click').innerText = game.clickCost;
-    document.getElementById('cost-auto').innerText = game.autoCost;
+  
+  // Load Save
+  const savedData = localStorage.getItem('gemMinerAscended');
+  if (savedData) {
+    const parsed = JSON.parse(savedData);
+    // Merge primitive values
+    game.gems = parsed.gems ?? game.gems;
+    game.totalGemsLifetime = parsed.totalGemsLifetime ?? game.totalGemsLifetime;
+    game.clickPower = parsed.clickPower ?? game.clickPower;
+    game.clickCost = parsed.clickCost ?? game.clickCost;
+    game.dust = parsed.dust ?? game.dust;
+    game.lastSaveTime = parsed.lastSaveTime ?? Date.now();
     
-    // Disable buttons if player can't afford them
-    document.getElementById('upg-click').disabled = game.gems < game.clickCost;
-    document.getElementById('upg-auto').disabled = game.gems < game.autoCost;
+    // Merge building counts safely
+    if (parsed.buildings) {
+      game.buildings.forEach((b, index) => {
+        if (parsed.buildings[index]) {
+          b.count = parsed.buildings[index].count;
+        }
+      });
+    }
   }
 
-  // Manual Clicking
-  document.getElementById('click-btn').addEventListener('click', () => {
-    game.gems += game.clickPower;
-    updateUI();
-  });
+  // --- CORE LOGIC ---
+  function getPrestigeMultiplier() {
+    return 1 + (game.dust * 0.1);
+  }
 
-  // Upgrades
+  function getGPS() {
+    let rawGPS = 0;
+    game.buildings.forEach(b => {
+      rawGPS += b.count * b.baseGPS;
+    });
+    return rawGPS * getPrestigeMultiplier();
+  }
+
+  function getClickValue() {
+    return game.clickPower * getPrestigeMultiplier();
+  }
+
+  function getBuildingCost(buildingIndex) {
+    const b = game.buildings[buildingIndex];
+    return Math.floor(b.baseCost * Math.pow(b.costMult, b.count));
+  }
+
+  // --- UI UPDATES ---
+  function updateUI() {
+    const gps = getGPS();
+    document.getElementById('gems').innerText = Math.floor(game.gems).toLocaleString();
+    document.getElementById('gps').innerText = gps.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+    document.getElementById('mult').innerText = getPrestigeMultiplier().toFixed(2);
+    
+    document.getElementById('click-power').innerText = getClickValue().toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+    document.getElementById('cost-click').innerText = game.clickCost.toLocaleString();
+    document.getElementById('btn-upg-click').disabled = game.gems < game.clickCost;
+
+    // Render/Update Buildings
+    const container = document.getElementById('buildings-container');
+    if (container.innerHTML === '') {
+      // First time render
+      game.buildings.forEach((b, i) => {
+        const div = document.createElement('div');
+        div.className = 'store-item';
+        div.innerHTML = `
+          <div class="store-info">
+            <h3>${b.name} <span style="color:var(--accent)">[<span id="b-count-${i}">${b.count}</span>]</span></h3>
+            <p>Produces ${b.baseGPS} GPS base. Total: <span id="b-total-${i}">0</span> GPS</p>
+          </div>
+          <button id="b-btn-${i}" onclick="buyBuilding(${i})">Cost: <span id="b-cost-${i}">0</span></button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Update building dynamic values
+    game.buildings.forEach((b, i) => {
+      const cost = getBuildingCost(i);
+      const totalGPS = b.count * b.baseGPS * getPrestigeMultiplier();
+      document.getElementById(`b-count-${i}`).innerText = b.count;
+      document.getElementById(`b-cost-${i}`).innerText = cost.toLocaleString();
+      document.getElementById(`b-total-${i}`).innerText = totalGPS.toLocaleString(undefined, {maximumFractionDigits: 1});
+      document.getElementById(`b-btn-${i}`).disabled = game.gems < cost;
+    });
+
+    // Update Prestige
+    document.getElementById('dust-owned').innerText = game.dust.toLocaleString();
+    const pendingDust = Math.floor(game.totalGemsLifetime / 10000) - game.dust;
+    const finalPending = Math.max(0, pendingDust);
+    document.getElementById('dust-pending').innerText = finalPending.toLocaleString();
+    document.getElementById('btn-prestige').disabled = finalPending <= 0;
+  }
+
+  // --- ACTIONS ---
+  function manualClick() {
+    const val = getClickValue();
+    game.gems += val;
+    game.totalGemsLifetime += val;
+    updateUI();
+  }
+
   function buyClick() {
     if (game.gems >= game.clickCost) {
       game.gems -= game.clickCost;
-      game.clickPower += 1;
-      game.clickCost = Math.floor(game.clickCost * 1.5); // Exponential scaling
+      game.clickPower++;
+      game.clickCost = Math.floor(game.clickCost * 1.6);
       updateUI();
     }
   }
 
-  function buyAuto() {
-    if (game.gems >= game.autoCost) {
-      game.gems -= game.autoCost;
-      game.autoMiners += 1;
-      game.autoCost = Math.floor(game.autoCost * 1.15); // Exponential scaling
+  function buyBuilding(index) {
+    const cost = getBuildingCost(index);
+    if (game.gems >= cost) {
+      game.gems -= cost;
+      game.buildings[index].count++;
       updateUI();
     }
   }
 
-  // Core Idle Loop (1 tick per second)
-  setInterval(() => {
-    game.gems += game.autoMiners;
-    updateUI();
-  }, 1000);
+  function prestige() {
+    const pendingDust = Math.max(0, Math.floor(game.totalGemsLifetime / 10000) - game.dust);
+    if (pendingDust > 0) {
+      if(confirm(`Are you sure you want to Ascend? You will lose current gems and buildings, but gain ${pendingDust} Gem Dust permanently boosting production.`)) {
+        game.dust += pendingDust;
+        // Reset properties
+        game.gems = 0;
+        game.clickPower = 1;
+        game.clickCost = 10;
+        game.buildings.forEach(b => b.count = 0);
+        updateUI();
+      }
+    }
+  }
 
-  // Auto-Save Loop (Every 5 seconds)
-  setInterval(() => {
-    localStorage.setItem('gemMinerSave', JSON.stringify(game));
-  }, 5000);
-
-  function resetGame() {
-    if(confirm("Are you sure? This will wipe all of your local save data!")) {
-      localStorage.removeItem('gemMinerSave');
+  function hardReset() {
+    if(confirm("DANGER: WIPE ENTIRE SAVE INCLUDING PRESTIGE?")) {
+      localStorage.removeItem('gemMinerAscended');
       location.reload();
     }
   }
 
-  // Minigame Logic
+  // --- VISUAL EFFECTS ---
+  function spawnFloatingText(e) {
+    if (e.target.id !== 'main-click-btn') return; // Only spawn if clicking the button itself
+    const area = document.getElementById('mine-area');
+    const floatEl = document.createElement('div');
+    floatEl.className = 'floating-text';
+    floatEl.innerText = `+${getClickValue().toLocaleString(undefined, {maximumFractionDigits:1})}`;
+    
+    // Position near click
+    const rect = area.getBoundingClientRect();
+    const x = e.clientX - rect.left - 20 + (Math.random() * 20 - 10);
+    const y = e.clientY - rect.top - 20;
+    
+    floatEl.style.left = `${x}px`;
+    floatEl.style.top = `${y}px`;
+    // Random color occasionally
+    const colors = ['#fff', '#4caf50', '#2196F3', '#ffeb3b'];
+    floatEl.style.color = colors[Math.floor(Math.random() * (game.clickPower > 5 ? colors.length : 1))];
+
+    area.appendChild(floatEl);
+    setTimeout(() => floatEl.remove(), 1000);
+  }
+
+  // --- TABS ---
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // --- MINIGAME ---
   let minigameActive = false;
   let targetTimeout;
 
@@ -127,51 +328,90 @@
     minigameActive = true;
     document.getElementById('minigame-area').style.display = 'block';
     document.getElementById('minigame-btn').disabled = true;
-    mgTimer = 60; // 60-second cooldown
+    mgTimer = 120; // 2 min cooldown
     document.getElementById('mg-cooldown').innerText = mgTimer;
     
     moveTarget();
-    
-    // End minigame after 10 seconds
     setTimeout(() => {
       minigameActive = false;
       document.getElementById('minigame-area').style.display = 'none';
       document.getElementById('target').style.display = 'none';
       clearTimeout(targetTimeout);
-    }, 10000); 
+    }, 12000); 
   }
 
   function moveTarget() {
     if(!minigameActive) return;
     const target = document.getElementById('target');
     const area = document.getElementById('minigame-area');
-    
     target.style.display = 'block';
-    // Randomly place target within the bounds of the minigame box
-    target.style.left = Math.random() * (area.offsetWidth - 40) + 'px';
-    target.style.top = Math.random() * (area.offsetHeight - 40) + 'px';
-    
-    // Target jumps to a new location every 0.6 to 1.2 seconds
-    targetTimeout = setTimeout(moveTarget, 600 + Math.random() * 600);
+    target.style.left = Math.random() * (area.offsetWidth - 45) + 'px';
+    target.style.top = Math.random() * (area.offsetHeight - 45) + 'px';
+    targetTimeout = setTimeout(moveTarget, 500 + Math.random() * 500);
   }
 
   function hitTarget() {
     if(!minigameActive) return;
-    // Reward scales with your current progression
-    const reward = (game.autoMiners * 15) + (game.clickPower * 50); 
+    const reward = (getGPS() * 10) + (getClickValue() * 30); 
     game.gems += reward; 
+    game.totalGemsLifetime += reward;
     
-    // Visual feedback for clicking
     document.getElementById('target').style.display = 'none';
     clearTimeout(targetTimeout);
-    updateUI();
     
-    // Spawn next target slightly faster
+    // Visual text in minigame
+    const area = document.getElementById('minigame-area');
+    const floatEl = document.createElement('div');
+    floatEl.className = 'floating-text';
+    floatEl.innerText = `+${Math.floor(reward)}`;
+    floatEl.style.left = document.getElementById('target').style.left;
+    floatEl.style.top = document.getElementById('target').style.top;
+    floatEl.style.color = '#ff9800';
+    area.appendChild(floatEl);
+    setTimeout(() => floatEl.remove(), 1000);
+
+    updateUI();
     targetTimeout = setTimeout(moveTarget, 200);
   }
 
-  // Cooldown Timer Loop for Minigame
+  // --- LOOPS & OFFLINE ---
+  function calculateOfflineProgress() {
+    const now = Date.now();
+    const secondsOffline = Math.floor((now - game.lastSaveTime) / 1000);
+    
+    if (secondsOffline > 60 && getGPS() > 0) {
+      const gained = (secondsOffline * getGPS()) * 0.5; // 50% efficiency
+      game.gems += gained;
+      game.totalGemsLifetime += gained;
+      
+      let timeString = secondsOffline < 3600 
+        ? `${Math.floor(secondsOffline/60)} minutes`
+        : `${Math.floor(secondsOffline/3600)} hours`;
+        
+      document.getElementById('offline-time').innerText = timeString;
+      document.getElementById('offline-gains').innerText = Math.floor(gained).toLocaleString();
+      document.getElementById('offline-modal').style.display = 'flex';
+    }
+    game.lastSaveTime = now;
+  }
+
+  function closeOfflineModal() {
+    document.getElementById('offline-modal').style.display = 'none';
+  }
+
+  // 10 times a second update loop for smoother resources
   setInterval(() => {
+    const increment = getGPS() / 10;
+    game.gems += increment;
+    game.totalGemsLifetime += increment;
+    updateUI();
+  }, 100);
+
+  // Save Loop & Cooldowns (1 per sec)
+  setInterval(() => {
+    game.lastSaveTime = Date.now();
+    localStorage.setItem('gemMinerAscended', JSON.stringify(game));
+    
     if(mgTimer > 0) {
       mgTimer--;
       document.getElementById('mg-cooldown').innerText = mgTimer;
@@ -179,7 +419,8 @@
     }
   }, 1000);
 
-  // Initial UI Render
+  // Init
+  calculateOfflineProgress();
   updateUI();
 </script>
 </body>
