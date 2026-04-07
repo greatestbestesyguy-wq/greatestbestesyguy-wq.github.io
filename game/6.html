@@ -1,22 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ghost Hunter FPS</title>
+    <title>Ghost Hunter FPS - Fixed Map</title>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
-        canvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
+        canvas#gameCanvas { display: block; width: 100vw; height: 100vh; }
+        
         #ui { position: absolute; top: 20px; left: 20px; color: #f00; text-shadow: 2px 2px #000; pointer-events: none; }
-        #crosshair { position: absolute; top: 50%; left: 50%; color: rgba(255,0,0,0.5); font-size: 24px; transform: translate(-50%, -50%); }
-        #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; }
+        
+        /* Minimap Styling */
+        #minimap-container { 
+            position: absolute; 
+            bottom: 20px; 
+            right: 20px; 
+            border: 2px solid #555; 
+            background: rgba(0,0,0,0.8);
+            transition: all 0.3s ease;
+        }
+        
+        /* Large Map State */
+        #minimap-container.large {
+            bottom: 50%;
+            right: 50%;
+            transform: translate(50%, 50%);
+            width: 400px;
+            height: 400px;
+        }
+
+        #crosshair { position: absolute; top: 50%; left: 50%; color: rgba(255,0,0,0.5); font-size: 24px; transform: translate(-50%, -50%); pointer-events: none; }
+        #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px; }
     </style>
 </head>
 <body>
-    <div id="msg">CLICK TO START<br>WASD/Arrows to Move | Mouse to Look</div>
-    <div id="ui">
-        <div id="status">SURVIVE</div>
-        <canvas id="minimap" width="150" height="150" style="border: 1px solid #555; margin-top: 10px;"></canvas>
-    </div>
+    <div id="msg">CLICK TO START<br>WASD/Arrows to Move | Mouse to Look<br>Press 'M' to Toggle Map</div>
+    <div id="ui"><div id="status">SURVIVE</div></div>
     <div id="crosshair">+</div>
+    
+    <div id="minimap-container">
+        <canvas id="minimap" width="200" height="200"></canvas>
+    </div>
+
     <canvas id="gameCanvas"></canvas>
 
 <script>
@@ -24,8 +47,11 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const mCanvas = document.getElementById('minimap');
 const mCtx = mCanvas.getContext('2d');
+const mContainer = document.getElementById('minimap-container');
 
 let w, h;
+let mapLarge = false;
+
 function resize() {
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
@@ -49,7 +75,6 @@ const player = { x: 2, y: 2, dir: 0, speed: 0.05 };
 const ghost = { x: 13, y: 7, speed: 0.02, active: true };
 const keys = {};
 
-// Mouse Lock & Control
 canvas.onclick = () => {
     canvas.requestPointerLock();
     document.getElementById('msg').style.display = 'none';
@@ -61,7 +86,19 @@ document.addEventListener('mousemove', (e) => {
     }
 });
 
-window.onkeydown = (e) => keys[e.code] = true;
+window.onkeydown = (e) => {
+    keys[e.code] = true;
+    if (e.code === 'KeyM') {
+        mapLarge = !mapLarge;
+        if(mapLarge) {
+            mContainer.classList.add('large');
+            mCanvas.width = 400; mCanvas.height = 400;
+        } else {
+            mContainer.classList.remove('large');
+            mCanvas.width = 200; mCanvas.height = 200;
+        }
+    }
+};
 window.onkeyup = (e) => keys[e.code] = false;
 
 function update() {
@@ -71,15 +108,12 @@ function update() {
     if (keys['KeyA'] || keys['ArrowLeft']) { moveX += Math.sin(player.dir); moveY -= Math.cos(player.dir); }
     if (keys['KeyD'] || keys['ArrowRight']) { moveX -= Math.sin(player.dir); moveY += Math.cos(player.dir); }
 
-    // Simple Collision
     let newX = player.x + moveX * player.speed;
     let newY = player.y + moveY * player.speed;
     if (map[Math.floor(player.y)][Math.floor(newX)] === 0) player.x = newX;
     if (map[Math.floor(newY)][Math.floor(player.x)] === 0) player.y = newY;
 
-    // Ghost AI (Simple Pathing toward player)
-    let dx = player.x - ghost.x;
-    let dy = player.y - ghost.y;
+    let dx = player.x - ghost.x, dy = player.y - ghost.y;
     let dist = Math.sqrt(dx*dx + dy*dy);
     ghost.x += (dx / dist) * ghost.speed;
     ghost.y += (dy / dist) * ghost.speed;
@@ -88,23 +122,30 @@ function update() {
         document.getElementById('msg').innerHTML = "YOU WERE CAUGHT<br>Refresh to restart";
         document.getElementById('msg').style.display = 'block';
         ghost.active = false;
+        document.exitPointerLock();
     }
 }
 
 function drawMinimap() {
-    mCtx.fillStyle = "black"; mCtx.fillRect(0,0,150,150);
-    let size = 150 / 15;
+    mCtx.clearRect(0,0,mCanvas.width,mCanvas.height);
+    let size = mCanvas.width / 15;
     for(let y=0; y<map.length; y++) {
         for(let x=0; x<map[y].length; x++) {
-            if(map[y][x]) { mCtx.fillStyle = "#444"; mCtx.fillRect(x*size, y*size, size, size); }
+            if(map[y][x]) { 
+                mCtx.fillStyle = "#444"; 
+                mCtx.fillRect(x*size, y*size, size-1, size-1); 
+            }
         }
     }
-    mCtx.fillStyle = "lime"; mCtx.fillRect(player.x*size-2, player.y*size-2, 4, 4);
-    mCtx.fillStyle = "red"; mCtx.fillRect(ghost.x*size-2, ghost.y*size-2, 4, 4);
+    // Player
+    mCtx.fillStyle = "lime";
+    mCtx.fillRect(player.x*size-3, player.y*size-3, 6, 6);
+    // Ghost
+    mCtx.fillStyle = "red";
+    mCtx.fillRect(ghost.x*size-3, ghost.y*size-3, 6, 6);
 }
 
 function draw() {
-    // Background
     ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, w, h/2);
     ctx.fillStyle = "#111"; ctx.fillRect(0, h/2, w, h/2);
 
@@ -129,10 +170,10 @@ function draw() {
         let wallH = h / fixDist;
         let color = 200 / (1 + fixDist * 0.5);
         ctx.strokeStyle = `rgb(${color},${color/2},${color/2})`;
+        ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(i, h/2 - wallH/2); ctx.lineTo(i, h/2 + wallH/2); ctx.stroke();
     }
 
-    // Draw Ghost (Sprite calculation)
     if (ghost.active) {
         let gdx = ghost.x - player.x, gdy = ghost.y - player.y;
         let gDist = Math.sqrt(gdx*gdx + gdy*gdy);
@@ -144,7 +185,7 @@ function draw() {
             let screenX = (0.5 * (gAngle / (fov / 2)) + 0.5) * w;
             let spriteH = h / (gDist * Math.cos(gAngle));
             if (gDist < zBuffer[Math.floor(screenX)]) {
-                ctx.fillStyle = `rgba(255, 0, 0, ${1/gDist})`;
+                ctx.fillStyle = `rgba(255, 0, 0, ${1.5/gDist})`;
                 ctx.fillRect(screenX - spriteH/4, h/2 - spriteH/2, spriteH/2, spriteH);
             }
         }
