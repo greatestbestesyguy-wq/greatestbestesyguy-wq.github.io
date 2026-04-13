@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Precision Platformer</title>
+    <style>
+        body { margin: 0; background-color: #111; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
+        #gameCanvas { background-color: #222; box-shadow: 0 0 20px rgba(0,0,0,0.8); display: none; margin-top: 20px;}
+        #menu { width: 800px; padding: 20px; box-sizing: border-box; }
+        .level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        .level-card { background: #333; border: 2px solid #555; border-radius: 8px; padding: 10px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; text-align: center; }
+        .level-card:hover { transform: scale(1.05); border-color: #00ff88; }
+        .level-card.locked { opacity: 0.5; cursor: not-allowed; border-color: #ff3333; filter: grayscale(100%); }
+        .level-card.locked:hover { transform: none; border-color: #ff3333; }
+        .preview-canvas { background: #222; border-radius: 4px; width: 100%; height: auto; aspect-ratio: 4/3; margin-bottom: 10px; }
+        h1 { text-align: center; color: #00ff88; }
+        #ui { display: none; width: 800px; justify-content: space-between; margin-top: 10px; }
+        button { background: #444; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #666; }
+    </style>
+</head>
+<body>
+
+    <div id="menu">
+        <h1>Select Level</h1>
+        <div class="level-grid" id="levelGrid">Loading levels...</div>
+    </div>
+
+    <div id="ui">
+        <span id="levelNameDisplay">Level Name</span>
+        <button onclick="returnToMenu()">Back to Menu</button>
+    </div>
+    
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let levelsData = [];
+    let currentLevel = null;
+    let gameState = 'MENU'; // MENU, PLAYING, DEAD, WON
+    let unlockedLevels = JSON.parse(localStorage.getItem('plat_unlocked')) || [];
+    let frameCount = 0;
+
+    // Player Object
+    const player = {
+        x: 0, y: 0, w: 20, h: 20,
+        vx: 0, vy: 0,
+        speed: 5, jumpPower: -12, gravity: 0.6,
+        color: '#00ff88',
+        grounded: false,
+        jumpsLeft: 1,
+        maxJumps: 1,
+        inWater: false
+    };
+
+    const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false };
+
+    // --- INITIALIZATION ---
+    async function init() {
+        try {
+            // Load from your specified path
+            const response = await fetch('/game/plat.json');
+            levelsData = await response.json();
+            
+            // Ensure first level is unlocked if starting fresh
+            if (unlockedLevels.length === 0 && levelsData.length > 0) {
+                unlockLevel(levelsData[0].id);
+            }
+            
+            buildMenu();
+        } catch (e) {
+            document.getElementById('levelGrid').innerHTML = `<p style="color:red">Error loading /game/plat.json. Are you running a local web server?</p>`;
+            console.error(e);
+        }
+    }
+
+    function unlockLevel(id) {
+        if (!unlockedLevels.includes(id)) {
+            unlockedLevels.push(id);
+            localStorage.setItem('plat_unlocked', JSON.stringify(unlockedLevels));
+        }
+    }
+
+    // --- MENU & PREVIEWS ---
+    function buildMenu() {
+        const grid = document.getElementById('levelGrid');
+        grid.innerHTML = '';
+
+        levelsData.forEach((lvl, index) => {
+            const isUnlocked = lvl.unlockedByDefault || unlockedLevels.includes(lvl.id);
+            const card = document.createElement('div');
+            card.className = `level-card ${isUnlocked ? '' : 'locked'}`;
+            card.innerHTML = `
+                <canvas class="preview-canvas" width="160" height="120" id="prev-${lvl.id}"></canvas>
+                <div style="font-weight:bold">${index + 1}. ${lvl.name}</div>
+                <div style="font-size:12px; color:#aaa">${isUnlocked ? 'Unlocked' : 'Locked'}</div>
+            `;
+            
+            if (isUnlocked) {
+                card.onclick = () => loadLevel(lvl);
+            }
+            grid.appendChild(card);
+            drawPreview(lvl, document.getElementById(`prev-${lvl.id}`));
+        });
+    }
+
+    function drawPreview(level, prevCanvas) {
+        const pctx = prevCanvas.getContext('2d');
+        pctx.scale(0.2, 0.2); // Scale 800x600 down to 160x120
+        
+        // Draw entities based on type colors
+        level.entities.forEach(e => {
+            if(e.type === 'solid') pctx.fillStyle = '#666';
+            if(e.type === 'hazard') pctx.fillStyle = '#ff3333';
+            if(e.type === 'water') pctx.fillStyle = 'rgba(0, 150, 255, 0.5)';
+            if(e.type === 'bounce') pctx.fillStyle = '#ffcc00';
+            if(e.type === 'moving') pctx.fillStyle = '#8844ff';
+            pctx.fillRect(e.x, e.y, e.w, e.h);
+        });
+        
+        // Draw Exit
+        pctx.fillStyle = '#ffff00';
+        pctx.fillRect(level.exit.x, level.exit.y, level.exit.w, level.exit.h);
+        
+        // Draw Player Start
+        pctx.fillStyle = '#00ff88';
+        pctx.fillRect(level.playerStart.x, level.playerStart.y, 20, 20);
+    }
+
+    // --- GAME LOOP ---
+    function loadLevel(level) {
+        currentLevel = JSON.parse(JSON.stringify(level)); // Deep copy to reset moving parts
+        player.x = currentLevel.playerStart.x;
+        player.y = currentLevel.playerStart.y;
+        player.vx = 0; player.vy = 0;
+        player.maxJumps = currentLevel.modifiers.doubleJump ? 2 : 1;
+        
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('gameCanvas').style.display = 'block';
+        document.getElementById('ui').style.display = 'flex';
+        document.getElementById('levelNameDisplay').innerText = level.name;
+        
+        gameState = 'PLAYING';
+    }
+
+    function returnToMenu() {
+        gameState = 'MENU';
+        document.getElementById('menu').style.display = 'block';
+        document.getElementById('gameCanvas').style.display = 'none';
+        document.getElementById('ui').style.display = 'none';
+        buildMenu(); // Refresh to show newly unlocked levels
+    }
+
+    // Input Handling
+    window.addEventListener('keydown', e => {
+        if(keys.hasOwnProperty(e.code)) {
+            keys[e.code] = true;
+            // Handle Jump
+            if(e.code === 'ArrowUp' && gameState === 'PLAYING') {
+                if (player.jumpsLeft > 0 || player.inWater) {
+                    player.vy = player.inWater ? player.jumpPower * 0.7 : player.jumpPower;
+                    player.jumpsLeft--;
+                    player.grounded = false;
+                }
+            }
+        }
+    });
+    window.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.code)) keys[e.code] = false; });
+
+    // AABB Collision
+    function rectIntersect(r1, r2) {
+        return !(r2.x > r1.x + r1.w || r2.x + r2.w < r1.x || r2.y > r1.y + r1.h || r2.y + r2.h < r1.y);
+    }
+
+    function update() {
+        if (gameState !== 'PLAYING') return;
+        frameCount++;
+
+        // Horizontal Movement
+        if (keys.ArrowLeft) player.vx = -player.speed;
+        else if (keys.ArrowRight) player.vx = player.speed;
+        else player.vx = 0;
+
+        // Apply Water physics modifier
+        player.inWater = false;
+        currentLevel.entities.forEach(e => {
+            if (e.type === 'water' && rectIntersect(player, e)) {
+                player.inWater = true;
+            }
+        });
+
+        // Gravity
+        let currentGravity = currentLevel.modifiers.gravity || 0.6;
+        if (player.inWater) currentGravity *= 0.3; // Fall slower in water
+        player.vy += currentGravity;
+        if (player.inWater && player.vy > 3) player.vy = 3; // Max fall speed in water
+
+        // --- Move & Collide X ---
+        player.x += player.vx;
+        currentLevel.entities.forEach(e => {
+            if (e.type === 'solid' || e.type === 'bounce' || e.type === 'moving') {
+                if (rectIntersect(player, e)) {
+                    if (player.vx > 0) player.x = e.x - player.w;
+                    else if (player.vx < 0) player.x = e.x + e.w;
+                    player.vx = 0;
+                }
+            }
+        });
+
+        // --- Update Moving Platforms ---
+        let platformDx = 0;
+        currentLevel.entities.forEach(e => {
+            if (e.type === 'moving') {
+                e.startX = e.startX || e.x;
+                e.startY = e.startY || e.y;
+                let oldX = e.x;
+                
+                // Simple sine wave oscillation
+                if(e.moveAxis === 'x') e.x = e.startX + Math.sin(frameCount * e.speed) * e.distance;
+                if(e.moveAxis === 'y') e.y = e.startY + Math.sin(frameCount * e.speed) * e.distance;
+                
+                // If player is standing on it, move player too
+                if (player.grounded && player.y + player.h === e.y && player.x + player.w > e.x && player.x < e.x + e.w) {
+                    player.x += (e.x - oldX); 
+                }
+            }
+        });
+
+        // --- Move & Collide Y ---
+        player.y += player.vy;
+        player.grounded = false;
+
+        currentLevel.entities.forEach(e => {
+            if (e.type === 'solid' || e.type === 'bounce' || e.type === 'moving') {
+                if (rectIntersect(player, e)) {
+                    if (player.vy > 0) { // Landing
+                        player.y = e.y - player.h;
+                        player.vy = 0;
+                        player.grounded = true;
+                        player.jumpsLeft = player.maxJumps;
+                        if (e.type === 'bounce') {
+                            player.vy = (currentLevel.modifiers.bouncePower || -18);
+                            player.grounded = false;
+                        }
+                    } else if (player.vy < 0) { // Hitting head
+                        player.y = e.y + e.h;
+                        player.vy = 0;
+                    }
+                }
+            }
+        });
+
+        // --- Hazards & Death ---
+        if (player.y > canvas.height) die(); // Fell off screen
+        currentLevel.entities.forEach(e => {
+            if (e.type === 'hazard' && rectIntersect(player, e)) die();
+        });
+
+        // --- Exit / Win ---
+        if (rectIntersect(player, currentLevel.exit)) {
+            winLevel();
+        }
+    }
+
+    function die() {
+        // Reset player to start
+        player.x = currentLevel.playerStart.x;
+        player.y = currentLevel.playerStart.y;
+        player.vx = 0; player.vy = 0;
+    }
+
+    function winLevel() {
+        gameState = 'WON';
+        const currentIndex = levelsData.findIndex(l => l.id === currentLevel.id);
+        if (currentIndex < levelsData.length - 1) {
+            unlockLevel(levelsData[currentIndex + 1].id);
+        }
+        setTimeout(returnToMenu, 1000);
+    }
+
+    function draw() {
+        if (gameState !== 'PLAYING' && gameState !== 'WON') return;
+
+        // Background
+        ctx.fillStyle = '#222';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Entities
+        currentLevel.entities.forEach(e => {
+            if(e.type === 'solid') ctx.fillStyle = '#666';
+            if(e.type === 'hazard') ctx.fillStyle = '#ff3333';
+            if(e.type === 'water') ctx.fillStyle = 'rgba(0, 150, 255, 0.5)';
+            if(e.type === 'bounce') ctx.fillStyle = '#ffcc00';
+            if(e.type === 'moving') ctx.fillStyle = '#8844ff';
+            ctx.fillRect(e.x, e.y, e.w, e.h);
+        });
+
+        // Draw Exit
+        ctx.fillStyle = '#ffff00';
+        ctx.fillRect(currentLevel.exit.x, currentLevel.exit.y, currentLevel.exit.w, currentLevel.exit.h);
+
+        // Draw Player
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x, player.y, player.w, player.h);
+
+        if (gameState === 'WON') {
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff88';
+            ctx.font = '40px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('LEVEL CLEARED!', canvas.width/2, canvas.height/2);
+        }
+    }
+
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    init();
+    loop();
+</script>
+</body>
+</html>
