@@ -18,9 +18,25 @@
         #ui { display: none; width: 800px; justify-content: space-between; margin-top: 10px; }
         button { background: #444; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; }
         button:hover { background: #666; }
+        
+        /* Admin Panel Styles */
+        #adminPanel {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(20, 0, 0, 0.95); border: 2px solid #ff3333; padding: 20px;
+            border-radius: 8px; z-index: 1000; text-align: center;
+        }
+        .admin-btn { background: #ff3333; color: white; margin: 10px; padding: 10px 20px; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;}
+        .admin-btn:hover { background: #ff6666; }
     </style>
 </head>
 <body>
+
+    <div id="adminPanel">
+        <h2 style="color:#ff3333; margin-top:0;">Admin Console</h2>
+        <button class="admin-btn" onclick="adminUnlockAll()">Unlock All Levels</button>
+        <button class="admin-btn" onclick="adminReset()">Reset Progress</button>
+        <button class="admin-btn" onclick="closeAdmin()" style="background:#555;">Close Menu</button>
+    </div>
 
     <div id="menu">
         <h1>Select Level</h1>
@@ -43,6 +59,7 @@
     let gameState = 'MENU'; // MENU, PLAYING, DEAD, WON
     let unlockedLevels = JSON.parse(localStorage.getItem('plat_unlocked')) || [];
     let frameCount = 0;
+    let keyBuffer = ''; // For secret admin code
 
     // Player Object
     const player = {
@@ -61,18 +78,16 @@
     // --- INITIALIZATION ---
     async function init() {
         try {
-            // Load from your specified path
-            const response = await fetch('/game/plat.json');
+            const response = await fetch('./game/plat.json');
             levelsData = await response.json();
             
-            // Ensure first level is unlocked if starting fresh
             if (unlockedLevels.length === 0 && levelsData.length > 0) {
                 unlockLevel(levelsData[0].id);
             }
             
             buildMenu();
         } catch (e) {
-            document.getElementById('levelGrid').innerHTML = `<p style="color:red">Error loading /game/plat.json. Are you running a local web server?</p>`;
+            document.getElementById('levelGrid').innerHTML = `<p style="color:red">Error loading ./game/plat.json. Are you running a local web server?</p>`;
             console.error(e);
         }
     }
@@ -109,9 +124,8 @@
 
     function drawPreview(level, prevCanvas) {
         const pctx = prevCanvas.getContext('2d');
-        pctx.scale(0.2, 0.2); // Scale 800x600 down to 160x120
+        pctx.scale(0.2, 0.2);
         
-        // Draw entities based on type colors
         level.entities.forEach(e => {
             if(e.type === 'solid') pctx.fillStyle = '#666';
             if(e.type === 'hazard') pctx.fillStyle = '#ff3333';
@@ -121,18 +135,39 @@
             pctx.fillRect(e.x, e.y, e.w, e.h);
         });
         
-        // Draw Exit
         pctx.fillStyle = '#ffff00';
         pctx.fillRect(level.exit.x, level.exit.y, level.exit.w, level.exit.h);
         
-        // Draw Player Start
         pctx.fillStyle = '#00ff88';
         pctx.fillRect(level.playerStart.x, level.playerStart.y, 20, 20);
     }
 
+    // --- ADMIN FUNCTIONS ---
+    function adminUnlockAll() {
+        levelsData.forEach(lvl => {
+            if (!unlockedLevels.includes(lvl.id)) unlockedLevels.push(lvl.id);
+        });
+        localStorage.setItem('plat_unlocked', JSON.stringify(unlockedLevels));
+        buildMenu();
+        alert("All levels successfully unlocked!");
+    }
+
+    function adminReset() {
+        unlockedLevels = levelsData.length > 0 ? [levelsData[0].id] : [];
+        localStorage.setItem('plat_unlocked', JSON.stringify(unlockedLevels));
+        buildMenu();
+        alert("Game progress has been reset.");
+    }
+
+    function closeAdmin() {
+        document.getElementById('adminPanel').style.display = 'none';
+        // Give focus back to the window so playing can resume smoothly
+        window.focus(); 
+    }
+
     // --- GAME LOOP ---
     function loadLevel(level) {
-        currentLevel = JSON.parse(JSON.stringify(level)); // Deep copy to reset moving parts
+        currentLevel = JSON.parse(JSON.stringify(level));
         player.x = currentLevel.playerStart.x;
         player.y = currentLevel.playerStart.y;
         player.vx = 0; player.vy = 0;
@@ -151,20 +186,30 @@
         document.getElementById('menu').style.display = 'block';
         document.getElementById('gameCanvas').style.display = 'none';
         document.getElementById('ui').style.display = 'none';
-        buildMenu(); // Refresh to show newly unlocked levels
+        buildMenu();
     }
 
     // Input Handling
     window.addEventListener('keydown', e => {
+        // Core Game Inputs
         if(keys.hasOwnProperty(e.code)) {
             keys[e.code] = true;
-            // Handle Jump
             if(e.code === 'ArrowUp' && gameState === 'PLAYING') {
                 if (player.jumpsLeft > 0 || player.inWater) {
                     player.vy = player.inWater ? player.jumpPower * 0.7 : player.jumpPower;
                     player.jumpsLeft--;
                     player.grounded = false;
                 }
+            }
+        }
+
+        // Secret Admin Code Tracker
+        if (e.key && e.key.length === 1) {
+            keyBuffer += e.key.toLowerCase();
+            if (keyBuffer.length > 5) keyBuffer = keyBuffer.slice(-5);
+            if (keyBuffer === 'admin') {
+                document.getElementById('adminPanel').style.display = 'block';
+                keyBuffer = ''; // Clear buffer after opening
             }
         }
     });
@@ -179,24 +224,23 @@
         if (gameState !== 'PLAYING') return;
         frameCount++;
 
-        // Horizontal Movement
         if (keys.ArrowLeft) player.vx = -player.speed;
         else if (keys.ArrowRight) player.vx = player.speed;
         else player.vx = 0;
 
-        // Apply Water physics modifier
         player.inWater = false;
         currentLevel.entities.forEach(e => {
-            if (e.type === 'water' && rectIntersect(player, e)) {
-                player.inWater = true;
-            }
+            if (e.type === 'water' && rectIntersect(player, e)) player.inWater = true;
         });
 
-        // Gravity
+        // Gravity & Terminal Velocity Fix
         let currentGravity = currentLevel.modifiers.gravity || 0.6;
-        if (player.inWater) currentGravity *= 0.3; // Fall slower in water
+        if (player.inWater) currentGravity *= 0.3;
         player.vy += currentGravity;
-        if (player.inWater && player.vy > 3) player.vy = 3; // Max fall speed in water
+        
+        // BUG FIX: Prevent falling through platforms by capping maximum fall speed
+        if (player.vy > 18) player.vy = 18; 
+        if (player.inWater && player.vy > 3) player.vy = 3;
 
         // --- Move & Collide X ---
         player.x += player.vx;
@@ -211,18 +255,15 @@
         });
 
         // --- Update Moving Platforms ---
-        let platformDx = 0;
         currentLevel.entities.forEach(e => {
             if (e.type === 'moving') {
                 e.startX = e.startX || e.x;
                 e.startY = e.startY || e.y;
                 let oldX = e.x;
                 
-                // Simple sine wave oscillation
                 if(e.moveAxis === 'x') e.x = e.startX + Math.sin(frameCount * e.speed) * e.distance;
                 if(e.moveAxis === 'y') e.y = e.startY + Math.sin(frameCount * e.speed) * e.distance;
                 
-                // If player is standing on it, move player too
                 if (player.grounded && player.y + player.h === e.y && player.x + player.w > e.x && player.x < e.x + e.w) {
                     player.x += (e.x - oldX); 
                 }
@@ -236,7 +277,9 @@
         currentLevel.entities.forEach(e => {
             if (e.type === 'solid' || e.type === 'bounce' || e.type === 'moving') {
                 if (rectIntersect(player, e)) {
-                    if (player.vy > 0) { // Landing
+                    // BUG FIX: Improved Y-Collision logic. 
+                    // Only snap to the top if we were actually falling from ABOVE the platform.
+                    if (player.vy > 0 && player.y - player.vy + player.h <= e.y + 10) { 
                         player.y = e.y - player.h;
                         player.vy = 0;
                         player.grounded = true;
@@ -245,7 +288,9 @@
                             player.vy = (currentLevel.modifiers.bouncePower || -18);
                             player.grounded = false;
                         }
-                    } else if (player.vy < 0) { // Hitting head
+                    } 
+                    // Only snap to bottom if jumping up from BELOW the platform.
+                    else if (player.vy < 0 && player.y - player.vy >= e.y + e.h - 10) { 
                         player.y = e.y + e.h;
                         player.vy = 0;
                     }
@@ -254,7 +299,7 @@
         });
 
         // --- Hazards & Death ---
-        if (player.y > canvas.height) die(); // Fell off screen
+        if (player.y > canvas.height) die(); 
         currentLevel.entities.forEach(e => {
             if (e.type === 'hazard' && rectIntersect(player, e)) die();
         });
@@ -266,7 +311,6 @@
     }
 
     function die() {
-        // Reset player to start
         player.x = currentLevel.playerStart.x;
         player.y = currentLevel.playerStart.y;
         player.vx = 0; player.vy = 0;
@@ -284,11 +328,9 @@
     function draw() {
         if (gameState !== 'PLAYING' && gameState !== 'WON') return;
 
-        // Background
         ctx.fillStyle = '#222';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw Entities
         currentLevel.entities.forEach(e => {
             if(e.type === 'solid') ctx.fillStyle = '#666';
             if(e.type === 'hazard') ctx.fillStyle = '#ff3333';
@@ -298,11 +340,9 @@
             ctx.fillRect(e.x, e.y, e.w, e.h);
         });
 
-        // Draw Exit
         ctx.fillStyle = '#ffff00';
         ctx.fillRect(currentLevel.exit.x, currentLevel.exit.y, currentLevel.exit.w, currentLevel.exit.h);
 
-        // Draw Player
         ctx.fillStyle = player.color;
         ctx.fillRect(player.x, player.y, player.w, player.h);
 
