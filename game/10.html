@@ -78,7 +78,7 @@
     // --- INITIALIZATION ---
     async function init() {
         try {
-            const response = await fetch('./game/plat.json');
+            const response = await fetch('/game/plat.json');
             levelsData = await response.json();
             
             if (unlockedLevels.length === 0 && levelsData.length > 0) {
