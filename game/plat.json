@@ -1,0 +1,62 @@
+[
+  {
+    "id": "level_1",
+    "name": "First Steps",
+    "unlockedByDefault": true,
+    "modifiers": { "gravity": 0.6, "doubleJump": false },
+    "playerStart": { "x": 50, "y": 400 },
+    "exit": { "x": 700, "y": 110, "w": 40, "h": 40 },
+    "entities": [
+      { "type": "solid", "x": 0, "y": 500, "w": 800, "h": 100 },
+      { "type": "solid", "x": 300, "y": 420, "w": 100, "h": 20 },
+      { "type": "solid", "x": 500, "y": 340, "w": 100, "h": 20 },
+      { "type": "solid", "x": 650, "y": 150, "w": 150, "h": 20 }
+    ]
+  },
+  {
+    "id": "level_2",
+    "name": "Danger Floor",
+    "unlockedByDefault": false,
+    "modifiers": { "gravity": 0.6, "doubleJump": false },
+    "playerStart": { "x": 50, "y": 100 },
+    "exit": { "x": 720, "y": 360, "w": 40, "h": 40 },
+    "entities": [
+      { "type": "solid", "x": 0, "y": 150, "w": 150, "h": 20 },
+      { "type": "solid", "x": 250, "y": 250, "w": 100, "h": 20 },
+      { "type": "solid", "x": 450, "y": 350, "w": 100, "h": 20 },
+      { "type": "solid", "x": 680, "y": 400, "w": 120, "h": 20 },
+      { "type": "hazard", "x": 0, "y": 550, "w": 800, "h": 50 }
+    ]
+  },
+  {
+    "id": "level_3",
+    "name": "Water and Springs",
+    "unlockedByDefault": false,
+    "modifiers": { "gravity": 0.6, "doubleJump": false, "bouncePower": -15 },
+    "playerStart": { "x": 50, "y": 450 },
+    "exit": { "x": 50, "y": 50, "w": 40, "h": 40 },
+    "entities": [
+      { "type": "solid", "x": 0, "y": 550, "w": 200, "h": 50 },
+      { "type": "water", "x": 200, "y": 200, "w": 300, "h": 400 },
+      { "type": "solid", "x": 550, "y": 550, "w": 250, "h": 50 },
+      { "type": "bounce", "x": 600, "y": 530, "w": 60, "h": 20 },
+      { "type": "solid", "x": 0, "y": 100, "w": 150, "h": 20 },
+      { "type": "hazard", "x": 150, "y": 100, "w": 650, "h": 20 }
+    ]
+  },
+  {
+    "id": "level_4",
+    "name": "Moving Madness & Double Jump",
+    "unlockedByDefault": false,
+    "modifiers": { "gravity": 0.6, "doubleJump": true },
+    "playerStart": { "x": 50, "y": 450 },
+    "exit": { "x": 700, "y": 50, "w": 40, "h": 40 },
+    "entities": [
+      { "type": "solid", "x": 0, "y": 550, "w": 150, "h": 50 },
+      { "type": "moving", "x": 200, "y": 450, "w": 100, "h": 20, "moveAxis": "y", "distance": 100, "speed": 0.05 },
+      { "type": "moving", "x": 400, "y": 250, "w": 100, "h": 20, "moveAxis": "x", "distance": 150, "speed": 0.03 },
+      { "type": "solid", "x": 650, "y": 100, "w": 150, "h": 20 },
+      { "type": "hazard", "x": 0, "y": 580, "w": 800, "h": 20 }
+    ]
+  }
+]
