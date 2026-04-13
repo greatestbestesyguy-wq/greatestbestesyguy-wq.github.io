@@ -220,94 +220,89 @@
         return !(r2.x > r1.x + r1.w || r2.x + r2.w < r1.x || r2.y > r1.y + r1.h || r2.y + r2.h < r1.y);
     }
 
-    function update() {
-        if (gameState !== 'PLAYING') return;
-        frameCount++;
+function update() {
+    if (gameState !== 'PLAYING') return;
+    frameCount++;
 
-        if (keys.ArrowLeft) player.vx = -player.speed;
-        else if (keys.ArrowRight) player.vx = player.speed;
-        else player.vx = 0;
-
-        player.inWater = false;
-        currentLevel.entities.forEach(e => {
-            if (e.type === 'water' && rectIntersect(player, e)) player.inWater = true;
-        });
-
-        // Gravity & Terminal Velocity Fix
-        let currentGravity = currentLevel.modifiers.gravity || 0.6;
-        if (player.inWater) currentGravity *= 0.3;
-        player.vy += currentGravity;
-        
-        // BUG FIX: Prevent falling through platforms by capping maximum fall speed
-        if (player.vy > 18) player.vy = 18; 
-        if (player.inWater && player.vy > 3) player.vy = 3;
-
-        // --- Move & Collide X ---
-        player.x += player.vx;
-        currentLevel.entities.forEach(e => {
-            if (e.type === 'solid' || e.type === 'bounce' || e.type === 'moving') {
-                if (rectIntersect(player, e)) {
-                    if (player.vx > 0) player.x = e.x - player.w;
-                    else if (player.vx < 0) player.x = e.x + e.w;
-                    player.vx = 0;
-                }
+    // 1. Update Moving Platforms FIRST so the player can ride them
+    currentLevel.entities.forEach(e => {
+        if (e.type === 'moving') {
+            e.startX = e.startX || e.x;
+            e.startY = e.startY || e.y;
+            let oldX = e.x;
+            let oldY = e.y;
+            
+            if(e.moveAxis === 'x') e.x = e.startX + Math.sin(frameCount * e.speed) * e.distance;
+            if(e.moveAxis === 'y') e.y = e.startY + Math.sin(frameCount * e.speed) * e.distance;
+            
+            // If player is on top, move them with the platform
+            if (player.grounded && player.y + player.h <= oldY + 2 && player.x + player.w > e.x && player.x < e.x + e.w) {
+                player.x += (e.x - oldX);
+                player.y += (e.y - oldY);
             }
-        });
-
-        // --- Update Moving Platforms ---
-        currentLevel.entities.forEach(e => {
-            if (e.type === 'moving') {
-                e.startX = e.startX || e.x;
-                e.startY = e.startY || e.y;
-                let oldX = e.x;
-                
-                if(e.moveAxis === 'x') e.x = e.startX + Math.sin(frameCount * e.speed) * e.distance;
-                if(e.moveAxis === 'y') e.y = e.startY + Math.sin(frameCount * e.speed) * e.distance;
-                
-                if (player.grounded && player.y + player.h === e.y && player.x + player.w > e.x && player.x < e.x + e.w) {
-                    player.x += (e.x - oldX); 
-                }
-            }
-        });
-
-        // --- Move & Collide Y ---
-        player.y += player.vy;
-        player.grounded = false;
-
-        currentLevel.entities.forEach(e => {
-            if (e.type === 'solid' || e.type === 'bounce' || e.type === 'moving') {
-                if (rectIntersect(player, e)) {
-                    // BUG FIX: Improved Y-Collision logic. 
-                    // Only snap to the top if we were actually falling from ABOVE the platform.
-                    if (player.vy > 0 && player.y - player.vy + player.h <= e.y + 10) { 
-                        player.y = e.y - player.h;
-                        player.vy = 0;
-                        player.grounded = true;
-                        player.jumpsLeft = player.maxJumps;
-                        if (e.type === 'bounce') {
-                            player.vy = (currentLevel.modifiers.bouncePower || -18);
-                            player.grounded = false;
-                        }
-                    } 
-                    // Only snap to bottom if jumping up from BELOW the platform.
-                    else if (player.vy < 0 && player.y - player.vy >= e.y + e.h - 10) { 
-                        player.y = e.y + e.h;
-                        player.vy = 0;
-                    }
-                }
-            }
-        });
-
-        // --- Hazards & Death ---
-        if (player.y > canvas.height) die(); 
-        currentLevel.entities.forEach(e => {
-            if (e.type === 'hazard' && rectIntersect(player, e)) die();
-        });
-
-        // --- Exit / Win ---
-        if (rectIntersect(player, currentLevel.exit)) {
-            winLevel();
         }
+    });
+
+    // 2. Set Horizontal Velocity
+    if (keys.ArrowLeft) player.vx = -player.speed;
+    else if (keys.ArrowRight) player.vx = player.speed;
+    else player.vx = 0;
+
+    // 3. Gravity & Water
+    player.inWater = false;
+    currentLevel.entities.forEach(e => {
+        if (e.type === 'water' && rectIntersect(player, e)) player.inWater = true;
+    });
+
+    let currentGravity = currentLevel.modifiers.gravity || 0.6;
+    if (player.inWater) currentGravity *= 0.3;
+    player.vy += currentGravity;
+    if (player.vy > 15) player.vy = 15; 
+
+    // 4. MOVE X AND CHECK COLLISION
+    player.x += player.vx;
+    currentLevel.entities.forEach(e => {
+        if (['solid', 'bounce', 'moving'].includes(e.type)) {
+            if (rectIntersect(player, e)) {
+                // If we hit a wall, push out and stop horizontal speed
+                if (player.vx > 0) player.x = e.x - player.w;
+                if (player.vx < 0) player.x = e.x + e.w;
+            }
+        }
+    });
+
+    // 5. MOVE Y AND CHECK COLLISION
+    player.y += player.vy;
+    player.grounded = false; // Assume in air until proven otherwise
+    
+    currentLevel.entities.forEach(e => {
+        if (['solid', 'bounce', 'moving'].includes(e.type)) {
+            if (rectIntersect(player, e)) {
+                if (player.vy > 0) { // Falling
+                    player.y = e.y - player.h;
+                    player.vy = 0;
+                    player.grounded = true;
+                    player.jumpsLeft = player.maxJumps;
+                    
+                    if (e.type === 'bounce') {
+                        player.vy = (currentLevel.modifiers.bouncePower || -15);
+                        player.grounded = false;
+                    }
+                } else if (player.vy < 0) { // Jumping up
+                    player.y = e.y + e.h;
+                    player.vy = 0;
+                }
+            }
+        }
+    });
+
+    // 6. Hazards & Exit
+    if (player.y > canvas.height) die(); 
+    currentLevel.entities.forEach(e => {
+        if (e.type === 'hazard' && rectIntersect(player, e)) die();
+    });
+    if (rectIntersect(player, currentLevel.exit)) winLevel();
+}
     }
 
     function die() {
