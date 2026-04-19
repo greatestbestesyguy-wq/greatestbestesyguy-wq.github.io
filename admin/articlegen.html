@@ -3,136 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle STL | Pro Article Studio</title>
+    <title>Recycle STL | Full-Page Article Generator</title>
     <style>
         :root { --bg: #09090b; --surface: #18181b; --border: #27272a; --accent: #10b981; --text: #f4f4f5; --dim: #a1a1aa; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
         
-        /* Editor UI */
-        .editor { width: 480px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
-        .editor-header { padding: 30px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
-        .editor-content { flex: 1; overflow-y: auto; padding: 30px; }
+        /* Editor Sidebar */
+        .editor { width: 450px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+        .editor-header { padding: 25px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+        .editor-content { flex: 1; overflow-y: auto; padding: 25px; }
         
-        .field { margin-bottom: 25px; }
-        label { display: block; font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
-        input, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; color: #fff; padding: 14px; font-size: 14px; outline: none; transition: 0.2s; }
-        input:focus, textarea:focus { border-color: var(--accent); background: #111; }
-        textarea { height: 100px; resize: vertical; line-height: 1.6; }
+        /* Input Styling */
+        .field { margin-bottom: 20px; }
+        label { display: block; font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        input, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: #fff; padding: 12px; font-size: 14px; outline: none; transition: 0.2s; }
+        input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1); }
+        textarea { height: 100px; resize: vertical; }
 
         /* Preview Area */
         .preview-pane { flex: 1; background: #000; display: flex; flex-direction: column; position: relative; }
-        .toolbar { padding: 15px 30px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .toolbar { padding: 15px 25px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         
-        .iframe-wrap { flex: 1; background: #0a0a0a; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
-        .iframe-wrap.fullscreen { position: fixed; inset: 0; z-index: 100; }
+        .iframe-wrap { flex: 1; margin: 20px; border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid var(--border); transition: all 0.3s ease; }
+        .iframe-wrap.fullscreen { position: fixed; inset: 0; z-index: 100; margin: 0; border-radius: 0; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        .btn { padding: 12px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; }
+        /* Buttons */
+        .btn { padding: 10px 18px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 13px; }
         .btn-primary { background: var(--accent); color: #000; }
+        .btn-primary:hover { background: #0da372; transform: translateY(-1px); }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
         .btn-outline:hover { background: var(--border); }
         
-        #close-fs { display: none; position: fixed; top: 25px; right: 25px; z-index: 101; background: #ef4444; color: white; }
+        #close-fs { display: none; position: fixed; top: 20px; right: 20px; z-index: 101; background: #ff4444; color: white; }
     </style>
 </head>
 <body>
 
     <div class="editor">
         <div class="editor-header">
-            <h2 style="font-size: 1.4rem;">Article Studio <span style="color:var(--accent)">v3</span></h2>
-            <p style="font-size: 12px; color: var(--dim); margin-top: 5px;">Generates themed HTML for your advocacy site.</p>
+            <h2 style="font-size: 1.2rem;">Full-Page Generator</h2>
+            <p style="font-size: 12px; color: var(--dim);">Build a standalone advocacy article</p>
         </div>
         <div class="editor-content">
-            <div class="field"><label>Filename Slug</label><input type="text" id="in-slug" value="recycling-report"></div>
-            <div class="field"><label>Article Headline</label><input type="text" id="in-title" value="The St. Louis Waste Crisis" oninput="update()"></div>
+            <div class="field"><label>Page Slug (Filename)</label><input type="text" id="in-slug" value="recycling-report" placeholder="e.g. recycling-report"></div>
+            <div class="field"><label>Navigation Link Text</label><input type="text" id="in-nav" value="New Article" oninput="update()"></div>
+            <div class="field"><label>Main Headline</label><input type="text" id="in-title" value="St. Louis Recycling Breakdown" oninput="update()"></div>
             <div class="field"><label>Hero Image URL</label><input type="text" id="in-img" placeholder="https://..." oninput="update()"></div>
-            <div class="field"><label>Author & Date</label><input type="text" id="in-meta" value="By Joshua Massa • April 2026" oninput="update()"></div>
-            <div class="field"><label>Lead Paragraph (Intro)</label><textarea id="in-body" oninput="update()">As residential recycling pickups remain suspended across St. Louis, the burden of sustainability has shifted entirely to the residents...</textarea></div>
-            <div class="field"><label>Main Body (HTML & Markdown)</label><textarea id="in-content" style="height: 250px;" oninput="update()"><h2>The Drop-Off Challenge</h2><p>With only 14 official locations, many residents face significant barriers to proper waste disposal...</p></textarea></div>
+            <div class="field"><label>Hero Image Alt Text</label><input type="text" id="in-alt" placeholder="Description for accessibility..." oninput="update()"></div>
+            <div class="field"><label>Lead Paragraph</label><textarea id="in-body" oninput="update()">In light of recent policy changes, Metro High students have analyzed the primary drop-off sites in the St. Louis area...</textarea></div>
+            <div class="field"><label>Full Article Content (HTML allowed)</label><textarea id="in-content" style="height: 200px;" oninput="update()"><h3>The Current Status</h3><p>Detailed analysis goes here...</p></textarea></div>
             
-            <div style="display: flex; gap: 12px; margin-top: 10px;">
-                <button class="btn btn-outline" style="flex: 1;" onclick="copyHTML()">📋 Copy Code</button>
-                <button class="btn btn-primary" style="flex: 1;" onclick="downloadHTML()">💾 Save File</button>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="copyHTML()">📋 Copy HTML</button>
+                <button class="btn btn-primary" style="flex: 1;" onclick="downloadHTML()">💾 Download</button>
             </div>
         </div>
     </div>
 
     <div class="preview-pane">
         <div class="toolbar">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 8px; height: 8px; background: var(--accent); border-radius: 50%;"></div>
-                <span style="font-size: 11px; font-weight: 800; color: var(--dim); letter-spacing: 1px;">LIVE THEME PREVIEW</span>
-            </div>
-            <button class="btn btn-outline" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+            <span style="font-size: 12px; color: var(--dim);">PREVIEW MODE</span>
+            <button class="btn btn-outline" onclick="toggleFullscreen()">⛶ Fullscreen Preview</button>
         </div>
         <div id="wrapper" class="iframe-wrap">
             <iframe id="pre-frame"></iframe>
         </div>
     </div>
 
-    <button id="close-fs" class="btn" onclick="toggleFullscreen()">✕ Exit Fullscreen</button>
+    <button id="close-fs" class="btn" onclick="toggleFullscreen()">Exit Fullscreen</button>
 
     <script>
         function generateFullHTML() {
+            const nav = document.getElementById('in-nav').value || 'Article';
             const title = document.getElementById('in-title').value || 'Headline';
             const img = document.getElementById('in-img').value;
-            const meta = document.getElementById('in-meta').value;
+            const alt = document.getElementById('in-alt').value;
             const body = document.getElementById('in-body').value;
             const content = document.getElementById('in-content').value;
 
-            // This template uses your specific site IDs and Classes
             return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title} | Recycle STL</title>
-    
+    <title>Recycle STL | ${title}</title>
     <link rel="stylesheet" href="./style.css">
-    
     <style>
-        /* Article-specific theme refinements */
-        body { background: var(--bg); color: var(--text); }
-        .article-header { padding: 100px 20px 60px; text-align: center; max-width: 900px; margin: 0 auto; }
-        .article-header h1 { font-size: 3.5rem; color: #fff; margin-bottom: 20px; line-height: 1.1; letter-spacing: -1px; }
-        .article-meta { color: var(--accent); font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
-        
-        .article-hero-box { max-width: 1100px; margin: 0 auto 60px; padding: 0 20px; }
-        .article-hero-img { width: 100%; height: 500px; object-fit: cover; border-radius: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); border: 1px solid var(--border); }
-        
-        .article-main { max-width: 750px; margin: 0 auto; padding: 0 25px 100px; }
-        .article-lead { font-size: 1.4rem; line-height: 1.6; color: #fff; margin-bottom: 40px; font-weight: 300; border-left: 3px solid var(--accent); padding-left: 30px; }
-        .article-body { line-height: 1.9; color: var(--text-dim); font-size: 1.15rem; }
-        .article-body h2 { color: #fff; margin: 50px 0 20px; font-size: 2rem; }
-        .article-body p { margin-bottom: 25px; }
+        .article-hero { padding: 80px 20px; text-align: center; background: #000; border-bottom: 1px solid #222; }
+        .article-container { max-width: 800px; margin: 60px auto; padding: 0 25px; line-height: 1.8; color: #ccc; }
+        .article-img { width: 100%; border-radius: 16px; margin-bottom: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        h1 { font-size: 3rem; color: #fff; margin-bottom: 20px; }
+        .lead { font-size: 1.25rem; color: var(--accent, #10b981); margin-bottom: 40px; }
+        h3 { color: #fff; margin: 40px 0 20px; }
     </style>
 </head>
 <body>
-    <div id="header-placeholder"></div>
+    <header style="padding: 20px; text-align: center; border-bottom: 1px solid #222;">
+        <nav style="display: flex; justify-content: center; gap: 20px;">
+            <a href="/" style="color:#aaa; text-decoration:none;">Home</a>
+            <a href="#" style="color:var(--accent, #10b981); font-weight:bold; text-decoration:none;">${nav}</a>
+        </nav>
+    </header>
 
     <main>
-        <header class="article-header">
-            <div class="article-meta">${meta}</div>
+        <section class="article-hero">
             <h1>${title}</h1>
-        </header>
+            <p class="lead">${body}</p>
+        </section>
 
-        ${img ? `
-        <div class="article-hero-box">
-            <img src="${img}" class="article-hero-img" alt="Article Cover">
-        </div>` : ''}
-
-        <div class="article-main">
-            <div class="article-lead">${body}</div>
-            <div class="article-body">
+        <article class="article-container">
+            ${img ? `<img src="${img}" alt="${alt}" class="article-img">` : ''}
+            <div class="rich-text">
                 ${content}
             </div>
-        </div>
+        </article>
     </main>
 
-    <div id="footer-placeholder"></div>
-
-    <script src="./script.js"><\/script>
+    <footer style="padding: 60px 20px; text-align: center; color: #555; border-top: 1px solid #222;">
+        Metro Academic & Classical High School Advocacy Project
+    </footer>
 </body>
 </html>`;
         }
@@ -152,7 +143,7 @@
 
         function copyHTML() {
             navigator.clipboard.writeText(generateFullHTML());
-            alert("Themed HTML copied!");
+            alert("Full HTML page copied to clipboard!");
         }
 
         function downloadHTML() {
@@ -163,6 +154,7 @@
             link.click();
         }
 
+        // Initial preview
         update();
     </script>
 </body>
