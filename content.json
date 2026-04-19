@@ -159,12 +159,30 @@
   "contentBlocks": [
     {
       "label": "New interview",
-      "title": "Saint Louis's mayor on the state of recycling.",
-      "body": "we talk to the mayor ",
+      "title": "Saint Louis Has a Recycling Problem",
+      "body": "We talk to the mayor to learn more",
       "imageUrl": "https://media.istockphoto.com/id/1298167522/photo/compost-recycling-and-garbage-carts-set-outside.jpg?s=612x612&w=0&k=20&c=MJxfKzA1Cdz4nJtcWAbx_lolmb6H4vHOUeieMxtnEL4=",
       "buttonText": "Watch Now",
       "buttonUrl": "/interviews",
       "expandableBody": ""
+    },
+    {
+      "label": "New Update",
+      "title": "Recycling, the Transition",
+      "body": "St. Louis is in a weird spot right now",
+      "imageUrl": "https://external-preview.redd.it/1-month-in-st-louis-residents-frustrated-with-new-recycling-v0-Z2cH8sS20yIkU-NgyCmikhHnQ6lckuHty0xxuee2VCM.jpeg?width=640&crop=smart&auto=webp&s=e7c076aa8f71eda1da46d8c643a3b0a70346d159",
+      "buttonText": "",
+      "buttonUrl": "",
+      "expandableBody": "St. Louis is in a weird spot with its trash and recycling right now. Most people have noticed that we aren’t really using the old alleyway recycling system anymore. The city basically had to switch things up because the alley bins were getting way too much contamination. It’s actually really expensive; we spend a lot more trying to process messy recycling than we do just hauling away regular trash. If you want to make sure your stuff actually gets recycled, the \"St. Louis City Recycles\" site says you have to follow the rules, like never putting your items in plastic bags. They also have specific pickup days now, usually Monday and Friday or Tuesday and Thursday, depending on where you live. Local officials have said that this \"recycling revamp is already paying off\", but it really comes down to us. If citizens don’t do their part to sort things right, the whole system is basically \"impossible\" to pull off on a mass scale. Research suggests that \"formal recycling\" done by organized enterprises is much more efficient than informal or uncoordinated efforts. It is also important to recognize that a \"quiet revolution\" is happening in sorting technology, which might eventually help the city manage waste more effectively. Ultimately, the system is \"impossible\" to pull off on a mass scale without citizens doing their part to keep the stream clean. As the city looks toward the future, the goal is to close the gap between what we spend on waste versus what we can recover through a functional, citizen-supported system. Ultimately, the system is \"impossible\" to pull off on a mass scale without citizens doing their part to keep the stream clean. As the city looks toward the future, the goal is to close the gap between what we spend on waste versus what we can recover through a functional, citizen-supported system."
+    },
+    {
+      "label": "Insider Info",
+      "title": "New Content Block",
+      "body": "Learn how recycling helps the economy",
+      "imageUrl": "https://www.stlmag.com/wp-content/uploads/2025/10/recycling-drop-sites.webp",
+      "buttonText": "",
+      "buttonUrl": "",
+      "expandableBody": "Recycling isn't just a chore; it’s a vital part of a much larger system known as the Circular Economy. The general idea is that resources should be used repeatedly—essentially \"reusing items instead of discarding them after a single use\"—until they literally cannot be used anymore. The ultimate goal is to \"decrease the material disposed of, and the new products created\". Nationally, the EPA is pushing this through a \"National recycling goal\" to increase recycling rates by 50%. This is supported by the Save Our Seas 2.0 Act, a law passed by Congress to spark innovation and fund groups that help keep our oceans and environments clean. However, we have to be realistic because recycling is \"never perfect\". There is a big difference between closed-loop recycling, where a product (like a glass bottle) is turned back into the exact same thing, and open-loop or \"down-cycling\". In down-cycling, materials lose quality each time they are processed, eventually becoming \"lesser products\" that can't be reused again. This is a major challenge for plastics, which are made of complex polymers and \"additives\" like glass fiber that can make up 5% to 80% of the material. Despite these challenges, there are some really interesting things happening right here in Missouri. The Department of Natural Resources recently funded a \"study on the ability to use recycled tires in concrete\". The study found that using old tires actually makes concrete better at blocking out noise while allowing us to use less raw limestone. By focusing on these kinds of innovative, state-specific solutions, we can work toward a future where \"innovation\" and \"incentives\" finally help us tackle the piles of plastic waste we produce."
     }
   ]
 }
