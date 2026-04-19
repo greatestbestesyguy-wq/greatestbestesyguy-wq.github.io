@@ -74,24 +74,39 @@
 
         /* SMOOTH EXPANDABLE STYLES */
         .expand-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-bottom 0.4s ease-in-out;
-            opacity: 0;
-            padding: 0 20px;
-            background: rgba(0,0,0,0.2);
-            border-left: 4px solid var(--accent, #10b981);
-            border-radius: 6px;
-            color: var(--text, #fff);
-            white-space: pre-wrap;
-            margin-bottom: 0;
-        }
-        .expand-content.expanded {
-            max-height: 800px; /* arbitrary large height to accommodate content smoothly */
-            opacity: 1;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-bottom 0.4s ease-in-out;
+    opacity: 0;
+    padding: 0 20px;
+    background: rgba(0,0,0,0.2);
+    border-left: 4px solid var(--accent, #10b981);
+    border-radius: 6px;
+    color: var(--text-dim, #e4e4e7); 
+    font-size: 1.1rem;
+    line-height: 1.8; 
+    max-width: 75ch; 
+    white-space: pre-wrap;
+    margin-bottom: 0;
+}
+
+.expand-content.expanded {
+    max-height: 1500px; 
+    opacity: 1;
+    padding: 25px 30px; 
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .dynamic-block { 
+        padding: 20px; 
+    }
+    .expand-content.expanded {
+        padding: 15px; 
+        font-size: 1.05rem; 
+        line-height: 1.6;
+    }
+}
     </style>
 </head>
 <body>
