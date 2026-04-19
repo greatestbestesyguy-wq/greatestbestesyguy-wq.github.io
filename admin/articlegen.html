@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recycle STL | Article Builder</title>
+    <style>
+        :root { --bg: #09090b; --surface: #18181b; --border: #27272a; --accent: #10b981; --text: #f4f4f5; --text-dim: #a1a1aa; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; margin: 0; }
+        
+        /* Sidebar Controls */
+        .sidebar { width: 400px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
+        h1 { color: var(--accent); font-size: 1.5rem; margin-bottom: 20px; }
+        .field { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; }
+        input, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; font-family: inherit; }
+        textarea { height: 120px; resize: vertical; }
+        
+        /* Preview Area */
+        .preview-pane { flex: 1; display: flex; flex-direction: column; background: #000; }
+        .toolbar { padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        button { background: var(--accent); color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        iframe { flex: 1; border: none; background: #0a0a0a; }
+
+        /* Modal for Export */
+        #code-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; padding:40px; }
+        .modal-content { background:var(--surface); width:100%; max-width:800px; padding:20px; border-radius:12px; border:1px solid var(--border); }
+        pre { background:#000; padding:15px; overflow:auto; max-height:400px; border-radius:8px; font-size:12px; color:var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h1>Article Builder</h1>
+        
+        <div class="field">
+            <label>Article Title</label>
+            <input type="text" id="title" placeholder="e.g., The Crisis of Glass" oninput="update()">
+        </div>
+
+        <div class="field">
+            <label>Header Image URL</label>
+            <input type="text" id="image" placeholder="https://..." oninput="update()">
+        </div>
+
+        <div class="field">
+            <label>Author Name</label>
+            <input type="text" id="author" placeholder="Josh Massa" oninput="update()">
+        </div>
+
+        <div class="field">
+            <label>Introduction</label>
+            <textarea id="intro" placeholder="Summary of the issue..." oninput="update()"></textarea>
+        </div>
+
+        <div class="field">
+            <label>Main Content (HTML Allowed)</label>
+            <textarea id="content" placeholder="Detailed article text..." oninput="update()"></textarea>
+        </div>
+    </div>
+
+    <div class="preview-pane">
+        <div class="toolbar">
+            <span style="color:var(--text-dim); font-size:13px; padding-top:8px;">Live Preview</span>
+            <button onclick="showCode()">Get HTML Code</button>
+        </div>
+        <iframe id="preview"></iframe>
+    </div>
+
+    <div id="code-modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0">Generated HTML</h2>
+            <p style="color:var(--text-dim)">Copy this into a new .html file in your project.</p>
+            <pre id="code-output"></pre>
+            <button onclick="document.getElementById('code-modal').style.display='none'">Close</button>
+            <button onclick="copyCode()" style="background:#fff">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <script>
+        function generateHTML() {
+            const t = document.getElementById('title').value || "Article Title";
+            const img = document.getElementById('image').value || "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b";
+            const auth = document.getElementById('author').value || "Staff Writer";
+            const intro = document.getElementById('intro').value || "Beginning of the article...";
+            const body = document.getElementById('content').value || "Main body content goes here...";
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${t} | Recycle STL</title>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        .article-hero { height: 40vh; background: linear-gradient(rgba(0,0,0,0.6), #0a0a0a), url('${img}'); background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 40px; }
+        .content-wrap { max-width: 800px; margin: 0 auto; padding: 40px 20px; line-height: 1.8; color: #d1d1d1; font-size: 1.1rem; }
+        h1 { color: #00ff88; font-size: 3rem; margin: 0; }
+        .meta { color: #a0a0a0; margin-bottom: 30px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .intro { font-size: 1.4rem; color: #fff; margin-bottom: 40px; font-weight: 300; }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+    
+    <header class="article-hero">
+        <div>
+            <div class="meta">By ${auth} • Advocacy Project</div>
+            <h1>${t}</h1>
+        </div>
+    </header>
+
+    <main class="content-wrap">
+        <p class="intro">${intro}</p>
+        <div class="article-body">
+            ${body}
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="./script.js"><\/script>
+</body>
+</html>`;
+        }
+
+        function update() {
+            const frame = document.getElementById('preview');
+            frame.srcdoc = generateHTML();
+        }
+
+        function showCode() {
+            const modal = document.getElementById('code-modal');
+            const output = document.getElementById('code-output');
+            output.innerText = generateHTML();
+            modal.style.display = 'flex';
+        }
+
+        function copyCode() {
+            navigator.clipboard.writeText(generateHTML());
+            alert("Code copied!");
+        }
+
+        // Initial call
+        update();
+    </script>
+</body>
+</html>
