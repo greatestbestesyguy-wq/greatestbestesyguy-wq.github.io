@@ -47,16 +47,8 @@
   },
   "stats": [
     {
-      "value": "0",
-      "label": "Curbside Pickups Active"
-    },
-    {
-      "value": "14",
-      "label": "Drop-Off Locations"
-    },
-    {
-      "value": "100%",
-      "label": "User Responsibility"
+      "value": "17%",
+      "label": "Contamination rate"
     }
   ],
   "interview": {
