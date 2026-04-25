@@ -48,7 +48,11 @@
   "stats": [
     {
       "value": "17%",
-      "label": "Contamination rate"
+      "label": "Current stl contamination rate"
+    },
+    {
+      "value": "0",
+      "label": "Average recycling contamination in America"
     }
   ],
   "interview": {
