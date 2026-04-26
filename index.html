@@ -330,13 +330,7 @@
             }, 80);
         }
 
-        // --- POPUP BUG FIX ---
-        function closePopup() {
-            sessionStorage.setItem('notifClosed', 'true'); // Save state to browser session
-            const popup = document.getElementById('popup-notif');
-            if(popup) popup.style.display = 'none';
-        }
-
+      
         // --- EXISTING CONTENT LOGIC ---
         function renderContent(data) {
             window.siteContentBlocks = data.contentBlocks; 
