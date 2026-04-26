@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Works Cited | Recycle St. Louis</title>
+    <style>
+        /* --- GLOBAL RESETS (Matching your style) --- */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            background-color: #09090b;
+            color: #ffffff;
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        :root {
+            --accent: #10b981;
+            --surface: #18181b;
+            --border: #27272a;
+            --text-dim: #a1a1aa;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            margin-bottom: 50px;
+        }
+
+        /* --- CITATION BLOCKS --- */
+        .dynamic-block { 
+            width: 100%; 
+            margin-bottom: 30px; 
+            padding: 30px; 
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid var(--border); 
+            border-radius: 16px; 
+            transition: border-color 0.2s; 
+        }
+        .dynamic-block:hover { border-color: var(--accent); }
+
+        .citation-text {
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 20px;
+            padding-left: 2em;
+            text-indent: -2em; /* Hanging indent style for MLA */
+        }
+
+        /* --- EXPANDABLE SECTION --- */
+        .expand-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: all 0.4s ease-in-out; 
+            opacity: 0; 
+            background: rgba(0,0,0,0.2); 
+            border-left: 4px solid var(--accent); 
+            border-radius: 6px; 
+            color: var(--text-dim); 
+            font-size: 1rem; 
+        }
+        .expand-content.expanded { 
+            max-height: 1000px; 
+            opacity: 1; 
+            padding: 20px; 
+            margin-top: 20px;
+            margin-bottom: 10px; 
+        }
+
+        .action-btn { 
+            background: transparent; 
+            border: 1px solid var(--accent); 
+            color: var(--accent); 
+            cursor: pointer; 
+            font-weight: bold; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            transition: 0.2s; 
+            font-family: monospace;
+        }
+        .action-btn:hover { background: var(--accent); color: #000; }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Works Cited</h1>
+    <p class="subtitle">Research & Project Annotations</p>
+
+    <div class="dynamic-block">
+        <div class="citation-text">
+            Akenji, Lewis, et al. "Circular Economy and Plastics." <i>Circular Economy and Plastics: A Gap-Analysis in ASEAN Member States</i>, Institute for Global Environmental Strategies, 2019, pp. 14–20. JSTOR, http://www.jstor.org/stable/resrep21872.6. Accessed 24 Mar. 2026.
+        </div>
+        <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
+        <div class="expand-content">
+            This source is credible because it is a part of a book on the JSTOR website, which is a website well know for its credibility and the experts who write for it. So far, I have learned about the idea of a circular economy, which recycling plays a key role in. Essentially, a circular economy involves reusing items instead of discarding them after a single use, allowing them to offset the creation of new materials. I plan to use this source to explain why recycling is important and why citizens should be actively taking the necessary steps to have their items properly recycled.
+        </div>
+    </div>
+
+    <div class="dynamic-block">
+        <div class="citation-text">
+            Burcea, Ştefan Gabriel. "The Economical, Social and Environmental Implications of Informal Waste Collection and Recycling." <i>Theoretical and Empirical Researches in Urban Management</i>, vol. 10, no. 3, 2015, pp. 14–24. JSTOR, http://www.jstor.org/stable/24873532. Accessed 27 Mar. 2026.
+        </div>
+        <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
+        <div class="expand-content">
+            The main topic of the article is the difference between informal and formal recycling. Formal recycling is done by enterprises and is much more efficient. I would like to inform people about how important it is for companies and larger groups to ensure the waste they create is dealt with responsibly. For example, a factory might make things from plastic in molds, but each piece will have some waste.
+        </div>
+    </div>
+
+    <div class="dynamic-block">
+        <div class="citation-text">
+            Carey, John. "On the Brink of a Recycling Revolution?" <i>Proceedings of the National Academy of Sciences of the United States of America</i>, vol. 114, no. 4, 2017, pp. 612–16. JSTOR, https://www.jstor.org/stable/26479025. Accessed 27 Mar. 2026.
+        </div>
+        <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
+        <div class="expand-content">
+            I learned that the MBA director Mike Biddle says that they are going through a “quiet revolution” in the technology of product sorting. Saint Louis could take some of this new technology to increase the amount of contamination allowed in bins. The current problem is people putting trash into recycling bins; if new technology could filter it out, we could simplify our recycling process significantly.
+        </div>
+    </div>
+
+    <div class="dynamic-block">
+        <div class="citation-text">
+            "City Dumpsters and Rollcarts - Saint Louis City Recycles." <i>Saint Louis City Recycles</i>, 9 Mar. 2026, stlcityrecycles.com. Accessed 29 Mar. 2026.
+        </div>
+        <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
+        <div class="expand-content">
+            This source is the official recycling website for Saint Louis. I would like to use this to inform people about how they should recycle to ensure their efforts do not go to waste. A key insight: "The City of St. Louis has shifted from alley recycling to drop-off recycling due to ineffectiveness and high costs." This change is the highlight of our advocacy project.
+        </div>
+    </div>
+
+    <div class="dynamic-block">
+        <div class="citation-text">
+            Cityofstlouismissouri. "Public Infrastructure & Utilities Committee – August 14, 2025." <i>YouTube</i>, 14 Aug. 2025, www.youtube.com/watch?v=crYaIlizSxU.
+        </div>
+        <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
+        <div class="expand-content">
+            This source is a filming of a meeting where representatives give important insights into recycling in Saint Louis. Our main plan is to use this source to explain why Saint Louis no longer has an alleyway recycling system, diving into specific stats. We also want to use clips in our video to add credibility.
+        </div>
+    </div>
+
+    <div class="dynamic-block">
+        <div class="citation-text">
+            Krull, Ryan. "St. Louis Officials Say Recycling Revamp Is Already Paying Off." <i>St. Louis Magazine</i>, 29 Oct. 2025, www.stlmag.com/news/stlouis-recycling-drop-sites-results/.
+        </div>
+        <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
+        <div class="expand-content">
+            This article includes professional insight and quotes from local officials like Cara Spencer. While it claims the revamp is paying off, we noted that some stats may be misleading, which we plan to address in our mayor interview.
+        </div>
+    </div>
+
+    <div class="dynamic-block">
+        <div class="citation-text">
+            Spencer, Cara. Personal Interview. 5 April 2026.
+        </div>
+        <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
+        <div class="expand-content">
+            We chose to interview the current mayor (Cara Spencer). A good quote from Spencer is: “Young people can improve what goes into landfills by consuming less, buying stuff secondhand, and looking for ways in which you can prevent things from being made to begin with.”
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Recycle St. Louis Advocacy Project
+    </footer>
+</div>
+
+<script>
+    function toggleExpand(btn) {
+        const content = btn.nextElementSibling;
+        content.classList.toggle('expanded');
+        btn.innerText = content.classList.contains('expanded') ? "- Hide Analysis" : "+ View Analysis";
+    }
+</script>
+
+</body>
+</html>
