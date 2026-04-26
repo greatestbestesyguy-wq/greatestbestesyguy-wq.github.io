@@ -28,7 +28,7 @@
     <style>
         /* --- GLOBAL RESETS --- */
         *, *::before, *::after {
-            box-sizing: border-box; /* Crucial for keeping padding inside max-width */
+            box-sizing: border-box; 
         }
 
         :root {
@@ -40,16 +40,33 @@
             --danger: #ef4444;
         }
 
+        /* --- SHARE BUTTON (TOP RIGHT) --- */
+        #share-site-btn {
+            position: fixed; top: 20px; right: 20px;
+            background: rgba(16, 185, 129, 0.15); color: var(--accent);
+            border: 1px solid var(--accent); border-radius: 8px;
+            padding: 8px 16px; font-weight: bold; cursor: pointer;
+            z-index: 10001; transition: 0.2s; backdrop-filter: blur(5px);
+        }
+        #share-site-btn:hover { background: var(--accent); color: #000; }
+
+        /* --- POPUP NOTIFICATION (OFFSET BELOW SHARE) --- */
+        #popup-notif { 
+            position: fixed; top: 75px; right: 20px; 
+            background: var(--surface); color: var(--text); 
+            padding: 15px 20px; /* Reduced padding so it's not too tall */
+            border-radius: 12px; z-index: 10000; 
+            border: 1px solid var(--accent); box-shadow: 0 8px 25px rgba(0,0,0,0.6); 
+            width: max-content; max-width: 320px; 
+        }
+        .close-notif { position: absolute; top: 5px; right: 10px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-dim); transition: 0.2s; }
+        .close-notif:hover { color: var(--danger); }
+        .popup-link { color: var(--accent); font-weight: bold; text-decoration: none; display: inline-block; margin-top: 8px; }
+
         /* --- HACKER TERMINAL --- */
         #hacker-terminal {
-            display: none;
-            position: fixed; inset: 0;
-            background: rgba(0, 10, 0, 0.95);
-            z-index: 9999;
-            color: #0f0;
-            font-family: 'Courier New', monospace;
-            padding: 40px; overflow: hidden;
-            border: 4px solid #050;
+            display: none; position: fixed; inset: 0; background: rgba(0, 10, 0, 0.95); z-index: 99999;
+            color: #0f0; font-family: 'Courier New', monospace; padding: 40px; overflow: hidden; border: 4px solid #050;
         }
         .terminal-header { border-bottom: 2px solid #050; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .terminal-header span { font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
@@ -61,15 +78,8 @@
         #code-scroll { position: absolute; right: 40px; top: 80px; width: 45%; height: 80vh; color: rgba(0, 255, 0, 0.4); font-size: 11px; white-space: pre; overflow: hidden; border-left: 1px solid #050; padding-left: 20px; }
         .close-terminal { color: #0f0; background: none; border: none; font-size: 24px; cursor: pointer; }
         
-        /* --- POPUP NOTIFICATION --- */
-        /* Moved to top right to avoid clashing with Netlify Identity and Scroll Indicator */
-        #popup-notif { position: fixed; top: 20px; right: 20px; background: var(--surface); color: var(--text); padding: 25px; border-radius: 12px; z-index: 10000; border: 2px solid var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 320px; }
-        .close-notif { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-dim); transition: 0.2s; }
-        .close-notif:hover { color: var(--danger); }
-        .popup-link { color: var(--accent); font-weight: bold; text-decoration: none; display: inline-block; margin-top: 10px; }
-        
         /* --- MAIN CONTENT & DYNAMIC BLOCKS --- */
-        #main-content { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        #main-content { display: flex; flex-direction: column; align-items: center; width: 100%; padding-top: 20px; }
         
         .dynamic-block { 
             max-width: 800px; width: 100%; 
@@ -81,27 +91,28 @@
         }
         .dynamic-block:hover { border-color: var(--accent); }
 
-        /* Extracted JS Inline Styles */
-        .block-label { color: var(--accent); font-weight: 800; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 10px; letter-spacing: 1.5px; }
+        .block-label { color: var(--accent); font-weight: 800; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 10px; letter-spacing: 1.5px; text-align: center; }
         .block-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .block-title { margin-bottom: 15px; font-size: 1.8rem; }
+        .block-title { margin-bottom: 15px; font-size: 1.8rem; text-align: center; }
         .block-body { margin-bottom: 20px; line-height: 1.6; color: var(--text-dim); font-size: 1.1rem; }
         
-        /* Hero Buttons */
-        .hero-btn { padding: 12px 24px; background: var(--accent); color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.2s; }
+        /* Buttons */
+        .hero-btn { padding: 12px 24px; background: var(--accent); color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.2s; display: inline-block; }
+        .hero-btn:hover { box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
         
-        /* Article Buttons */
-        .action-group { margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; }
+        /* Centered action group */
+        .action-group { margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; align-items: center; }
         .action-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); cursor: pointer; font-weight: bold; padding: 10px 20px; border-radius: 8px; transition: 0.2s; text-decoration: none; display: inline-block; }
         .action-btn:hover { background: var(--accent); color: #000; }
         .action-btn.secondary { border-color: #3f3f46; color: #e4e4e7; }
         .action-btn.secondary:hover { background: #3f3f46; color: #fff; }
 
         /* --- EXPANDABLE STYLES (DESKTOP) --- */
-        .expand-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-bottom 0.4s ease-in-out; opacity: 0; padding: 0 20px; background: rgba(0,0,0,0.2); border-left: 4px solid var(--accent); border-radius: 6px; color: #e4e4e7; font-size: 1.1rem; line-height: 1.8; max-width: 75ch; white-space: pre-wrap; margin-bottom: 0; }
-        .expand-content.expanded { max-height: 2500px; opacity: 1; padding: 25px 30px; margin-bottom: 20px; }
+        .expand-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-bottom 0.4s ease-in-out; opacity: 0; padding: 0 20px; background: rgba(0,0,0,0.2); border-left: 4px solid var(--accent); border-radius: 6px; color: #e4e4e7; font-size: 1.1rem; line-height: 1.8; max-width: 100%; white-space: pre-wrap; margin-bottom: 0; }
+        .expand-content.expanded { max-height: 3500px; opacity: 1; padding: 25px 30px; margin-bottom: 20px; }
+        .inline-sources-container { margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; text-align: center; }
 
-        /* --- MODAL STYLES (MOBILE) --- */
+        /* --- MODAL STYLES --- */
         #article-modal { visibility: hidden; opacity: 0; pointer-events: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 20000; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px; transition: opacity 0.3s ease, visibility 0.3s ease; }
         #article-modal.show { visibility: visible; opacity: 1; pointer-events: auto; }
         .modal-content-box { background: #111; width: 100%; max-width: 750px; max-height: 85vh; border: 1px solid var(--accent); border-radius: 15px; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0, 255, 136, 0.2); transform: translateY(30px) scale(0.95); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -110,8 +121,8 @@
         .modal-close { background: none; border: none; color: #fff; font-size: 30px; cursor: pointer; line-height: 1; transition: 0.2s; }
         .article-text { font-family: 'Inter', -apple-system, sans-serif; max-width: 65ch; margin: 0 auto; white-space: pre-wrap; }
 
-        .mobile-article-actions { margin-top: 30px; padding-top: 25px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 12px; }
-        .mobile-article-actions a { text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.05rem; transition: 0.2s; }
+        .modal-actions { margin-top: 30px; padding-top: 25px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 12px; }
+        .modal-actions a { text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.05rem; transition: 0.2s; }
         .btn-recycle { background: rgba(16, 185, 129, 0.1); color: var(--accent); border: 1px solid var(--accent); }
         .btn-recycle:hover { background: var(--accent); color: #000; }
         .btn-sources { background: rgba(255, 255, 255, 0.05); color: #e4e4e7; border: 1px solid #3f3f46; }
@@ -129,15 +140,22 @@
 
         /* --- RESPONSIVE ADJUSTMENTS --- */
         @media (max-width: 768px) {
+            /* Kill the notification completely on mobile */
+            #popup-notif { display: none !important; }
+            
             .dynamic-block { padding: 20px; }
             .modal-content-box { max-height: 90vh; }
             #modal-body-content { padding: 20px !important; font-size: 1.05rem !important; }
             .mobile-scroll-indicator { display: block; }
-            .hide-on-mobile { display: none !important; } /* Hides desktop sources button */
+            
+            /* Hide desktop specific buttons on mobile */
+            .hide-on-mobile { display: none !important; } 
         }
     </style>
 </head>
 <body>
+
+    <button id="share-site-btn" onclick="shareSite()">Share ↗</button>
 
     <div id="hacker-terminal">
         <div class="scanline"></div>
@@ -161,16 +179,16 @@
 
     <div id="popup-notif" style="display:none;">
         <button class="close-notif" onclick="closePopup()">×</button>
-        <div id="popup-content" style="margin-top: 5px; font-size: 14.5px; line-height: 1.5;"></div>
+        <div id="popup-content" style="margin-top: 5px; font-size: 14px; line-height: 1.4;"></div>
     </div>
 
     <div class="container">
         <div id="header-placeholder"></div>
 
         <main id="main-content">
-            <h1 id="hero-title"></h1>
-            <p id="hero-tagline" class="tagline"></p>
-            <div id="hero-buttons" style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;"></div>
+            <h1 id="hero-title" style="text-align:center;"></h1>
+            <p id="hero-tagline" class="tagline" style="text-align:center;"></p>
+            <div id="hero-buttons" class="action-group" style="margin-top: 20px;"></div>
 
             <div id="stats-grid" class="stats-grid"></div>
 
@@ -197,7 +215,7 @@
                 <img id="modal-image" class="block-img" src="" style="display:none;">
                 <div id="modal-text" class="article-text"></div>
                 
-                <div class="mobile-article-actions">
+                <div class="modal-actions">
                     <a href="/maps" class="btn-recycle">Recycle Now</a>
                     <a href="/sources" class="btn-sources">View Sources</a>
                 </div>
@@ -207,18 +225,34 @@
 
     <script src="./script.js"></script>
     <script>
+        // --- SHARE BUTTON LOGIC ---
+        function shareSite() {
+            const shareData = {
+                title: document.title,
+                text: 'Check out Recycle St. Louis!',
+                url: window.location.href
+            };
+            if (navigator.share) {
+                navigator.share(shareData).catch(err => console.log('Error sharing:', err));
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert("Link copied to clipboard!");
+            }
+        }
+
         // --- HYBRID READ MORE LOGIC ---
         function handleReadMore(index, expId, btnEl) {
             if (window.innerWidth <= 768) {
-                openArticleModal(index);
+                openArticleModal(index); // Mobile defaults to modal
             } else {
+                // Desktop expands inline
                 const el = document.getElementById(expId);
                 el.classList.toggle('expanded');
                 btnEl.innerText = el.classList.contains('expanded') ? 'Read Less ↑' : 'Read More ↓';
             }
         }
 
-        // --- MODAL LOGIC (MOBILE) ---
+        // --- MODAL LOGIC ---
         function openArticleModal(index) {
             const block = window.siteContentBlocks[index];
             document.getElementById('modal-title').innerText = block.title || '';
@@ -312,7 +346,8 @@
                     let pLink = (data.popup.linkText && data.popup.linkUrl) ? `<br><a href="${data.popup.linkUrl}" class="popup-link">${data.popup.linkText} →</a>` : '';
                     popupContent.innerHTML = `<p style="margin-bottom:0;">${data.popup.message || ''}</p>${pLink}`;
                 }
-                if(popup) popup.style.display = 'block';
+                // Setting to empty string falls back to CSS, allowing media query to keep it hidden on mobile
+                if(popup) popup.style.display = ''; 
             } else {
                 if(popup) popup.style.display = 'none';
             }
@@ -334,7 +369,7 @@
                 }
             }
 
-            // Cleaned Up Main Content Logic
+            // Main Content Rendering
             const mainContent = document.getElementById('main-content');
             document.querySelectorAll('.dynamic-block').forEach(e => e.remove());
 
@@ -351,15 +386,18 @@
                     
                     if (block.expandableBody) {
                         const expId = 'exp-' + index;
-                        html += `<div id="${expId}" class="expand-content">${block.expandableBody}</div>`;
                         
-                        // Action buttons container
+                        // Sources button appended to the BOTTOM of the expanded text
+                        const sourcesBtnHtml = `<div class="inline-sources-container hide-on-mobile"><a href="/sources" class="action-btn secondary">View Sources</a></div>`;
+                        html += `<div id="${expId}" class="expand-content">${block.expandableBody}${sourcesBtnHtml}</div>`;
+                        
+                        // Action buttons centered below
                         html += `<div class="action-group">`;
                         html += `<button class="action-btn" onclick="handleReadMore(${index}, '${expId}', this)">Read More ↓</button>`;
-                        
-                        // Desktop Only Source Button
-                        html += `<a href="/sources" class="action-btn secondary hide-on-mobile">View Sources</a>`;
+                        // Desktop Fullscreen Button
+                        html += `<button class="action-btn hide-on-mobile" onclick="openArticleModal(${index})">Fullscreen ⛶</button>`;
                         html += `</div>`;
+                        
                     } else if (block.buttonText && block.buttonUrl) {
                         html += `<div class="action-group"><a href="${block.buttonUrl}" class="hero-btn">${block.buttonText}</a></div>`;
                     }
