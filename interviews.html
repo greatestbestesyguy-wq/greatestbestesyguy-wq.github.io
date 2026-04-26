@@ -138,3 +138,72 @@
             const videoIframe = document.getElementById('featured-video-iframe');
             
             if (page.featuredVideoUrl && page.featuredVideoUrl.trim() !== "") {
+                videoWrap.style.display = 'block';
+                // Only update src if it changed to avoid iframe flickering
+                if(videoIframe.src !== page.featuredVideoUrl) {
+                    videoIframe.src = page.featuredVideoUrl;
+                }
+            } else {
+                videoWrap.style.display = 'none';
+                videoIframe.src = "";
+            }
+
+            // Dynamic List
+            const listContainer = document.getElementById('interview-list');
+            listContainer.innerHTML = ''; 
+
+            page.entries.forEach(entry => {
+                const section = document.createElement('section');
+                section.className = 'interview-entry';
+                
+                // Build HTML for the new sources structure
+                let sourcesHtml = '';
+                if (entry.sources && entry.sources.length > 0) {
+                    const links = entry.sources.map(src => 
+                        `<a href="${src.url}" class="source-link" target="_blank">${src.title}</a>`
+                    ).join('');
+                    
+                    sourcesHtml = `
+                        <div class="sources-container">
+                            <h4>Explore the Sources</h4>
+                            <div class="sources-list">${links}</div>
+                            ${entry.worksCitedUrl ? `
+                                <div class="divider">&mdash; OR &mdash;</div>
+                                <a href="${entry.worksCitedUrl}" class="works-cited-btn" target="_blank">Download Works Cited 📄</a>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+
+                section.innerHTML = `
+                    <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">${entry.label}</span>
+                    <h3>${entry.title}</h3>
+                    <p>${entry.description}</p>
+                    ${sourcesHtml}
+                `;
+                listContainer.appendChild(section);
+            });
+        }
+
+        // INITIAL LOAD
+        async function loadInterviews() {
+            try {
+                const response = await fetch('./content.json');
+                const data = await response.json();
+                renderInterviews(data);
+            } catch (error) {
+                console.error("Error loading Interviews JSON:", error);
+            }
+        }
+
+        loadInterviews();
+
+        // --- CMS LISTENER ---
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'UPDATE_CONTENT') {
+                renderInterviews(event.data.data);
+            }
+        });
+    </script>
+</body>
+</html>
