@@ -8,12 +8,12 @@
       gtag('js', new Date());
       gtag('config', 'G-R1Y5DRSP21');
     </script>
-<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="shortcut icon" href="/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="Recycle St. Louis" />
-<link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Recycle St. Louis" />
+    <link rel="manifest" href="/site.webmanifest" />
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <meta charset="UTF-8">
@@ -26,256 +26,114 @@
     <meta name="description" id="meta-desc" content="">
 
     <style>
-        /* HACKER TERMINAL STYLES */
+        /* --- GLOBAL RESETS --- */
+        *, *::before, *::after {
+            box-sizing: border-box; /* Crucial for keeping padding inside max-width */
+        }
+
+        :root {
+            --accent: #10b981;
+            --surface: #18181b;
+            --border: #27272a;
+            --text: #ffffff;
+            --text-dim: #a1a1aa;
+            --danger: #ef4444;
+        }
+
+        /* --- HACKER TERMINAL --- */
         #hacker-terminal {
             display: none;
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: rgba(0, 10, 0, 0.95);
             z-index: 9999;
             color: #0f0;
             font-family: 'Courier New', monospace;
-            padding: 40px;
-            overflow: hidden;
+            padding: 40px; overflow: hidden;
             border: 4px solid #050;
         }
-
         .terminal-header { border-bottom: 2px solid #050; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .terminal-header span { font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
-        
-        .scanline {
-            width: 100%; height: 2px; background: rgba(0, 255, 0, 0.1); position: absolute;
-            top: 0; left: 0; pointer-events: none; animation: scan 4s linear infinite;
-        }
+        .scanline { width: 100%; height: 2px; background: rgba(0, 255, 0, 0.1); position: absolute; top: 0; left: 0; pointer-events: none; animation: scan 4s linear infinite; }
         @keyframes scan { from { top: 0; } to { top: 100%; } }
-
         .admin-links { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
-        .admin-links a, .admin-links button {
-            background: transparent; border: 1px solid #0f0; color: #0f0; padding: 12px;
-            text-decoration: none; text-align: left; cursor: pointer; font-family: monospace;
-            transition: 0.2s; max-width: 400px;
-        }
+        .admin-links a, .admin-links button { background: transparent; border: 1px solid #0f0; color: #0f0; padding: 12px; text-decoration: none; text-align: left; cursor: pointer; font-family: monospace; transition: 0.2s; max-width: 400px; }
         .admin-links a:hover, .admin-links button:hover { background: #0f0; color: #000; box-shadow: 0 0 15px #0f0; }
-
-        #code-scroll {
-            position: absolute; right: 40px; top: 80px; width: 45%; height: 80vh;
-            color: rgba(0, 255, 0, 0.4); font-size: 11px; white-space: pre;
-            overflow: hidden; border-left: 1px solid #050; padding-left: 20px;
-        }
-
+        #code-scroll { position: absolute; right: 40px; top: 80px; width: 45%; height: 80vh; color: rgba(0, 255, 0, 0.4); font-size: 11px; white-space: pre; overflow: hidden; border-left: 1px solid #050; padding-left: 20px; }
         .close-terminal { color: #0f0; background: none; border: none; font-size: 24px; cursor: pointer; }
         
-        /* POPUP & CONTENT STYLES */
-        #popup-notif { position: fixed; bottom: 20px; right: 20px; background: var(--surface, #18181b); color: var(--text, #fff); padding: 25px; border-radius: 12px; z-index: 10000; border: 2px solid var(--accent, #10b981); box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 320px; }
-        .close-notif { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-dim, #a1a1aa); transition: 0.2s; }
-        .close-notif:hover { color: var(--danger, #ef4444); }
+        /* --- POPUP NOTIFICATION --- */
+        /* Moved to top right to avoid clashing with Netlify Identity and Scroll Indicator */
+        #popup-notif { position: fixed; top: 20px; right: 20px; background: var(--surface); color: var(--text); padding: 25px; border-radius: 12px; z-index: 10000; border: 2px solid var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 320px; }
+        .close-notif { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-dim); transition: 0.2s; }
+        .close-notif:hover { color: var(--danger); }
+        .popup-link { color: var(--accent); font-weight: bold; text-decoration: none; display: inline-block; margin-top: 10px; }
         
-        .dynamic-block { max-width: 800px; width: 100%; margin: 0 auto 50px; padding: 30px; background: rgba(255,255,255,0.03); border: 1px solid var(--border, #27272a); border-radius: 16px; transition: transform 0.2s; }
-        .dynamic-block:hover { border-color: var(--accent, #10b981); }
-
-        /* DESKTOP LAYOUT WITH SIDEBAR */
-        .desktop-wrapper {
-            display: flex;
-            gap: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            align-items: flex-start;
-        }
+        /* --- MAIN CONTENT & DYNAMIC BLOCKS --- */
+        #main-content { display: flex; flex-direction: column; align-items: center; width: 100%; }
         
-        #main-content {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Centers dynamic blocks within main */
+        .dynamic-block { 
+            max-width: 800px; width: 100%; 
+            margin: 0 auto 50px; padding: 30px; 
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid var(--border); 
+            border-radius: 16px; 
+            transition: transform 0.2s; 
         }
+        .dynamic-block:hover { border-color: var(--accent); }
 
-        .desktop-sidebar {
-            display: none; /* Hidden on mobile */
-            width: 300px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border, #27272a);
-            border-radius: 12px;
-            padding: 25px;
-            position: sticky;
-            top: 20px;
-        }
-        .desktop-sidebar h3 { color: var(--accent, #10b981); margin-top: 0; margin-bottom: 15px; font-size: 1.2rem; }
-        .desktop-sidebar p { color: var(--text-dim, #e4e4e7); font-size: 0.95rem; line-height: 1.6; margin: 0; }
-
-        @media (min-width: 1024px) {
-            .desktop-sidebar { display: block; }
-            #main-content { align-items: flex-start; } /* Reset alignment so it looks natural next to sidebar */
-        }
-
-        /* SMOOTH EXPANDABLE STYLES (DESKTOP) */
-        .expand-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-bottom 0.4s ease-in-out;
-            opacity: 0;
-            padding: 0 20px;
-            background: rgba(0,0,0,0.2);
-            border-left: 4px solid var(--accent, #10b981);
-            border-radius: 6px;
-            color: var(--text-dim, #e4e4e7); 
-            font-size: 1.1rem;
-            line-height: 1.8; 
-            max-width: 75ch; 
-            white-space: pre-wrap;
-            margin-bottom: 0;
-        }
-
-        .expand-content.expanded {
-            max-height: 2500px;
-            opacity: 1;
-            padding: 25px 30px; 
-            margin-bottom: 20px;
-        }
-
-        /* MODAL ANIMATION & STYLES (MOBILE) */
-        #article-modal {
-            visibility: hidden;
-            opacity: 0;
-            pointer-events: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 20000;
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        #article-modal.show {
-            visibility: visible;
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content-box {
-            background: #111;
-            width: 100%;
-            max-width: 750px;
-            max-height: 85vh;
-            border: 1px solid var(--accent, #10b981);
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.2);
-            transform: translateY(30px) scale(0.95);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        #article-modal.show .modal-content-box {
-            transform: translateY(0) scale(1);
-        }
-
-        .article-text {
-            font-family: 'Inter', -apple-system, sans-serif;
-            max-width: 65ch;
-            margin: 0 auto;
-            white-space: pre-wrap;
-        }
-
-        /* MOBILE ARTICLE ACTION BUTTONS */
-        .mobile-article-actions {
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .mobile-article-actions a {
-            text-align: center;
-            padding: 14px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.05rem;
-            transition: 0.2s;
-        }
-
-        /* NAVIGATION BUTTONS */
-        .top-nav-bar {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border, #27272a);
-        }
+        /* Extracted JS Inline Styles */
+        .block-label { color: var(--accent); font-weight: 800; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 10px; letter-spacing: 1.5px; }
+        .block-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .block-title { margin-bottom: 15px; font-size: 1.8rem; }
+        .block-body { margin-bottom: 20px; line-height: 1.6; color: var(--text-dim); font-size: 1.1rem; }
         
-        .top-nav-bar a {
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.95rem;
-            transition: 0.2s;
-        }
-
-        .btn-recycle {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--accent, #10b981);
-            border: 1px solid var(--accent, #10b981);
-        }
+        /* Hero Buttons */
+        .hero-btn { padding: 12px 24px; background: var(--accent); color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.2s; }
         
-        .btn-recycle:hover { background: var(--accent, #10b981); color: #000; }
+        /* Article Buttons */
+        .action-group { margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; }
+        .action-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); cursor: pointer; font-weight: bold; padding: 10px 20px; border-radius: 8px; transition: 0.2s; text-decoration: none; display: inline-block; }
+        .action-btn:hover { background: var(--accent); color: #000; }
+        .action-btn.secondary { border-color: #3f3f46; color: #e4e4e7; }
+        .action-btn.secondary:hover { background: #3f3f46; color: #fff; }
 
-        .btn-sources {
-            background: rgba(255, 255, 255, 0.05);
-            color: #e4e4e7;
-            border: 1px solid #3f3f46;
-        }
+        /* --- EXPANDABLE STYLES (DESKTOP) --- */
+        .expand-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-bottom 0.4s ease-in-out; opacity: 0; padding: 0 20px; background: rgba(0,0,0,0.2); border-left: 4px solid var(--accent); border-radius: 6px; color: #e4e4e7; font-size: 1.1rem; line-height: 1.8; max-width: 75ch; white-space: pre-wrap; margin-bottom: 0; }
+        .expand-content.expanded { max-height: 2500px; opacity: 1; padding: 25px 30px; margin-bottom: 20px; }
 
+        /* --- MODAL STYLES (MOBILE) --- */
+        #article-modal { visibility: hidden; opacity: 0; pointer-events: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 20000; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px; transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #article-modal.show { visibility: visible; opacity: 1; pointer-events: auto; }
+        .modal-content-box { background: #111; width: 100%; max-width: 750px; max-height: 85vh; border: 1px solid var(--accent); border-radius: 15px; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0, 255, 136, 0.2); transform: translateY(30px) scale(0.95); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        #article-modal.show .modal-content-box { transform: translateY(0) scale(1); }
+        .modal-header { padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .modal-close { background: none; border: none; color: #fff; font-size: 30px; cursor: pointer; line-height: 1; transition: 0.2s; }
+        .article-text { font-family: 'Inter', -apple-system, sans-serif; max-width: 65ch; margin: 0 auto; white-space: pre-wrap; }
+
+        .mobile-article-actions { margin-top: 30px; padding-top: 25px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 12px; }
+        .mobile-article-actions a { text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.05rem; transition: 0.2s; }
+        .btn-recycle { background: rgba(16, 185, 129, 0.1); color: var(--accent); border: 1px solid var(--accent); }
+        .btn-recycle:hover { background: var(--accent); color: #000; }
+        .btn-sources { background: rgba(255, 255, 255, 0.05); color: #e4e4e7; border: 1px solid #3f3f46; }
         .btn-sources:hover { background: #3f3f46; color: #fff; }
 
-        /* MOBILE SCROLL INDICATOR */
-        .mobile-scroll-indicator {
-            display: none;
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent, #10b981);
-            color: #000;
-            padding: 10px 24px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            z-index: 9000; /* Stays below the modal */
-            pointer-events: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            animation: bounce 2s infinite;
-            transition: opacity 0.3s ease, visibility 0.3s;
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        /* Only show if indicator is flagged visible and the modal is NOT open */
-        body:not(.modal-open) .mobile-scroll-indicator.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        @media (max-width: 768px) {
-            .mobile-scroll-indicator { display: block; }
-            .dynamic-block { padding: 20px; }
-            .modal-content-box { max-height: 90vh; }
-            #modal-body-content { padding: 20px !important; font-size: 1.05rem !important; }
-            .top-nav-bar { flex-direction: column; text-align: center; }
-        }
+        /* --- MOBILE SCROLL INDICATOR --- */
+        .mobile-scroll-indicator { display: none; position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #000; padding: 10px 24px; border-radius: 30px; font-size: 0.9rem; font-weight: bold; z-index: 9000; pointer-events: none; box-shadow: 0 5px 15px rgba(0,0,0,0.4); animation: bounce 2s infinite; transition: opacity 0.3s ease, visibility 0.3s; opacity: 0; visibility: hidden; }
+        body:not(.modal-open) .mobile-scroll-indicator.visible { opacity: 1; visibility: visible; }
 
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
             40% { transform: translateY(-10px) translateX(-50%); }
             60% { transform: translateY(-5px) translateX(-50%); }
+        }
+
+        /* --- RESPONSIVE ADJUSTMENTS --- */
+        @media (max-width: 768px) {
+            .dynamic-block { padding: 20px; }
+            .modal-content-box { max-height: 90vh; }
+            #modal-body-content { padding: 20px !important; font-size: 1.05rem !important; }
+            .mobile-scroll-indicator { display: block; }
+            .hide-on-mobile { display: none !important; } /* Hides desktop sources button */
         }
     </style>
 </head>
@@ -287,11 +145,9 @@
             <span>[ SYSTEM OVERRIDE: AUTHORIZED ACCESS ]</span>
             <button class="close-terminal" onclick="toggleTerminal(false)">×</button>
         </div>
-
         <div id="terminal-content">
             <p>> root@recycle-stl:~# access_granted</p>
             <p>> initializing admin_panel_v3.0...</p>
-            
             <div class="admin-links">
                 <a href="/admin/test">> 📂 VIEW TEST PAGE</a>
                 <a href="/admin">> ⚡ OPEN ADMIN STUDIO</a>
@@ -300,7 +156,6 @@
                 <button onclick="startHackerTyper()">> 💾 INITIALIZE DECRYPTION SEQUENCER</button>
             </div>
         </div>
-
         <div id="code-scroll"></div>
     </div>
 
@@ -312,24 +167,17 @@
     <div class="container">
         <div id="header-placeholder"></div>
 
-        <div class="desktop-wrapper">
-            <main id="main-content">
-                <h1 id="hero-title"></h1>
-                <p id="hero-tagline" class="tagline"></p>
-                <div id="hero-buttons" style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;"></div>
+        <main id="main-content">
+            <h1 id="hero-title"></h1>
+            <p id="hero-tagline" class="tagline"></p>
+            <div id="hero-buttons" style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;"></div>
 
-                <div id="stats-grid" class="stats-grid"></div>
+            <div id="stats-grid" class="stats-grid"></div>
 
-                <section id="interview-container" class="interview-section" style="display:none;"></section>
-                <section id="article-section" style="display:none;"></section>
-                <div id="additional-articles-container" style="display:none;"></div>
-            </main>
-
-            <aside class="desktop-sidebar">
-                <h3>Keep Exploring</h3>
-                <p>Don't stop at the top! Scroll down to uncover more resources, tips, and articles about recycling in St. Louis. Every bit of knowledge helps keep our city green.</p>
-            </aside>
-        </div>
+            <section id="interview-container" class="interview-section" style="display:none;"></section>
+            <section id="article-section" style="display:none;"></section>
+            <div id="additional-articles-container" style="display:none;"></div>
+        </main>
 
         <div id="footer-placeholder"></div>
     </div>
@@ -340,13 +188,13 @@
 
     <div id="article-modal">
         <div class="modal-content-box">
-            <div style="padding:20px; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
-                <span id="modal-label" style="color:var(--accent, #10b981); font-size:12px; text-transform:uppercase; letter-spacing:2px; font-weight:800;">Article</span>
-                <button onclick="closeArticleModal()" style="background:none; border:none; color:#fff; font-size:30px; cursor:pointer; line-height:1; transition: 0.2s;">&times;</button>
+            <div class="modal-header">
+                <span id="modal-label" class="block-label" style="margin-bottom:0;">Article</span>
+                <button onclick="closeArticleModal()" class="modal-close">&times;</button>
             </div>
             <div id="modal-body-content" style="padding:30px; overflow-y:auto; color:#eee; font-size:1.1rem; line-height:1.8;">
-                <h2 id="modal-title" style="margin-bottom:20px; color:#fff; font-size: 1.8rem; text-align: center;"></h2>
-                <img id="modal-image" src="" style="width:100%; max-height:300px; object-fit:cover; border-radius:12px; margin-bottom:20px; display:none;">
+                <h2 id="modal-title" class="block-title" style="color:#fff; text-align: center;"></h2>
+                <img id="modal-image" class="block-img" src="" style="display:none;">
                 <div id="modal-text" class="article-text"></div>
                 
                 <div class="mobile-article-actions">
@@ -361,11 +209,9 @@
     <script>
         // --- HYBRID READ MORE LOGIC ---
         function handleReadMore(index, expId, btnEl) {
-            // Check if device is mobile width
             if (window.innerWidth <= 768) {
                 openArticleModal(index);
             } else {
-                // Desktop: Expand inline
                 const el = document.getElementById(expId);
                 el.classList.toggle('expanded');
                 btnEl.innerText = el.classList.contains('expanded') ? 'Read Less ↑' : 'Read More ↓';
@@ -379,7 +225,6 @@
             document.getElementById('modal-label').innerText = block.label || 'Article';
             document.getElementById('modal-text').innerHTML = block.expandableBody;
             
-            // Image Integration
             const modalImg = document.getElementById('modal-image');
             if (block.imageUrl) {
                 modalImg.src = block.imageUrl;
@@ -391,7 +236,7 @@
             const modal = document.getElementById('article-modal');
             modal.classList.add('show');
             document.body.style.overflow = 'hidden'; 
-            document.body.classList.add('modal-open'); // Helps hide scroll indicator
+            document.body.classList.add('modal-open'); 
         }
 
         function closeArticleModal() {
@@ -401,11 +246,15 @@
             document.body.classList.remove('modal-open');
         }
 
+        function closePopup() {
+            document.getElementById('popup-notif').style.display = 'none';
+            sessionStorage.setItem('notifClosed', 'true');
+        }
+
         // --- MOBILE SCROLL INDICATOR LOGIC ---
         window.addEventListener('scroll', () => {
             const indicator = document.getElementById('mobile-scroll-indicator');
             if (indicator && window.innerWidth <= 768) {
-                // Hide indicator if user scrolls close to the bottom (within 150px)
                 if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 150) {
                     indicator.classList.remove('visible');
                 } else {
@@ -419,16 +268,13 @@
         window.addEventListener("keydown", (e) => {
             inputString += e.key.toLowerCase();
             if (inputString.length > 10) inputString = inputString.substring(1);
-            
             if (inputString.endsWith("admin")) {
                 toggleTerminal(true);
                 inputString = "";
             }
         });
 
-        function toggleTerminal(show) {
-            document.getElementById('hacker-terminal').style.display = show ? 'block' : 'none';
-        }
+        function toggleTerminal(show) { document.getElementById('hacker-terminal').style.display = show ? 'block' : 'none'; }
 
         function startHackerTyper() {
             const codeBox = document.getElementById('code-scroll');
@@ -442,16 +288,13 @@
                 "sudo rm -rf /var/log/access_logs",
                 "Packet injection successful at port 8080..."
             ];
-            
-            let i = 0;
             setInterval(() => {
                 codeBox.innerText += "\n" + codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
                 codeBox.scrollTop = codeBox.scrollHeight;
             }, 80);
         }
 
-      
-        // --- EXISTING CONTENT LOGIC ---
+        // --- CONTENT RENDERING ---
         function renderContent(data) {
             window.siteContentBlocks = data.contentBlocks; 
 
@@ -461,12 +304,12 @@
             if(metaTitle) metaTitle.content = data.metadata.metaTitle;
             if(metaDesc) metaDesc.content = data.metadata.metaDescription;
 
+            // Popup Logic
             const popup = document.getElementById('popup-notif');
-            // Check session storage so it doesn't reopen if closed before load
             if (data.popup && data.popup.enabled && !sessionStorage.getItem('notifClosed')) {
                 const popupContent = document.getElementById('popup-content');
                 if(popupContent) {
-                    let pLink = (data.popup.linkText && data.popup.linkUrl) ? `<br><br><a href="${data.popup.linkUrl}" style="color: var(--accent, #10b981); font-weight: bold; text-decoration: none; display: inline-block;">${data.popup.linkText} →</a>` : '';
+                    let pLink = (data.popup.linkText && data.popup.linkUrl) ? `<br><a href="${data.popup.linkUrl}" class="popup-link">${data.popup.linkText} →</a>` : '';
                     popupContent.innerHTML = `<p style="margin-bottom:0;">${data.popup.message || ''}</p>${pLink}`;
                 }
                 if(popup) popup.style.display = 'block';
@@ -474,9 +317,9 @@
                 if(popup) popup.style.display = 'none';
             }
 
+            // Hero Logic
             document.getElementById('hero-title').innerText = data.hero.title;
             document.getElementById('hero-tagline').innerText = data.hero.tagline;
-            
             const btnContainer = document.getElementById('hero-buttons');
             if (btnContainer) {
                 btnContainer.innerHTML = '';
@@ -485,26 +328,14 @@
                         const a = document.createElement('a');
                         a.href = btn.url || '#';
                         a.innerText = btn.text || 'Click Here';
-                        a.className = 'btn-primary'; 
-                        a.style = "padding: 12px 24px; background: var(--accent, #10b981); color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.2s;";
+                        a.className = 'hero-btn'; 
                         btnContainer.appendChild(a);
                     });
                 }
             }
 
-            const statsGrid = document.getElementById('stats-grid');
-            if(statsGrid && data.stats) {
-                statsGrid.innerHTML = ''; 
-                data.stats.forEach(stat => {
-                    const card = document.createElement('div');
-                    card.className = 'stat-card';
-                    card.innerHTML = `<h2>${stat.value}</h2><p>${stat.label}</p>`;
-                    statsGrid.appendChild(card);
-                });
-            }
-
+            // Cleaned Up Main Content Logic
             const mainContent = document.getElementById('main-content');
-            // Don't remove the top nav bar when clearing old dynamic blocks
             document.querySelectorAll('.dynamic-block').forEach(e => e.remove());
 
             if (data.contentBlocks) {
@@ -513,21 +344,24 @@
                     sec.className = 'dynamic-block';
                     
                     let html = '';
-                    if (block.label) html += `<span style="color:var(--accent, #10b981); font-weight:800; font-size:12px; text-transform:uppercase; display:block; margin-bottom:10px; letter-spacing:1.5px;">${block.label}</span>`;
-                    if (block.imageUrl) html += `<img src="${block.imageUrl}" style="width:100%; max-height: 400px; object-fit: cover; border-radius:12px; margin-bottom:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">`;
-                    if (block.title) html += `<h2 style="margin-bottom:15px; font-size: 1.8rem;">${block.title}</h2>`;
-                    if (block.body) html += `<p style="margin-bottom:20px; line-height: 1.6; color: var(--text-dim, #ccc); font-size: 1.1rem;">${block.body}</p>`;
+                    if (block.label) html += `<span class="block-label">${block.label}</span>`;
+                    if (block.imageUrl) html += `<img src="${block.imageUrl}" class="block-img">`;
+                    if (block.title) html += `<h2 class="block-title">${block.title}</h2>`;
+                    if (block.body) html += `<p class="block-body">${block.body}</p>`;
                     
                     if (block.expandableBody) {
                         const expId = 'exp-' + index;
-                        // Put the expandable div here, but only trigger it on desktop
                         html += `<div id="${expId}" class="expand-content">${block.expandableBody}</div>`;
-                        // Updated button to call the new hybrid function
-                        html += `<button onclick="handleReadMore(${index}, '${expId}', this)" style="background:transparent; border: 1px solid var(--accent, #10b981); color:var(--accent, #10b981); cursor:pointer; font-weight:bold; padding:10px 20px; margin-right: 15px; margin-bottom: 20px; border-radius: 8px; transition: 0.2s;">Read More ↓</button>`;
-                    }
-
-                    if (block.buttonText && block.buttonUrl) {
-                        html += `<a href="${block.buttonUrl}" style="display:inline-block; padding:12px 24px; background:var(--accent, #10b981); color:#000; text-decoration:none; border-radius:8px; font-weight:bold; transition: 0.2s; margin-bottom: 20px;">${block.buttonText}</a>`;
+                        
+                        // Action buttons container
+                        html += `<div class="action-group">`;
+                        html += `<button class="action-btn" onclick="handleReadMore(${index}, '${expId}', this)">Read More ↓</button>`;
+                        
+                        // Desktop Only Source Button
+                        html += `<a href="/sources" class="action-btn secondary hide-on-mobile">View Sources</a>`;
+                        html += `</div>`;
+                    } else if (block.buttonText && block.buttonUrl) {
+                        html += `<div class="action-group"><a href="${block.buttonUrl}" class="hero-btn">${block.buttonText}</a></div>`;
                     }
                     
                     sec.innerHTML = html;
@@ -549,9 +383,7 @@
         loadPageData();
 
         window.addEventListener('message', (event) => {
-            if (event.data.type === 'UPDATE_CONTENT') {
-                renderContent(event.data.data);
-            }
+            if (event.data.type === 'UPDATE_CONTENT') renderContent(event.data.data);
         });
 
         if (window.netlifyIdentity) {
@@ -564,6 +396,5 @@
             });
         }
     </script>
-    <div id="footer-placeholder"></div>
 </body>
 </html>
