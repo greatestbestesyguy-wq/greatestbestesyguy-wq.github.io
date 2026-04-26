@@ -42,6 +42,62 @@
             border-bottom: 1px solid #222;
             padding-bottom: 40px;
         }
+        
+        /* New Styles for the Sources Layout */
+        .sources-container {
+            margin-top: 25px;
+            background-color: #111;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        .sources-container h4 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .sources-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .source-link {
+            color: inherit;
+            text-decoration: none;
+            padding: 12px 16px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        .source-link:hover {
+            background-color: #2a2a2a;
+            border-color: #444;
+        }
+        .works-cited-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: var(--accent, #4da6ff);
+            color: #000;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: opacity 0.2s;
+        }
+        .works-cited-btn:hover {
+            opacity: 0.85;
+        }
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #555;
+            font-size: 12px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -82,51 +138,3 @@
             const videoIframe = document.getElementById('featured-video-iframe');
             
             if (page.featuredVideoUrl && page.featuredVideoUrl.trim() !== "") {
-                videoWrap.style.display = 'block';
-                // Only update src if it changed to avoid iframe flickering
-                if(videoIframe.src !== page.featuredVideoUrl) {
-                    videoIframe.src = page.featuredVideoUrl;
-                }
-            } else {
-                videoWrap.style.display = 'none';
-                videoIframe.src = "";
-            }
-
-            // Dynamic List
-            const listContainer = document.getElementById('interview-list');
-            listContainer.innerHTML = ''; 
-
-            page.entries.forEach(entry => {
-                const section = document.createElement('section');
-                section.className = 'interview-entry';
-                section.innerHTML = `
-                    <span style="color:var(--accent); font-weight:bold; text-transform:uppercase; font-size:12px;">${entry.label}</span>
-                    <h3>${entry.title}</h3>
-                    <p>${entry.description}</p>
-                `;
-                listContainer.appendChild(section);
-            });
-        }
-
-        // INITIAL LOAD
-        async function loadInterviews() {
-            try {
-                const response = await fetch('./content.json');
-                const data = await response.json();
-                renderInterviews(data);
-            } catch (error) {
-                console.error("Error loading Interviews JSON:", error);
-            }
-        }
-
-        loadInterviews();
-
-        // --- CMS LISTENER ---
-        window.addEventListener('message', (event) => {
-            if (event.data.type === 'UPDATE_CONTENT') {
-                renderInterviews(event.data.data);
-            }
-        });
-    </script>
-</body>
-</html>
