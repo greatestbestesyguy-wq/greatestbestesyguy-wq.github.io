@@ -97,7 +97,30 @@
       {
         "label": "Government Policy",
         "title": "A Sit-down with Mayor Cara Spencer",
-        "description": "We discuss the difficult decision to suspend curbside pickup. <br> <br> <b>Sources (click on each source to see more)</b> <br> <br> <a href=\"https://stl.planet-recycling.pl/sources#spencer\" style=\"color: inherit; text-decoration: none;\">Interview 🔗</a> <br>\n<a href=\"https://stl.planet-recycling.pl/sources#echeverria\" style=\"color: inherit; text-decoration: none;\">Price comparison between virgin, and new materials (see at 0:40) 🔗</a>\n<br> <a href=\"https://stl.planet-recycling.pl/sources#city-youtube\" style=\"color: inherit; text-decoration: none;\">Fact checking spencer's contamination and other facts 🔗</a>\n<br> <a href=\"https://stl.planet-recycling.pl/sources#city-dumpsters\" style=\"color: inherit; text-decoration: none;\">More fact checking🔗</a>\n<br> </a>\n <a href=\"https://stl.planet-recycling.pl/sources#carey\" style=\"color: inherit; text-decoration: none;\">The rest of the information🔗</a>\n<br> <br> <b>OR<b> <br> <br> \n\n <a href=\"https://stl.planet-recycling.pl/Workscitedforvideo.pdf\" style=\"color: inherit; text-decoration: none;\">Download the works cited page for this interview🔗</a>\n"
+        "description": "We discuss the difficult decision to suspend curbside pickup.",
+        "sources": [
+          {
+            "title": "Interview 🔗",
+            "url": "https://stl.planet-recycling.pl/sources#spencer"
+          },
+          {
+            "title": "Price comparison between virgin, and new materials (see at 0:40) 🔗",
+            "url": "https://stl.planet-recycling.pl/sources#echeverria"
+          },
+          {
+            "title": "Fact checking Spencer's contamination and other facts 🔗",
+            "url": "https://stl.planet-recycling.pl/sources#city-youtube"
+          },
+          {
+            "title": "More fact checking 🔗",
+            "url": "https://stl.planet-recycling.pl/sources#city-dumpsters"
+          },
+          {
+            "title": "The rest of the information 🔗",
+            "url": "https://stl.planet-recycling.pl/sources#carey"
+          }
+        ],
+        "worksCitedUrl": "https://stl.planet-recycling.pl/Workscitedforvideo.pdf"
       }
     ]
   },
@@ -164,7 +187,7 @@
       "imageUrl": "https://external-preview.redd.it/1-month-in-st-louis-residents-frustrated-with-new-recycling-v0-Z2cH8sS20yIkU-NgyCmikhHnQ6lckuHty0xxuee2VCM.jpeg?width=640&crop=smart&auto=webp&s=e7c076aa8f71eda1da46d8c643a3b0a70346d159",
       "buttonText": "",
       "buttonUrl": "",
-      "expandableBody": "St. Louis is in a weird spot with its trash and recycling right now. Most people have noticed that we aren’t really using the old alleyway recycling system anymore. The city basically had to switch things up because the alley bins were getting way too much contamination. It’s actually really expensive; we spend a lot more trying to process messy recycling than we do just hauling away regular trash. If you want to make sure your stuff actually gets recycled, the \"St. Louis City Recycles\" site says you have to follow the rules, like never putting your items in plastic bags. They also have specific pickup days now, usually Monday and Friday or Tuesday and Thursday, depending on where you live. Local officials have said that this \"recycling revamp is already paying off\", but it really comes down to us. If citizens don’t do their part to sort things right, the whole system is basically \"impossible\" to pull off on a mass scale. Research suggests that \"formal recycling\" done by organized enterprises is much more efficient than informal or uncoordinated efforts. It is also important to recognize that a \"quiet revolution\" is happening in sorting technology, which might eventually help the city manage waste more effectively. Ultimately, the system is \"impossible\" to pull off on a mass scale without citizens doing their part to keep the stream clean. As the city looks toward the future, the goal is to close the gap between what we spend on waste versus what we can recover through a functional, citizen-supported system. Ultimately, the system is \"impossible\" to pull off on a mass scale without citizens doing their part to keep the stream clean. As the city looks toward the future, the goal is to close the gap between what we spend on waste versus what we can recover through a functional, citizen-supported system."
+      "expandableBody": "St. Louis is in a weird spot with its trash and recycling right now. Most people have noticed that we aren’t really using the old alleyway recycling system anymore. The city basically had to switch things up because the alley bins were getting way too much contamination. It’s actually really expensive; we spend a lot more trying to process messy recycling than we do just hauling away regular trash. If you want to make sure your stuff actually gets recycled, the \"St. Louis City Recycles\" site says you have to follow the rules, like never putting your items in plastic bags. They also have specific pickup days now, usually Monday and Friday or Tuesday and Thursday, depending on where you live. Local officials have said that this \"recycling revamp is already paying off\", but it really comes down to us. If citizens don’t do their part to sort things right, the whole system is basically \"impossible\" to pull off on a mass scale. Research suggests that \"formal recycling\" done by organized enterprises is much more efficient than informal or uncoordinated efforts. It is also important to recognize that a \"quiet revolution\" is happening in sorting technology, which might eventually help the city manage waste more effectively. Ultimately, the system is \"impossible\" to pull off on a mass scale without citizens doing their part to keep the stream clean. As the city looks toward the future, the goal is to close the gap between what we spend on waste versus what we can recover through a functional, citizen-supported system."
     },
     {
       "label": "Insider Info",
