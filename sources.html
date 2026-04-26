@@ -5,182 +5,329 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Works Cited | Recycle St. Louis</title>
     <style>
-        /* --- GLOBAL RESETS --- */
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            background-color: #09090b;
-            color: #ffffff;
-            font-family: 'Inter', -apple-system, sans-serif;
-            margin: 0;
-            line-height: 1.6;
-        }
-
         :root {
             --accent: #10b981;
             --surface: #18181b;
             --border: #27272a;
             --text-dim: #a1a1aa;
+            --bg: #09090b;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #ffffff;
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 40px 20px;
         }
 
-        h1 { text-align: center; font-size: 2.5rem; margin-bottom: 10px; letter-spacing: -1px; }
-        .subtitle { text-align: center; color: var(--accent); text-transform: uppercase; font-weight: 800; font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 50px; }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+        }
 
-        /* --- TRANSCRIPT SECTION --- */
-        .transcript-section {
+        .dynamic-block {
+            margin-bottom: 25px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .dynamic-block:hover {
+            border-color: var(--accent);
+        }
+
+        .citation-text {
+            font-size: 1.05rem;
+            margin-bottom: 15px;
+            padding-left: 2em;
+            text-indent: -2em;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+
+        .action-btn:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .expand-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .expand-content.expanded {
+            max-height: 5000px; /* High value to accommodate full transcript */
+            opacity: 1;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 3px solid var(--accent);
+        }
+
+        .transcript-box {
+            font-family: monospace;
+            font-size: 0.9rem;
             background: #111;
-            border: 2px solid var(--accent);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 60px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            color: #d1d1d1;
         }
-        .transcript-header { font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
-        .transcript-box { height: 400px; overflow-y: scroll; padding: 20px; background: #000; border-radius: 8px; border: 1px solid var(--border); font-family: 'Courier New', Courier, monospace; }
-        .speaker { color: var(--accent); font-weight: bold; }
-        .timestamp { color: #555; font-size: 0.85rem; }
-        .dialogue { margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
 
-        /* --- CITATION BLOCKS --- */
-        .dynamic-block { 
-            width: 100%; 
-            margin-bottom: 20px; 
-            padding: 25px; 
-            background: rgba(255,255,255,0.03); 
-            border: 1px solid var(--border); 
-            border-radius: 12px; 
+        .analysis-text {
+            font-size: 1rem;
+            color: var(--text-dim);
         }
-        .citation-text { font-size: 1rem; color: #fff; margin-bottom: 15px; padding-left: 2em; text-indent: -2em; }
-        .expand-content { 
-            max-height: 0; overflow: hidden; transition: all 0.3s ease; opacity: 0; 
-            background: rgba(0,0,0,0.2); border-left: 3px solid var(--accent); border-radius: 4px; 
-            color: var(--text-dim); font-size: 0.95rem; 
-        }
-        .expand-content.expanded { max-height: 500px; opacity: 1; padding: 15px; margin-top: 15px; }
-        .action-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); cursor: pointer; padding: 6px 12px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; }
-        .action-btn:hover { background: var(--accent); color: #000; }
 
-        footer { text-align: center; margin: 60px 0; color: var(--text-dim); font-size: 0.8rem; }
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Research & Sources</h1>
-    <p class="subtitle">Recycle St. Louis Project</p>
+    <h1>Works Cited</h1>
 
-    <div class="transcript-section">
-        <div class="transcript-header"><span>🎤</span> Primary Source: Interview with Mayor Cara Spencer</div>
-        <div class="transcript-box">
-            <div class="dialogue"><span class="speaker">Speaker 1 <span class="timestamp">(00:02)</span>:</span> Can you introduce yourself really quick?</div>
-            <div class="dialogue"><span class="speaker">Speaker 2 <span class="timestamp">(00:09)</span>:</span> Sure. My name is Cara Spencer, and I'm the mayor of the city of St. Louis.</div>
-            <div class="dialogue"><span class="speaker">Speaker 1 <span class="timestamp">(00:14)</span>:</span> Do you see the current dropoff system as a permanent or temporary solution to a recycling situation?</div>
-            <div class="dialogue"><span class="speaker">Speaker 2 <span class="timestamp">(00:29)</span>:</span> ...We were one of the few cities in the nation that had alley recycling... the biggest issue that we've seen is that the waste in the blue bins was remarkably contaminated... the overwhelming majority of material wasn't actually getting recycled... if your neighbors were throwing garbage in that blue dumpster, it was all going to a landfill.</div>
-            <div class="dialogue"><span class="speaker">Speaker 2 <span class="timestamp">(03:16)</span>:</span> Believe it or not, we don't actually pay for recycling or trash removal with the fees we pay... every household pays less than 20 bucks a month. It doesn't actually cover the cost.</div>
-            <div class="dialogue"><span class="speaker">Speaker 2 <span class="timestamp">(11:48)</span>:</span> One of the biggest ways in which young people can improve what goes into landfills is by consuming less, buy stuff secondhand and look for ways in which you can prevent things from being made to begin with.</div>
-            <p style="text-align:center; color:#444;">[Scroll for full transcript...]</p>
-            </div>
+    <div class="dynamic-block">
+        <div class="citation-text">Akenji, Lewis, et al. "Circular Economy and Plastics." Circular Economy and Plastics: A Gap-Analysis in ASEAN Member States, Institute for Global Environmental Strategies, 2019, pp. 14–20. JSTOR, http://www.jstor.org/stable/resrep21872.6. Accessed 24 Mar. 2026.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is credible because it is a part of a book on the JSTOR website, which is a website well know for its credibility and the experts who write for it. So far, I have learned about the idea of a circular economy, which recycling plays a key role in. Essentially, a circular economy involves reusing items instead of discarding them after a single use, allowing them to offset the creation of new materials. I plan to use this source to explain why recycling is important and why citizens should be actively taking the necessary steps to have their items properly recycled. I also plan to use this source to explain why recycling is good for conserving resources and reducing climate change. A possibility is creating a graphic from the information in this source to show how a circular economy works, the source includes a few graphics, so I could synthesize these.</div>
+        </div>
     </div>
 
-    <div id="citations-list">
-        <div class="dynamic-block">
-            <div class="citation-text">Akenji, Lewis, et al. "Circular Economy and Plastics." <i>Circular Economy and Plastics: A Gap-Analysis in ASEAN Member States</i>, Institute for Global Environmental Strategies, 2019, pp. 14–20. JSTOR, http://www.jstor.org/stable/resrep21872.6. Accessed 24 Mar. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">A circular economy involves reusing items instead of discarding them after a single use. I plan to use this to explain the importance of resource conservation.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">Burcea, Ştefan Gabriel. "The Economical, Social and Environmental Implications of Informal Waste Collection and Recycling." Theoretical and Empirical Researches in Urban Management, vol. 10, no. 3, 2015, pp. 14–24. JSTOR, http://www.jstor.org/stable/24873532. Accessed 27 Mar. 2026.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">"The economical, social and environmental implications of informal waste collection and recycling" is a peer reviewed source cited by other articles. The main topic of the article is the difference between informal and formal recycling, but it focuses on informal recycling. Formal recycling is done by enterprises, and is much more efficient compared to the recycling done by individuals and picked by people. I would like to inform people about how important it is for companies and larger groups to ensure the waste they create in any way is dealt with responsibility. For example, a factory might make things from plastic in molds, but each peice will have some waste, this will add up very quickly and is important to deal with. This is important because normal people must ensure that the products they buy are made responsibly, they can also talk to political representatives or support those who hold buisnesses accountable.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">Burcea, Ştefan Gabriel. "The Economical, Social and Environmental Implications of Informal Waste Collection and Recycling." <i>Theoretical and Empirical Researches in Urban Management</i>, vol. 10, no. 3, 2015, pp. 14–24. JSTOR, http://www.jstor.org/stable/24873532. Accessed 27 Mar. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Focuses on the difference between formal and informal recycling. I want to highlight the responsibility of large factories to deal with manufacturing waste.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">Carey, John. "On the Brink of a Recycling Revolution?: We’re Awash in Plastics, Many of Which Are Hard to Recycle. Could Innovations, Girded by the Right Incentives, Finally Whittle Down the Piles of Plastic Waste?" Proceedings of the National Academy of Sciences of the United States of America, vol. 114, no. 4, 2017, pp. 612–16. JSTOR, https://www.jstor.org/stable/26479025. Accessed 27 Mar. 2026.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is credible site because it is from a page called JSTOR and this is a great website for getting information about recycling. It is also edited by masters in their work to make sure that it is right. I learned that they take disgusting trash from the worst places and make them a good product. I also learned that the MBA director Mike Biddle says that they are going through a “quiet revolution” in the technology of product sorting. Saint Louis could take some of this new technology to increase the amount of contamination allowed in bins. The current problem is of people putting trash into recycling bins, if new technology could recycle this so called trash or filter it out, we could simplify our recycling process significantly. Our advocacy project could bring these ideas to life if we share knowledge with people, they could advocate to the city about this.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">Carey, John. "On the Brink of a Recycling Revolution?" <i>PNAS</i>, vol. 114, no. 4, 2017, pp. 612–16. JSTOR, https://www.jstor.org/stable/26479025. Accessed 27 Mar. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Discusses the "quiet revolution" in sorting technology. Suggests St. Louis could adopt innovations to handle bin contamination.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">"City Dumpsters and Rollcarts - Saint Louis City Recycles." Saint Louis City Recycles, 9 Mar. 2026, stlcityrecycles.com/how-to-recycle-in-stl-city/how-to-recycle/city-dumpsters-rollcarts/. Accessed 29 Mar. 2026.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is the official recycling website for Saint Louis, therefore it is credible to give information about recycling in our city. I would like to use this source in our website to inform people about how they should recycle to ensure their efforts do not go to waste. Things I have learned include: the phone number to contact if recycling bin are overflowing, the fact that the bins should not be filled with plastic bags and many dates and times of pickups. For example, the pickups are either Monday and Friday or Tuesday and Thursday. More information that we can use includes "The City of St. Louis has shifted from alley recycling to drop-off recycling due to ineffectiveness and high costs." This quote shows the city's argument supporting the shift to the new drop of recycling system. This change is the highlight of our advocay project and website.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">"City Dumpsters and Rollcarts - Saint Louis City Recycles." <i>Saint Louis City Recycles</i>, 9 Mar. 2026, stlcityrecycles.com. Accessed 29 Mar. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Official city resource. Confirms the shift from alley recycling to drop-off due to high costs and ineffectiveness.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">Cityofstlouismissouri. "Public Infrastructure & Utilities Committee – August 14, 2025." YouTube, 14 Aug. 2025, www.youtube.com/watch?v=crYaIlizSxU.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is a filming of a meeting where representatives give important in-sites into recycling in Saint Louis. So far, our have learned helpful statistics about the percent of recycling that gets recycled and how much we spend on recycling vs on trash this is important because the most important part of recycling is its cost. Our main plan is to use this source to explain why Saint Louis no longer has an alleyway recycling system, diving into specific stats when and if needed. Our secondary planned use for this source is to use it for an in-site into what the city plans to do for recycling in the future. We would also like to use clips of this video in our video we will create from our interview, It will add credibility to our claims if we show people in charge saying them.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">Cityofstlouismissouri. "Public Infrastructure & Utilities Committee – August 14, 2025." <i>YouTube</i>, 14 Aug. 2025, www.youtube.com/watch?v=crYaIlizSxU.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Official filming of a city meeting. Provides helpful stats on the percentage of waste that actually gets recycled.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">Echeverría, Daniella, et al. "Waste Recycling and Reuse." Circular Economy Proxy Measures: Indicators on Job Effects for a Closed-Loop Economy, International Institute for Sustainable Development, 2020, pp. 7–8. JSTOR, http://www.jstor.org/stable/resrep29240.6. Accessed 24 Mar. 2026.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is very reliable because it comes from JSTOR, a data base well known for the reliably and credibility of the sources it hosts the writing is also cited in other works, The writing is peer reviewed, and the article So far, I have learned about the challenges of waste management and recycling. This source has also given us key information about the benefits of recycling in society, but also the downfalls and inefficiencies that come with recycling. I plan to primarily use this source to explain why recycling is so difficult to pull off, on a mass scale in a city like Saint Louis. My secondary use for this source to explain why it is important to acknowledge that recycling is difficult, if not impossible without citizen involvement, and I will highlight the importance of citizens doing their part. The source also acknowledges the importance of funding to help a recycling system succeed.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">Echeverría, Daniella, et al. "Waste Recycling and Reuse." <i>International Institute for Sustainable Development</i>, 2020, pp. 7–8. JSTOR. Accessed 24 Mar. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Explains why recycling is difficult on a mass scale and emphasizes that citizen involvement is non-negotiable for success.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">Ghosh, Sanchari. "Electronic Waste Recycling for Developing Economies." Economic and Political Weekly, vol. 46, no. 49, 2011, pp. 17–21. JSTOR, http://www.jstor.org/stable/41319452. Accessed 27 Mar. 2026.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">The article found on JSTOR is a really good source because it is on a credible site for research. This is because it is written by experts, and experts only post their articles after they have been looked over. This means that it is credible because it is not based on people's opinions, but it is based on research, which makes it credible compared to other sources found online, especially for school work. It is less related to saint louis itself, but because we all share the earth, supporting recycling in growing economies is very important because they create a significant portion of the worlds waste, and have less secured landfills and disposal areas. I would like to advocate for those who can to support these projects financally, as it can increase jobs in growing economies and protect our planet at the same time. I would like to make an article on our website relate to this.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">Ghosh, Sanchari. "Electronic Waste Recycling for Developing Economies." <i>Economic and Political Weekly</i>, vol. 46, no. 49, 2011, pp. 17–21. JSTOR. Accessed 27 Mar. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Highlights that supporting recycling in growing economies is vital as they create significant portions of global waste.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">Goodship, Vannessa. "Plastic Recycling." Science Progress (1933- ), vol. 90, no. 4, 2007, pp. 245–68. JSTOR, http://www.jstor.org/stable/43423211. Accessed 29 Mar. 2026.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This article is on JSTOR, which is a well known and very well respected source, which is how I know it is a reputable and academically credible source. So far I have learned about different types of plastics and their make ups. I’ve learned about how plastics are made up of polymers and additives, some additives, like glass fibre, range from 5% to 80% of the plastic’s make up. I plan to use this source for helping identify plastics make up and how that contributes to why they can or cannot be recycled. A helpful graphic for our website could include a pie chart comparison showing different plastics and their impact on the environment. This is important because plastics have different abilities to be recycled, and their use after recycling is impacted by their ability to melt. If people are informed about different plastics, they can be sure to buy those that work well.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">Goodship, Vannessa. "Plastic Recycling." <i>Science Progress</i>, vol. 90, no. 4, 2007, pp. 245–68. JSTOR. Accessed 29 Mar. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Provides technical info on polymers and additives. Explains how chemical makeup determines if a plastic can actually be melted and reused.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">Jain, Akshat, editor. "What Can Be Recycled and How Many Times?" Plastic Recycling: Decoded, Centre for Science and Environment, 2021, pp. 18–22. JSTOR, http://www.jstor.org/stable/resrep37920.8. Accessed 24 Mar. 2026.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is credible because it comes from JSTOR, which is a well known and trusted data base of educational and reliable sources. So far, I have learned about the RIC code system which helps categorize plastics, I have known about this system for a while, but this source clearly lays out information about each code and clarifies what I did not yet know. This source has also taught me about down cycling which involves recycling plastics into lesser products. I plan to primarily use this source to help clear confusion about what can and should be recycled and what cannot be recycled. Secondarily I would like to use this source to talk about down-cycling, what it means and why its important to keep in mind. Down cycling is where materials have reduced quality each time they are recycled or reused. I need to emphasize the importance or reusing, because it is way more efficient.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">Jain, Akshat, editor. "What Can Be Recycled and How Many Times?" <i>Plastic Recycling: Decoded</i>, 2021, pp. 18–22. JSTOR. Accessed 24 Mar. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Details the RIC code system and "down-cycling"—the process where materials lose quality each time they are processed.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">Krull, Ryan. "St. Louis Officials Say Recycling Revamp Is Already Paying Off." St. Louis Magazine, 29 Oct. 2025, www.stlmag.com/news/stlouis-recycling-drop-sites-results/.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">It can be generally stated that an article in the St. Louis Magazine can be regarded as credible. This is because it is an old article. The writers of this article are professionals. Furthermore, they have been subjected to editing, and it is safe to say that what they have written in this article is true. The article is also likely to be true in terms of matters relating to the region, like recycling, because it is a magazine relating to this region. The article could also have included true-life stories and quotes from people in this field, like Cara Spencer's quote the mayor of St. Louis. The article has quotes we can use, showing Cara Spencer's support for the current system. Many of the stats in the article are misleading, while this donesn't prove anything, it could show that the new system isnt going exactly as planned. We can use these quotes in our interview with the mayor</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">Krull, Ryan. "St. Louis Officials Say Recycling Revamp Is Already Paying Off." <i>St. Louis Magazine</i>, 29 Oct. 2025, www.stlmag.com/news/stlouis-recycling-drop-sites-results/.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Local coverage of the drop-site shift. Contains quotes from Cara Spencer that we used to prepare for our interview.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">Spencer, Cara. Personal Interview. 5 April 2026</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Transcript & Analysis</button>
+        <div class="expand-content">
+            <div class="transcript-box">Speaker 1 (00:02):
+Can you introduce yourself really quick? Just a brief summary, who you are and just what your name is, who you are. 
+
+Speaker 2 (00:09):
+Sure. My name is Cara Spencer, and I'm the mayor of the city of St. Louis. 
+
+Speaker 1 (00:14):
+Okay. I have a few questions for you. First question, do you see the current dropoff system as a permanent or temporary solution to a recycling situation? 
+
+Speaker 2 (00:29):
+Well, the current drop off of recycling goods, is that what you mean? Well, how about this? I'll talk a little bit about how we do recycling in the city of St. Louis. We were one of the few cities in the nation that had alley recycling, no separation. Everything goes in at once, and it was really convenient and it worked actually fairly well for a while when recycling goods, when the demand for them was very high, we didn't pay very much to get rid of it, get rid of that waste. But in recent years, there's been a couple of issues. One, the biggest issue that we've seen is that the waste in the blue dens was remarkably contaminated. So we would take the trucks down the alleys, pick up the recycling, get it to the recycling plant, and it would be rejected. And there was just too much contamination. (01:37):
+The overwhelming majority of material wasn't actually getting recycled, even if your family was doing a good job separating it, if your neighbors or anybody else in the block was throwing garbage in that blue dumpster, it was all going to a landfill. And so there were a couple issues we were trying to solve. One, obviously, we wanted recycling material to make it to the recycling plant and not get rejected. But number two, we have a limited number of drivers and a limited number of trucks. And so sending them down your alley twice was ineffective and actually costing a lot more in the carbon footprint department. So this is allowing us to get down alleys more reliably. And for the last several months, we've actually been recycling more tonnage this way because when people separate it and drive it to the drop sites, it's not contaminated. And so it's a really good solution. So far, it's worked better than the alley dumpsters by a good amount, by several metrics, and we're really excited about that. 
+
+Speaker 1 (02:58):
+The shift to the drop-off system has saved our city significant money. 
+
+Speaker 2 (03:02):
+Could 
+
+Speaker 1 (03:02):
+A portion of these savings be used to improve our recycling system further? What do you believe would be the best way to use any new money set aside from the recycling reform? 
+
+Speaker 2 (03:16):
+This is an interesting question, and one, I think that it's a great question. Believe it or not, we don't actually pay for recycling or trash removal with the fees we pay. So every household pays a small amount of money, less than 20 bucks per household, per month. And it doesn't actually cover the cost of removing the trash or recycling. It's only a fraction, actually. So the savings aren't really a net gain. It means that we actually lose less money every month collecting, recycling. But I do have to say what we're looking to do is to buy more trucks and make sure that our drivers who are really, really underpaid, get a better wage. 
+
+Speaker 1 (04:05):
+What are the current goals for our city? Our city has to improve the recycling system. Are there things happening in other cities that we could learn from? 
+
+Speaker 2 (04:17):
+That's a great question. We recently sat a trash and recycling task force. It's a set of citizens who really care about recycling, who have been putting together a report for us. It got leaked last week, but the report isn't actually done yet. And one of the things that report and citizens are looking at is exactly what you're talking about, looking to other cities and other cities. Many other cities have roll carts where you can put your recycling in a roll cart and then a truck will come by. One of the challenges that we have with that are trucks. The fleet of trucks that we have are designed to pick up alley recycling, big dumpsters, and it's a completely different truck that would pick up a little roll cart. And we have a handful of them for people that don't have alleys, but it would be a big investment. So we're looking at it and once that report is completed, looking at what other cities are doing, we're going to take a look at what the results are and see what we can do from there. 
+
+Speaker 1 (05:23):
+What is the current bottleneck in the recycling system in our city? Which areas are we overspending on? Where do we need to spend more money? 
+
+Speaker 2 (05:33):
+Well, I think one of the biggest bottlenecks and being able to try new things and try to be more effective is the fact that what we pay for recycling and trash doesn't actually cover the cost. And so we have to subsidize it with other revenue sources like your property taxes or sales taxes. It comes out of the general fund, and it's not a small amount of money either. It's tens of millions of dollars that we actually subsidize the refuse department. And so I think the biggest bottleneck is that the household fee per month is much lower than it actually costs to provide that service. And so if we were to eliminate the bottleneck, we'd have to double or triple the cost of trash citywide. And I think that might be a barrier to getting it done. I'm not sure that families can bear that type of increase to their budget, but if we were to able to have more revenue out of the refuse refuse department, one of the ways that we're looking to derive more revenue without increasing the cost to families is by making sure we're doing an audit to make sure that everyone is actually paying their fair share. (07:02):
+And we're also conducting an audit on apartment buildings because apartment buildings, landlords often don't, not often sometimes don't get their own commercial dumpster, and so their tenants are using the dumpsters without actually paying for the service. And so we're making sure that all landlords are also paying what they need, their fair share on behalf of their tenants, and making sure that we have everyone paying into the system. 
+
+Speaker 1 (07:34):
+As you know, we currently have the drop off locations. Correct. If some citizens would be willing to spend more in order to get ally or bend pickups, is there a possibility to have different systems depending on the area's commitment to recycling? 
+
+Speaker 2 (07:53):
+Yes. That's one of the things we're looking at. So with the roll carts, the thinking so far right now is an opt-in system where if you're willing to pay extra for that personal service of picking up your recycling, we are considering a pilot program in that way. So it may look like taking in a survey for folks that would be interested in doing that and seeing the neighborhoods that have the highest concentration of people willing to pay additional service. The challenge is those trucks are close to a half a million dollars each. And so running a pilot program like that, it's a pretty expensive endeavor. It's like they're like $450,000 each. 
+
+Speaker 1 (08:49):
+What steps is the city taking to improve recycling participation among residents? 
+
+Speaker 2 (08:54):
+Well, we have a department called Brightside that does community engagement. They go to neighborhood meetings and talk about a recycling program. We also put stickers on the dumpsters when we converted the blue alley dumpsters to trash, we put new stickers on there. It also includes a QR code, and if you scan the QR code, it gives you the information about where you can drop off recycling. And so we're trying to educate the community as best we can about recycling. Brightside is a pretty great little subdepartment that goes around the neighborhood meetings. 
+
+Speaker 1 (09:39):
+How does St. Louis handle contamination in recycling bins and what can be done to further reduce it? 
+
+Speaker 2 (09:46):
+Yeah, the contamination really shot up during COVID and really hasn't abated. One of the challenges is that people stopped caring about recycling as much as they used to. Part of that is cultural. I think people just have so many other things they're worrying about, but as well, the cost of recycling has gone up so much. So interestingly enough, you would think that the material that we collect to be recycled would be valuable, but in reality, we actually pay five times per ton for each ton of recycling than we do pay for trash. It costs us more to recycle than it does to just throw things in the landfill, which is horrible for the planet. And part of that is a function of the contamination, but part of that is just the demand for recycling material has gone down around the world. 
+
+Speaker 1 (10:54):
+How does the city ensure that recycled materials are actually reused and not just sent to landfills? 
+
+Speaker 2 (11:00):
+So that's that chunk. We have a contract with a recycling plant, and they take the recycling material, and then they're the ones who actually go out and make sure it gets to, gets into recycled goods, but it's hard to follow that trail. Sometimes plastics and other things may not actually get recycled because the demand for them is fairly low. Aluminums and other materials that have a high recyclability pretty reliably get recycled. 
+
+Speaker 1 (11:40):
+What can students and young people, what role can students and young people play in improving recycling efforts in St. Louis? 
+
+Speaker 2 (11:48):
+I think one of the biggest is to be educated about it and to participate in separating out your recycling. I think it's really important that when you're separating out your recycling, that you're taking out the highest quality stuff. A lot of people think that just because it's plastic or it has that number at the bottom with the recycling, that it can be recycled. But often those things are telling you that they're not recyclable or very rarely recyclable. And so being educated on what actually can be recycled and what can't, but I think one of the biggest ways in which young people can improve what goes into landfills is by consuming less, buy stuff secondhand and look for ways in which you can prevent things from being made to begin with. 
+
+Speaker 1 (12:44):
+This kind of relates to one of my previous questions, but are there any plans to expand recycling surfaces such as curbside pickup or access to more materials? 
+
+Speaker 2 (12:54):
+Well, we are, as I mentioned in the process of concluding that community, there's going to be a white paper as the result of that panel and a stakeholder panel. And so we'll take a look at that and see what that nets us. I think it will be really expensive to be able to do, but I think we should, as long as it's feasible, I'd we're willing to try to make something work. 
+
+Speaker 1 (13:29):
+Thank you, mayor or Kara Spencer for your time. 
+
+Speaker 2 (13:32):
+Anytime. 
+
+Speaker 1 (13:32):
+This has been very informative. Thank you. 
+
+Speaker 2 (13:34):
+Of course.</div>
+            <div class="analysis-text">We chose to interview the current mayor, (Cara Spencer) she recently has reformed the recycling situation in our city, and is arguably the most important public figure in the case of the city’s recycling system. Overall, this interview gave us more insight, Spencer told us that the most effective way for people to improve how recycling works in or city Is to learn about what can and cant be recycled, we are going to do this with things like our recycling game, or quiz. This will make it interactive and interesting for people to learn. A good quote from Spencer is “young people can improve what goes into landfills is by consuming less, buy stuff secondhand and look for ways in which you can prevent things from being made to begin with.”, this is also something we will do for our project.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">Spencer, Cara. Personal Interview. 5 April 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Primary interview source. Discussed bottlenecks like funding, contamination, and the possibility of "opt-in" roll-cart programs.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">United States Congress. Save Our Seas 2.0 Act. S. 1982, 116th Congress, 2019–2020. Congress.gov, www.congress.gov/bill/116th-congress/senate-bill/1982/text.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is credible because it is a signed law passed by congress and signed by the president in 2020. The law is very detailed, but outline actions to be taken by our government. it includes a new “Genius Prize for Save Our Seas Innovations”, to encourage innovation. It also creates a nonprofit to organize donations. I would like to analyze this law, to determined where it fell short in order to promote change on those things. I could write an article on my website showing the impact this act had as well as how it did not work. Showing people how the act didn't work could encourage them to support more congressional acts related to recycling. according to other sources, the government supporting recycling is the best was to incentives private organizations to improve their recycling. Overall, the save our seas act benefited the world, but had some shortcomings.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">United States Congress. <i>Save Our Seas 2.0 Act</i>. S. 1982, 116th Congress, 2019–2020. Congress.gov.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Federal law aimed at innovation. We analyzed its shortcomings to advocate for more aggressive local recycling policies.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">United States Environmental Protection Agency. "National Recycling Strategy." EPA.gov, 13 Nov. 2019, www.epa.gov/circulareconomy/national-recycling-strategy.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is credible because it is published by the US government, as part of the environmental protection agency, It was published very recently on January 23, 2026 and outlines the timeline and achievements set by the EPA to improve recycling in general. The “National recycling goal” is to increase recycling by 50%. The EPA is requesting public comment on its draft of the National recycling goals. In my opinion, many of the goals set by this government plan are quite unambitious and I would like to use this article to show that. I could also use this article to show the organizations that are and aren’t in the pledge. Because public comment is being requested, this is an easy way for people to make an impact, i would like to find an email to allow people to comment on this through my website, i could even create a thing to allow them to submit comments which i could then email myself.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">United States EPA. "National Recycling Strategy." <i>EPA.gov</i>, 13 Nov. 2019. Accessed 23 Jan. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Outlines the goal to increase US recycling to 50%. We find some of these goals unambitious compared to the scale of the waste problem.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">United States Environmental Protection Agency. "What Is a Circular Economy?" EPA.gov, 4 Sept. 2025, www.epa.gov/circulareconomy/what-circular-economy.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is credible because it is published by the US government, as part of the environmental protection agency. It was published in November of 2024, and has been updated multiple times, most recently in September of 2025. The article was written due to the save our seas act, an law passed in 2020 (amended most recently in 2025) that I would like to find other sources on specifically and talk about in our final project. The general idea of a circular economy is that resources should be used repeatedly until they have broken down or are impossible to reuse with the overall goal of increasing the lifetime of all materials. The outcome of a circular economy is to decrease the material disposed of, and the new products created. This article includes statistics and goals the government has set for reducing our impact on the environment. I think it would be helpful to show/ display to our audience some of the graphics on this article, because they are very thorough yet easy to understand.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">United States EPA. "What Is a Circular Economy?" <i>EPA.gov</i>, 4 Sept. 2025.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Explains the transition from a linear "take-make-waste" model to a circular one. Helpful graphics for explaining the lifecycle of materials.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">van Ewijk, Stijn, and Julia Stegemann. "Waste Recycling." An Introduction to Waste Management and Circular Economy, UCL Press, 2023, pp. 216–55. JSTOR, https://doi.org/10.2307/jj.4350575.15. Accessed 23 Mar. 2026.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This source is credible because it is peer reviewed, I found it on jstore but it is a chapter from a book on waste management and circular economies. The source goes over more detailed ways things are recycled, but an important detail is the difference between open and closed loop recycling. Open loop recycling is when items lose quality (and usability) each time they are reused, and closed loop recycling mantains the exact materials. The article explains that recycling is never perfect, as mistakes and contamination always lead to loss of material. I would like to use this article to determine the difference between recycling different materials, I could advocate to explain the ways different object can be recycled to encourage people to buy things that can be recycled easier. Additionally, i would like to emphisize the importance for people to try to reuse something instead of recycling it.</div>
         </div>
+    </div>
 
-        <div class="dynamic-block">
-            <div class="citation-text">van Ewijk, Stijn, and Julia Stegemann. "Waste Recycling." <i>An Introduction to Waste Management</i>, UCL Press, 2023. JSTOR. Accessed 23 Mar. 2026.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">Details "open" vs "closed" loop recycling. Emphasizes that recycling is never perfect due to unavoidable material loss.</div>
-        </div>
-
-        <div class="dynamic-block">
-            <div class="citation-text">"Waste and Recycling Studies and Reports." <i>Missouri DNR</i>, 2020, dnr.mo.gov.</div>
-            <button class="action-btn" onclick="toggleExpand(this)">+ View Analysis</button>
-            <div class="expand-content">State-level studies. Includes a fascinating report on using recycled tires to replace limestone in concrete for sound insulation.</div>
+    <div class="dynamic-block">
+        <div class="citation-text">"Waste and Recycling Studies and Reports." Missouri Department of Natural Resources, 2020, dnr.mo.gov/waste-recycling/what-were-doing/studies-reports.</div>
+        <button class="action-btn" onclick="toggleExpand(this)">View Full Analysis</button>
+        <div class="expand-content">
+            <div class="analysis-text">This page is the current studies being funded by the government of Missouri (department of waste) related to waste management and recycling It is credible because it is part of the government and I have confirmed its information with other sites. I would like to use this page to inform people about what is being done specifically in our state about recycling. One of the studies that is complete is a study on the ability to use recycled tires in concrete, the result was that the rubber could be a partial replacement and improved sound insulation of the concrete. The benefit to using old tires in concrete is that we would be able to use less limestone in our concrete and replace it with tires which are already manufactured. I would like to include a link to this page to allow citizens to read what our government is working on</div>
         </div>
     </div>
 
@@ -192,8 +339,17 @@
 <script>
     function toggleExpand(btn) {
         const content = btn.nextElementSibling;
+        const isExpanded = content.classList.contains('expanded');
+        
+        // Toggle current
         content.classList.toggle('expanded');
-        btn.innerText = content.classList.contains('expanded') ? "- Hide Analysis" : "+ View Analysis";
+        
+        // Update button text
+        if (isExpanded) {
+            btn.innerText = btn.innerText.includes("Transcript") ? "View Transcript & Analysis" : "View Full Analysis";
+        } else {
+            btn.innerText = "Hide Content";
+        }
     }
 </script>
 
