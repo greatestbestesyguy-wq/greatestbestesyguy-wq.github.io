@@ -69,8 +69,44 @@
         #popup-notif { position: fixed; bottom: 20px; right: 20px; background: var(--surface, #18181b); color: var(--text, #fff); padding: 25px; border-radius: 12px; z-index: 10000; border: 2px solid var(--accent, #10b981); box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 320px; }
         .close-notif { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-dim, #a1a1aa); transition: 0.2s; }
         .close-notif:hover { color: var(--danger, #ef4444); }
-        .dynamic-block { max-width: 800px; margin: 0 auto 50px; padding: 30px; background: rgba(255,255,255,0.03); border: 1px solid var(--border, #27272a); border-radius: 16px; transition: transform 0.2s; }
+        
+        .dynamic-block { max-width: 800px; width: 100%; margin: 0 auto 50px; padding: 30px; background: rgba(255,255,255,0.03); border: 1px solid var(--border, #27272a); border-radius: 16px; transition: transform 0.2s; }
         .dynamic-block:hover { border-color: var(--accent, #10b981); }
+
+        /* DESKTOP LAYOUT WITH SIDEBAR */
+        .desktop-wrapper {
+            display: flex;
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+        
+        #main-content {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centers dynamic blocks within main */
+        }
+
+        .desktop-sidebar {
+            display: none; /* Hidden on mobile */
+            width: 300px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border, #27272a);
+            border-radius: 12px;
+            padding: 25px;
+            position: sticky;
+            top: 20px;
+        }
+        .desktop-sidebar h3 { color: var(--accent, #10b981); margin-top: 0; margin-bottom: 15px; font-size: 1.2rem; }
+        .desktop-sidebar p { color: var(--text-dim, #e4e4e7); font-size: 0.95rem; line-height: 1.6; margin: 0; }
+
+        @media (min-width: 1024px) {
+            .desktop-sidebar { display: block; }
+            #main-content { align-items: flex-start; } /* Reset alignment so it looks natural next to sidebar */
+        }
 
         /* SMOOTH EXPANDABLE STYLES (DESKTOP) */
         .expand-content {
@@ -91,7 +127,7 @@
         }
 
         .expand-content.expanded {
-            max-height: 2500px; /* Large enough to hold text */
+            max-height: 2500px;
             opacity: 1;
             padding: 25px 30px; 
             margin-bottom: 20px;
@@ -145,6 +181,26 @@
             white-space: pre-wrap;
         }
 
+        /* MOBILE ARTICLE ACTION BUTTONS */
+        .mobile-article-actions {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .mobile-article-actions a {
+            text-align: center;
+            padding: 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.05rem;
+            transition: 0.2s;
+        }
+
         /* NAVIGATION BUTTONS */
         .top-nav-bar {
             display: flex;
@@ -180,11 +236,46 @@
 
         .btn-sources:hover { background: #3f3f46; color: #fff; }
 
+        /* MOBILE SCROLL INDICATOR */
+        .mobile-scroll-indicator {
+            display: none;
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent, #10b981);
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 9000; /* Stays below the modal */
+            pointer-events: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            animation: bounce 2s infinite;
+            transition: opacity 0.3s ease, visibility 0.3s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Only show if indicator is flagged visible and the modal is NOT open */
+        body:not(.modal-open) .mobile-scroll-indicator.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
         @media (max-width: 768px) {
+            .mobile-scroll-indicator { display: block; }
             .dynamic-block { padding: 20px; }
             .modal-content-box { max-height: 90vh; }
             #modal-body-content { padding: 20px !important; font-size: 1.05rem !important; }
             .top-nav-bar { flex-direction: column; text-align: center; }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-10px) translateX(-50%); }
+            60% { transform: translateY(-5px) translateX(-50%); }
         }
     </style>
 </head>
@@ -221,21 +312,30 @@
     <div class="container">
         <div id="header-placeholder"></div>
 
-        <main id="main-content">
-            
+        <div class="desktop-wrapper">
+            <main id="main-content">
+                <h1 id="hero-title"></h1>
+                <p id="hero-tagline" class="tagline"></p>
+                <div id="hero-buttons" style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;"></div>
 
-            <h1 id="hero-title"></h1>
-            <p id="hero-tagline" class="tagline"></p>
-            <div id="hero-buttons" style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;"></div>
+                <div id="stats-grid" class="stats-grid"></div>
 
-            <div id="stats-grid" class="stats-grid"></div>
+                <section id="interview-container" class="interview-section" style="display:none;"></section>
+                <section id="article-section" style="display:none;"></section>
+                <div id="additional-articles-container" style="display:none;"></div>
+            </main>
 
-            <section id="interview-container" class="interview-section" style="display:none;"></section>
-            <section id="article-section" style="display:none;"></section>
-            <div id="additional-articles-container" style="display:none;"></div>
-        </main>
+            <aside class="desktop-sidebar">
+                <h3>Keep Exploring</h3>
+                <p>Don't stop at the top! Scroll down to uncover more resources, tips, and articles about recycling in St. Louis. Every bit of knowledge helps keep our city green.</p>
+            </aside>
+        </div>
 
         <div id="footer-placeholder"></div>
+    </div>
+
+    <div id="mobile-scroll-indicator" class="mobile-scroll-indicator visible">
+        Scroll to see more ↓
     </div>
 
     <div id="article-modal">
@@ -248,6 +348,11 @@
                 <h2 id="modal-title" style="margin-bottom:20px; color:#fff; font-size: 1.8rem; text-align: center;"></h2>
                 <img id="modal-image" src="" style="width:100%; max-height:300px; object-fit:cover; border-radius:12px; margin-bottom:20px; display:none;">
                 <div id="modal-text" class="article-text"></div>
+                
+                <div class="mobile-article-actions">
+                    <a href="/maps" class="btn-recycle">Recycle Now</a>
+                    <a href="/sources" class="btn-sources">View Sources</a>
+                </div>
             </div>
         </div>
     </div>
@@ -286,13 +391,28 @@
             const modal = document.getElementById('article-modal');
             modal.classList.add('show');
             document.body.style.overflow = 'hidden'; 
+            document.body.classList.add('modal-open'); // Helps hide scroll indicator
         }
 
         function closeArticleModal() {
             const modal = document.getElementById('article-modal');
             modal.classList.remove('show');
             document.body.style.overflow = 'auto'; 
+            document.body.classList.remove('modal-open');
         }
+
+        // --- MOBILE SCROLL INDICATOR LOGIC ---
+        window.addEventListener('scroll', () => {
+            const indicator = document.getElementById('mobile-scroll-indicator');
+            if (indicator && window.innerWidth <= 768) {
+                // Hide indicator if user scrolls close to the bottom (within 150px)
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 150) {
+                    indicator.classList.remove('visible');
+                } else {
+                    indicator.classList.add('visible');
+                }
+            }
+        });
 
         // --- ADMIN SEQUENCE LOGIC ---
         let inputString = "";
