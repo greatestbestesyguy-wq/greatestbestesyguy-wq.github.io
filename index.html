@@ -72,41 +72,59 @@
         .dynamic-block { max-width: 800px; margin: 0 auto 50px; padding: 30px; background: rgba(255,255,255,0.03); border: 1px solid var(--border, #27272a); border-radius: 16px; transition: transform 0.2s; }
         .dynamic-block:hover { border-color: var(--accent, #10b981); }
 
-        /* SMOOTH EXPANDABLE STYLES */
-        .expand-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-bottom 0.4s ease-in-out;
-    opacity: 0;
-    padding: 0 20px;
-    background: rgba(0,0,0,0.2);
-    border-left: 4px solid var(--accent, #10b981);
-    border-radius: 6px;
-    color: var(--text-dim, #e4e4e7); 
-    font-size: 1.1rem;
-    line-height: 1.8; 
-    max-width: 75ch; 
-    white-space: pre-wrap;
-    margin-bottom: 0;
-}
+        /* MODAL ANIMATION & STYLES */
+        #article-modal {
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 20000;
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
 
-.expand-content.expanded {
-    max-height: 1500px; 
-    opacity: 1;
-    padding: 25px 30px; 
-    margin-bottom: 20px;
-}
+        #article-modal.show {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
 
-@media (max-width: 768px) {
-    .dynamic-block { 
-        padding: 20px; 
-    }
-    .expand-content.expanded {
-        padding: 15px; 
-        font-size: 1.05rem; 
-        line-height: 1.6;
-    }
-}
+        .modal-content-box {
+            background: #111;
+            width: 100%;
+            max-width: 750px;
+            max-height: 85vh;
+            border: 1px solid var(--accent, #10b981);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.2);
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #article-modal.show .modal-content-box {
+            transform: translateY(0) scale(1);
+        }
+
+        .article-text {
+            font-family: 'Inter', -apple-system, sans-serif;
+            max-width: 65ch;
+            margin: 0 auto;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 768px) {
+            .dynamic-block { padding: 20px; }
+            .modal-content-box { max-height: 90vh; }
+            #modal-body-content { padding: 20px !important; font-size: 1.05rem !important; }
+        }
     </style>
 </head>
 <body>
@@ -157,8 +175,39 @@
         <div id="footer-placeholder"></div>
     </div>
 
+    <div id="article-modal">
+        <div class="modal-content-box">
+            <div style="padding:20px; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
+                <span id="modal-label" style="color:var(--accent, #10b981); font-size:12px; text-transform:uppercase; letter-spacing:2px; font-weight:800;">Article</span>
+                <button onclick="closeArticleModal()" style="background:none; border:none; color:#fff; font-size:30px; cursor:pointer; line-height:1; transition: 0.2s;">&times;</button>
+            </div>
+            <div id="modal-body-content" style="padding:30px; overflow-y:auto; color:#eee; font-size:1.1rem; line-height:1.8;">
+                <h2 id="modal-title" style="margin-bottom:20px; color:#fff; font-size: 1.8rem; text-align: center;"></h2>
+                <div id="modal-text" class="article-text"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="./script.js"></script>
     <script>
+        // --- MODAL LOGIC ---
+        function openArticleModal(index) {
+            const block = window.siteContentBlocks[index];
+            document.getElementById('modal-title').innerText = block.title || '';
+            document.getElementById('modal-label').innerText = block.label || 'Article';
+            document.getElementById('modal-text').innerHTML = block.expandableBody;
+            
+            const modal = document.getElementById('article-modal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Stop background scrolling
+        }
+
+        function closeArticleModal() {
+            const modal = document.getElementById('article-modal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto'; // Restore background scrolling
+        }
+
         // --- ADMIN SEQUENCE LOGIC ---
         let inputString = "";
         window.addEventListener("keydown", (e) => {
@@ -202,6 +251,8 @@
 
         // --- EXISTING CONTENT LOGIC ---
         function renderContent(data) {
+            window.siteContentBlocks = data.contentBlocks; // Store data globally for the modal
+
             document.title = data.metadata.pageTitle;
             const metaTitle = document.getElementById('meta-title');
             const metaDesc = document.getElementById('meta-desc');
@@ -264,10 +315,8 @@
                     if (block.body) html += `<p style="margin-bottom:20px; line-height: 1.6; color: var(--text-dim, #ccc); font-size: 1.1rem;">${block.body}</p>`;
                     
                     if (block.expandableBody) {
-                        const expId = 'exp-' + index;
-                        // Added new dynamic smooth transition classes here
-                        html += `<div id="${expId}" class="expand-content">${block.expandableBody}</div>`;
-                        html += `<button onclick="const el = document.getElementById('${expId}'); el.classList.toggle('expanded'); this.innerText = el.classList.contains('expanded') ? 'Read Less ↑' : 'Read More ↓';" style="background:transparent; border: 1px solid var(--accent, #10b981); color:var(--accent, #10b981); cursor:pointer; font-weight:bold; padding:10px 20px; margin-right: 15px; margin-bottom: 20px; border-radius: 8px; transition: 0.2s;">Read More ↓</button>`;
+                        // Triggers the smooth animated modal using the block index
+                        html += `<button onclick="openArticleModal(${index})" style="background:transparent; border: 1px solid var(--accent, #10b981); color:var(--accent, #10b981); cursor:pointer; font-weight:bold; padding:10px 20px; margin-right: 15px; margin-bottom: 20px; border-radius: 8px; transition: 0.2s;">Read More ↓</button>`;
                     }
 
                     if (block.buttonText && block.buttonUrl) {
