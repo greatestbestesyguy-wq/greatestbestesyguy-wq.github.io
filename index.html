@@ -72,7 +72,32 @@
         .dynamic-block { max-width: 800px; margin: 0 auto 50px; padding: 30px; background: rgba(255,255,255,0.03); border: 1px solid var(--border, #27272a); border-radius: 16px; transition: transform 0.2s; }
         .dynamic-block:hover { border-color: var(--accent, #10b981); }
 
-        /* MODAL ANIMATION & STYLES */
+        /* SMOOTH EXPANDABLE STYLES (DESKTOP) */
+        .expand-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-bottom 0.4s ease-in-out;
+            opacity: 0;
+            padding: 0 20px;
+            background: rgba(0,0,0,0.2);
+            border-left: 4px solid var(--accent, #10b981);
+            border-radius: 6px;
+            color: var(--text-dim, #e4e4e7); 
+            font-size: 1.1rem;
+            line-height: 1.8; 
+            max-width: 75ch; 
+            white-space: pre-wrap;
+            margin-bottom: 0;
+        }
+
+        .expand-content.expanded {
+            max-height: 2500px; /* Large enough to hold text */
+            opacity: 1;
+            padding: 25px 30px; 
+            margin-bottom: 20px;
+        }
+
+        /* MODAL ANIMATION & STYLES (MOBILE) */
         #article-modal {
             visibility: hidden;
             opacity: 0;
@@ -120,10 +145,46 @@
             white-space: pre-wrap;
         }
 
+        /* NAVIGATION BUTTONS */
+        .top-nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border, #27272a);
+        }
+        
+        .top-nav-bar a {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        .btn-recycle {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent, #10b981);
+            border: 1px solid var(--accent, #10b981);
+        }
+        
+        .btn-recycle:hover { background: var(--accent, #10b981); color: #000; }
+
+        .btn-sources {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e4e4e7;
+            border: 1px solid #3f3f46;
+        }
+
+        .btn-sources:hover { background: #3f3f46; color: #fff; }
+
         @media (max-width: 768px) {
             .dynamic-block { padding: 20px; }
             .modal-content-box { max-height: 90vh; }
             #modal-body-content { padding: 20px !important; font-size: 1.05rem !important; }
+            .top-nav-bar { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
@@ -161,6 +222,12 @@
         <div id="header-placeholder"></div>
 
         <main id="main-content">
+            
+            <nav class="top-nav-bar">
+                <a href="/map" class="btn-recycle">📍 Recycle Now (Map)</a>
+                <a href="/sources" class="btn-sources">📚 View Sources</a>
+            </nav>
+
             <h1 id="hero-title"></h1>
             <p id="hero-tagline" class="tagline"></p>
             <div id="hero-buttons" style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;"></div>
@@ -183,6 +250,7 @@
             </div>
             <div id="modal-body-content" style="padding:30px; overflow-y:auto; color:#eee; font-size:1.1rem; line-height:1.8;">
                 <h2 id="modal-title" style="margin-bottom:20px; color:#fff; font-size: 1.8rem; text-align: center;"></h2>
+                <img id="modal-image" src="" style="width:100%; max-height:300px; object-fit:cover; border-radius:12px; margin-bottom:20px; display:none;">
                 <div id="modal-text" class="article-text"></div>
             </div>
         </div>
@@ -190,22 +258,44 @@
 
     <script src="./script.js"></script>
     <script>
-        // --- MODAL LOGIC ---
+        // --- HYBRID READ MORE LOGIC ---
+        function handleReadMore(index, expId, btnEl) {
+            // Check if device is mobile width
+            if (window.innerWidth <= 768) {
+                openArticleModal(index);
+            } else {
+                // Desktop: Expand inline
+                const el = document.getElementById(expId);
+                el.classList.toggle('expanded');
+                btnEl.innerText = el.classList.contains('expanded') ? 'Read Less ↑' : 'Read More ↓';
+            }
+        }
+
+        // --- MODAL LOGIC (MOBILE) ---
         function openArticleModal(index) {
             const block = window.siteContentBlocks[index];
             document.getElementById('modal-title').innerText = block.title || '';
             document.getElementById('modal-label').innerText = block.label || 'Article';
             document.getElementById('modal-text').innerHTML = block.expandableBody;
             
+            // Image Integration
+            const modalImg = document.getElementById('modal-image');
+            if (block.imageUrl) {
+                modalImg.src = block.imageUrl;
+                modalImg.style.display = 'block';
+            } else {
+                modalImg.style.display = 'none';
+            }
+            
             const modal = document.getElementById('article-modal');
             modal.classList.add('show');
-            document.body.style.overflow = 'hidden'; // Stop background scrolling
+            document.body.style.overflow = 'hidden'; 
         }
 
         function closeArticleModal() {
             const modal = document.getElementById('article-modal');
             modal.classList.remove('show');
-            document.body.style.overflow = 'auto'; // Restore background scrolling
+            document.body.style.overflow = 'auto'; 
         }
 
         // --- ADMIN SEQUENCE LOGIC ---
@@ -244,14 +334,16 @@
             }, 80);
         }
 
+        // --- POPUP BUG FIX ---
         function closePopup() {
+            sessionStorage.setItem('notifClosed', 'true'); // Save state to browser session
             const popup = document.getElementById('popup-notif');
             if(popup) popup.style.display = 'none';
         }
 
         // --- EXISTING CONTENT LOGIC ---
         function renderContent(data) {
-            window.siteContentBlocks = data.contentBlocks; // Store data globally for the modal
+            window.siteContentBlocks = data.contentBlocks; 
 
             document.title = data.metadata.pageTitle;
             const metaTitle = document.getElementById('meta-title');
@@ -260,7 +352,8 @@
             if(metaDesc) metaDesc.content = data.metadata.metaDescription;
 
             const popup = document.getElementById('popup-notif');
-            if (data.popup && data.popup.enabled) {
+            // Check session storage so it doesn't reopen if closed before load
+            if (data.popup && data.popup.enabled && !sessionStorage.getItem('notifClosed')) {
                 const popupContent = document.getElementById('popup-content');
                 if(popupContent) {
                     let pLink = (data.popup.linkText && data.popup.linkUrl) ? `<br><br><a href="${data.popup.linkUrl}" style="color: var(--accent, #10b981); font-weight: bold; text-decoration: none; display: inline-block;">${data.popup.linkText} →</a>` : '';
@@ -301,6 +394,7 @@
             }
 
             const mainContent = document.getElementById('main-content');
+            // Don't remove the top nav bar when clearing old dynamic blocks
             document.querySelectorAll('.dynamic-block').forEach(e => e.remove());
 
             if (data.contentBlocks) {
@@ -315,8 +409,11 @@
                     if (block.body) html += `<p style="margin-bottom:20px; line-height: 1.6; color: var(--text-dim, #ccc); font-size: 1.1rem;">${block.body}</p>`;
                     
                     if (block.expandableBody) {
-                        // Triggers the smooth animated modal using the block index
-                        html += `<button onclick="openArticleModal(${index})" style="background:transparent; border: 1px solid var(--accent, #10b981); color:var(--accent, #10b981); cursor:pointer; font-weight:bold; padding:10px 20px; margin-right: 15px; margin-bottom: 20px; border-radius: 8px; transition: 0.2s;">Read More ↓</button>`;
+                        const expId = 'exp-' + index;
+                        // Put the expandable div here, but only trigger it on desktop
+                        html += `<div id="${expId}" class="expand-content">${block.expandableBody}</div>`;
+                        // Updated button to call the new hybrid function
+                        html += `<button onclick="handleReadMore(${index}, '${expId}', this)" style="background:transparent; border: 1px solid var(--accent, #10b981); color:var(--accent, #10b981); cursor:pointer; font-weight:bold; padding:10px 20px; margin-right: 15px; margin-bottom: 20px; border-radius: 8px; transition: 0.2s;">Read More ↓</button>`;
                     }
 
                     if (block.buttonText && block.buttonUrl) {
