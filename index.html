@@ -55,11 +55,11 @@
         #popup-notif { 
             position: fixed; bottom: 30px; right: 20px; 
             background: var(--surface); color: var(--text); 
-            padding: 15px 20px 15px 15px; /* Restored original aesthetic */
+            padding: 15px 20px 15px 15px;
             border-radius: 12px; z-index: 10000; 
             border: 1px solid var(--accent); box-shadow: 0 8px 25px rgba(0,0,0,0.6); 
             width: max-content; max-width: 320px; 
-            height: fit-content; /* Fixed the weird vertical stretching */
+            height: fit-content;
         }
         .close-notif { position: absolute; top: 8px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-dim); transition: 0.2s; padding: 0; }
         .close-notif:hover { color: var(--danger); }
@@ -287,7 +287,7 @@
 
         let typerInterval;
         function startHackerTyper() {
-            if (typerInterval) return; // Prevent multiple intervals
+            if (typerInterval) return;
             const codeBox = document.getElementById('code-scroll');
             const snippets = ["import os\n# Bypassing firewall...", "def init_hack(ip):\n return ping(ip)", "GET /admin/v3/config HTTP/1.1", "01001000 01100001", "db.users.find({ role: 'admin' });", "WARNING: HEURISTIC DETECTION", "sudo rm -rf /var/log"];
             typerInterval = setInterval(() => {
