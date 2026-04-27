@@ -92,6 +92,7 @@
         .dynamic-block:hover { border-color: var(--accent); }
         .block-label { color: var(--accent); font-weight: 800; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 10px; letter-spacing: 1.5px; text-align: center; }
         .block-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .image-citation { font-size: 0.85rem; color: var(--text-dim); text-align: right; margin-top: -10px; margin-bottom: 20px; font-style: italic; }
         .block-title { margin-bottom: 15px; font-size: 1.8rem; text-align: center; }
         .block-body { margin-bottom: 20px; line-height: 1.6; color: var(--text-dim); font-size: 1.1rem; }
         
@@ -212,6 +213,7 @@
             <div id="modal-body-content" style="padding:30px; overflow-y:auto; color:#eee; font-size:1.1rem; line-height:1.8;">
                 <h2 id="modal-title" class="block-title" style="color:#fff; text-align: center;"></h2>
                 <img id="modal-image" class="block-img" src="" style="display:none;">
+                <p id="modal-citation" class="image-citation" style="display:none;"></p>
                 <div id="modal-text" class="article-text"></div>
                 
                 <div class="modal-actions">
@@ -248,6 +250,10 @@
             const modalImg = document.getElementById('modal-image');
             modalImg.src = block.imageUrl || '';
             modalImg.style.display = block.imageUrl ? 'block' : 'none';
+
+            const modalCit = document.getElementById('modal-citation');
+            modalCit.innerText = block.imageCitation ? `Image: ${block.imageCitation}` : '';
+            modalCit.style.display = block.imageCitation ? 'block' : 'none';
             
             document.getElementById('article-modal').classList.add('show');
             document.body.style.overflow = 'hidden'; 
@@ -335,6 +341,7 @@
                 let html = '';
                 if (block.label) html += `<span class="block-label">${block.label}</span>`;
                 if (block.imageUrl) html += `<img src="${block.imageUrl}" class="block-img">`;
+                if (block.imageCitation) html += `<p class="image-citation">Image: ${block.imageCitation}</p>`;
                 if (block.title) html += `<h2 class="block-title">${block.title}</h2>`;
                 if (block.body) html += `<p class="block-body">${block.body}</p>`;
                 
