@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Strategy Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #4F46E5; --bg: #F3F4F6; --text: #1F2937; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        input, select, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
+        button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { opacity: 0.9; }
+        
+        /* Admin Panel Styles */
+        #admin-panel { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #111827; color: white; padding: 30px; z-index: 1000; overflow-y: auto; box-sizing: border-box; }
+        #admin-panel button { background: #374151; border: 1px solid #4B5563; }
+        #admin-panel button.danger { background: #DC2626; }
+        #admin-panel button.success { background: #059669; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .team-card { background: #1F2937; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        
+        /* Global UI Elements */
+        #notification-banner { position: fixed; top: 0; left: 0; width: 100%; background: #F59E0B; color: black; text-align: center; padding: 15px; font-weight: bold; z-index: 2000; transform: translateY(-100%); transition: transform 0.3s; }
+        #timer-display { font-size: 2em; font-weight: bold; text-align: center; margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+    <div id="notification-banner">Notification</div>
+
+    <div class="container" id="player-view">
+        <div id="timer-display" class="hidden">00:00</div>
+        
+        <div id="login-section">
+            <h2>Join the Game</h2>
+            <input type="text" id="player-name" placeholder="Enter your name">
+            <select id="team-select">
+                <option value="" disabled selected>Select your Table/Group</option>
+                <option value="Table 1">Table 1</option>
+                <option value="Table 2">Table 2</option>
+                <option value="Table 3">Table 3</option>
+                <option value="Table 4">Table 4</option>
+                <option value="Table 5">Table 5</option>
+            </select>
+            <button onclick="joinGame()">Join</button>
+        </div>
+
+        <div id="waiting-section" class="hidden">
+            <h2>Waiting for teacher to start...</h2>
+            <p>You are in <span id="my-team-display"></span>.</p>
+        </div>
+
+        <div id="gameplay-section" class="hidden">
+            <h2 id="decision-title">Decision 1 of 5</h2>
+            <p id="decision-prompt">Your group has encountered an obstacle. How do you proceed?</p>
+            <select id="decision-choice">
+                <option value="Aggressive Approach">Aggressive Approach</option>
+                <option value="Diplomatic Approach">Diplomatic Approach</option>
+                <option value="Resource Gathering">Resource Gathering</option>
+            </select>
+            <button onclick="submitDecision()">Submit Decision</button>
+        </div>
+
+        <div id="end-section" class="hidden">
+            <h2>Game Over</h2>
+            <p>Look at the smartboard to see everyone's choices!</p>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Teacher Dashboard</h2>
+            <button onclick="closeAdmin()" style="width: auto;">Close Admin</button>
+        </div>
+        
+        <div class="admin-grid">
+            <div>
+                <h3>Game Controls</h3>
+                <button class="success" onclick="updateGameState('playing')">Start Game</button>
+                <button class="danger" onclick="updateGameState('ended')">End Game / Show Results</button>
+                <button onclick="updateGameState('waiting')">Reset to Waiting</button>
+                
+                <hr style="border-color: #374151; margin: 20px 0;">
+                
+                <h3>Global Timer</h3>
+                <input type="number" id="timer-minutes" placeholder="Minutes" value="5">
+                <button onclick="startTimer()">Start Timer</button>
+                
+                <hr style="border-color: #374151; margin: 20px 0;">
+                
+                <h3>Send Notification</h3>
+                <input type="text" id="notif-message" placeholder="Message content">
+                <select id="notif-target">
+                    <option value="All">All Groups</option>
+                    <option value="Table 1">Table 1</option>
+                    <option value="Table 2">Table 2</option>
+                    <option value="Table 3">Table 3</option>
+                    <option value="Table 4">Table 4</option>
+                    <option value="Table 5">Table 5</option>
+                </select>
+                <button onclick="sendNotification()">Send Message</button>
+            </div>
+
+            <div>
+                <h3>Live Roster & Progress</h3>
+                <div id="admin-teams-container">
+                    </div>
+            </div>
+        </div>
+
+        <div id="admin-results" class="hidden" style="margin-top: 30px;">
+            <h3>Final Choices for Smartboard</h3>
+            <div id="results-container" class="admin-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. SUPABASE SETUP (REPLACE WITH YOUR KEYS)
+        // ==========================================
+        const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+        const SUPABASE_KEY = 'YOUR_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ==========================================
+        // 2. STATE VARIABLES
+        // ==========================================
+        let currentPlayer = { name: '', team: '', decisionStep: 1 };
+        let gameState = 'waiting'; // waiting, playing, ended
+        let timerInterval;
+
+        // ==========================================
+        // 3. ADMIN SECRET KEYSTROKE LOGIC
+        // ==========================================
+        let secretCode = '';
+        window.addEventListener('keydown', (e) => {
+            secretCode += e.key.toLowerCase();
+            if (secretCode.length > 5) secretCode = secretCode.slice(-5);
+            if (secretCode === 'admin') {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                fetchAdminData();
+            }
+        });
+
+        function closeAdmin() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        // ==========================================
+        // 4. PLAYER FUNCTIONS
+        // ==========================================
+        async function joinGame() {
+            const name = document.getElementById('player-name').value;
+            const team = document.getElementById('team-select').value;
+            if (!name || !team) return alert('Please enter name and select a table.');
+
+            currentPlayer = { name, team, decisionStep: 1 };
+            
+            // Save to database
+            await supabase.from('players').insert([{ name, team, step: 1 }]);
+
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('waiting-section').classList.remove('hidden');
+            document.getElementById('my-team-display').innerText = team;
+
+            subscribeToGameUpdates();
+        }
+
+        async function submitDecision() {
+            const choice = document.getElementById('decision-choice').value;
+            
+            // Save choice to database
+            await supabase.from('decisions').insert([{ 
+                team: currentPlayer.team, 
+                player_name: currentPlayer.name, 
+                step: currentPlayer.decisionStep, 
+                choice: choice 
+            }]);
+
+            currentPlayer.decisionStep++;
+            
+            // Update player step in DB so admin can see
+            await supabase.from('players')
+                .update({ step: currentPlayer.decisionStep })
+                .eq('name', currentPlayer.name)
+                .eq('team', currentPlayer.team);
+
+            if (currentPlayer.decisionStep > 5) {
+                document.getElementById('gameplay-section').classList.add('hidden');
+                document.getElementById('waiting-section').classList.remove('hidden');
+                document.querySelector('#waiting-section h2').innerText = "Waiting for other tables to finish...";
+            } else {
+                document.getElementById('decision-title').innerText = `Decision ${currentPlayer.decisionStep} of 5`;
+            }
+        }
+
+        // ==========================================
+        // 5. REAL-TIME SUBSCRIPTIONS
+        // ==========================================
+        function subscribeToGameUpdates() {
+            // Listen for game state changes (start/end)
+            supabase.channel('public:game_state')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'game_state' }, payload => {
+                    handleStateChange(payload.new.state);
+                }).subscribe();
+
+            // Listen for notifications
+            supabase.channel('public:notifications')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, payload => {
+                    if (payload.new.target === 'All' || payload.new.target === currentPlayer.team) {
+                        showNotification(payload.new.message);
+                    }
+                }).subscribe();
+        }
+
+        function handleStateChange(newState) {
+            gameState = newState;
+            document.getElementById('waiting-section').classList.add('hidden');
+            document.getElementById('gameplay-section').classList.add('hidden');
+            document.getElementById('end-section').classList.add('hidden');
+
+            if (newState === 'playing') {
+                if (currentPlayer.decisionStep <= 5) {
+                    document.getElementById('gameplay-section').classList.remove('hidden');
+                } else {
+                    document.getElementById('waiting-section').classList.remove('hidden');
+                }
+            } else if (newState === 'ended') {
+                document.getElementById('end-section').classList.remove('hidden');
+            } else {
+                document.getElementById('waiting-section').classList.remove('hidden');
+            }
+        }
+
+        function showNotification(msg) {
+            const banner = document.getElementById('notification-banner');
+            banner.innerText = msg;
+            banner.style.transform = 'translateY(0)';
+            setTimeout(() => { banner.style.transform = 'translateY(-100%)'; }, 5000);
+        }
+
+        // ==========================================
+        // 6. ADMIN FUNCTIONS
+        // ==========================================
+        async function updateGameState(state) {
+            await supabase.from('game_state').update({ state: state }).eq('id', 1);
+            if(state === 'ended') loadResults();
+        }
+
+        async function sendNotification() {
+            const msg = document.getElementById('notif-message').value;
+            const target = document.getElementById('notif-target').value;
+            await supabase.from('notifications').insert([{ message: msg, target: target }]);
+            document.getElementById('notif-message').value = '';
+        }
+
+        async function startTimer() {
+            const mins = document.getElementById('timer-minutes').value;
+            const endTime = Date.now() + (mins * 60000);
+            await supabase.from('game_state').update({ timer_end: endTime }).eq('id', 1);
+        }
+
+        // Fetch live data for admin panel
+        async function fetchAdminData() {
+            const { data: players } = await supabase.from('players').select('*');
+            const container = document.getElementById('admin-teams-container');
+            container.innerHTML = '';
+            
+            const teams = ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5'];
+            teams.forEach(team => {
+                const teamPlayers = players.filter(p => p.team === team);
+                let html = `<div class="team-card"><h4>${team}</h4><ul>`;
+                teamPlayers.forEach(p => {
+                    html += `<li>${p.name} (On Decision ${p.step})</li>`;
+                });
+                html += `</ul></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        async function loadResults() {
+            document.getElementById('admin-results').classList.remove('hidden');
+            const { data: decisions } = await supabase.from('decisions').select('*').order('step', { ascending: true });
+            
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+            
+            const teams = ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5'];
+            teams.forEach(team => {
+                const teamDecisions = decisions.filter(d => d.team === team);
+                if(teamDecisions.length === 0) return;
+                
+                let html = `<div class="team-card"><h4>${team} Results</h4><ul>`;
+                teamDecisions.forEach(d => {
+                    html += `<li><strong>Step ${d.step}:</strong> ${d.choice} (${d.player_name})</li>`;
+                });
+                html += `</ul></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        // Global Timer Listener
+        setInterval(async () => {
+            const { data } = await supabase.from('game_state').select('timer_end').eq('id', 1).single();
+            if (data && data.timer_end) {
+                const remaining = Math.max(0, data.timer_end - Date.now());
+                if (remaining > 0) {
+                    const m = Math.floor(remaining / 60000);
+                    const s = Math.floor((remaining % 60000) / 1000);
+                    const display = document.getElementById('timer-display');
+                    display.classList.remove('hidden');
+                    display.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+                }
+            }
+        }, 1000);
+
+    </script>
+</body>
+</html>
