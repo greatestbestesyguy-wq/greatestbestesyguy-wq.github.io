@@ -2,49 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vote Josh Massa</title>
     <style>
         :root {
             --primary: #4f46e5;
             --primary-hover: #4338ca;
             --bg: #0f172a;
-            --card-bg: #1e293b;
             --text: #f8fafc;
-            --text-muted: #94a3b8;
             --success: #22c55e;
         }
 
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 24px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        * {
             box-sizing: border-box;
         }
 
-        .container {
+        html, body {
+            margin: 0;
+            padding: 0;
             width: 100%;
-            max-width: 400px;
-            background: var(--card-bg);
+            height: 100%;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .fullscreen-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
             padding: 40px 24px;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         h1 {
-            font-size: 2.25rem;
+            font-size: 2.75rem;
             font-weight: 800;
-            letter-spacing: -0.025em;
-            margin: 0 0 32px 0;
+            letter-spacing: -0.03em;
+            margin: 20px 0 0 0;
             background: linear-gradient(to right, #818cf8, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -54,40 +53,47 @@
             background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: white;
             border: none;
-            padding: 24px 32px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            border-radius: 16px;
-            cursor: pointer;
-            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.5);
-            transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
             width: 100%;
-            letter-spacing: 0.025em;
+            flex-grow: 1;
+            max-height: 60vh;
+            margin: 30px 0;
+            font-size: 3rem;
+            font-weight: 800;
+            border-radius: 32px;
+            cursor: pointer;
+            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.6);
+            transition: transform 0.1s ease, filter 0.15s ease;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .vote-btn:active {
-            transform: scale(0.96);
-            box-shadow: 0 5px 10px -3px rgba(79, 70, 229, 0.4);
+            transform: scale(0.97);
+            filter: brightness(0.9);
         }
 
         #message {
-            margin-top: 24px;
-            font-size: 1.15rem;
+            font-size: 1.25rem;
             font-weight: 600;
             color: var(--success);
-            min-height: 30px;
+            min-height: 40px;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            margin-bottom: 20px;
         }
 
         #message.show {
             opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="fullscreen-container">
         <h1>Vote Josh Massa</h1>
         <button class="vote-btn" onclick="castVote()">VOTE</button>
         <div id="message"></div>
